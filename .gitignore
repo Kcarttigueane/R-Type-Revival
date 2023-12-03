@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# vs code
+.vscode
+
+# Conan library package directory
+conan/
+
+# CMake build directory
+build
+
+Makefile
+CMakeUserPresets.json
