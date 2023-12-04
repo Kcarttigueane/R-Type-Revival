@@ -1,8 +1,10 @@
+# Include directories for client
+# target_include_directories(r-type_client PRIVATE include)
+
+find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
+
 # Define the client target
 add_executable(r-type_client src/main.cpp)
 
-# Include directories for client
-target_include_directories(r-type_client PRIVATE include)
-
-# Link libraries (if any), for example: target_link_libraries(Client
-# some_library)
+# Link SFML to your target
+target_link_libraries(r-type_client PRIVATE sfml-system sfml-window sfml-graphics)

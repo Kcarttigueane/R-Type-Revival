@@ -34,11 +34,12 @@
 # vs code
 .vscode
 
-# Conan library package directory
-conan/
+# Vcpkg
+vcpkg_installed/
 
 # CMake build directory
 build
 
 Makefile
 CMakeUserPresets.json
+
