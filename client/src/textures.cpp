@@ -1,9 +1,9 @@
 #include "../include/game.hpp"
 
 textures::textures() {
-    _parallax.loadFromFile("../../client/assets/background/layer_3/space_background.png");
-    _ships.loadFromFile("../../client/assets/player/spaceship.gif");
-    _planet.loadFromFile("../../client/assets/background/layer_1/wet.png");
+    _parallax.loadFromFile("../../client/assets/Background/Layer 3/Space_background.png");
+    _ships.loadFromFile("../../client/assets/Player/spaceship.gif");
+    _planet.loadFromFile("../../client/assets/Background/Layer 1/Wet.png");
 }
 
 Texture &textures::getParallaxTexture() {
