@@ -13,6 +13,7 @@ private:
     int _move_up = 0;
     int _move_down = 0;
 protected:
+    string assetsPath = ASSETS_DIR;
     RenderWindow _window;
     textures _textures;
     vector<player> _players;

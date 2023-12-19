@@ -9,7 +9,7 @@ protected:
     Texture _ships;
     Texture _planet;
 public:
-    textures();
+    textures(string assetsPath);
     Texture &getParallaxTexture();
     Texture &getShipsTexture();
     Texture &getPlanetTexture();
