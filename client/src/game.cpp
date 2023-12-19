@@ -31,7 +31,7 @@ game::game(int width, int height, const std::string &windowTitle) : _window(Vide
     });
     initParallax(_textures);
     _players.push_back(player(1, "local", _textures.getShipsTexture()));
-    createSound(_sound, _buffer, "../../client/assets/SoundFX/shot2.wav");
+    createSound(_sound, _buffer, "../../client/assets/sound-fx/shot_2.wav");
     windowLoop(client);
     client.stop();
     client_thread.join();
