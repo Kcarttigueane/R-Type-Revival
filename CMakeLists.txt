@@ -1,5 +1,5 @@
 # Set the minimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.22)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
