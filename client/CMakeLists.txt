@@ -7,8 +7,11 @@ find_package(Boost COMPONENTS system REQUIRED)
 # Set the directory containing your assets
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
+# Get all source files in the src/ directory
+file(GLOB SOURCE_FILES "src/*.cpp")
+
 # Define the client target
-add_executable(r-type_client src/main.cpp)
+add_executable(r-type_client ${SOURCE_FILES})
 
 # Include directories for client
 target_include_directories(r-type_client PRIVATE include)
