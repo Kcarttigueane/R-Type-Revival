@@ -8,7 +8,8 @@ mutex &game::getMessagesMutex() {
     return _messages_mutex;
 }
 
-game::game(int width, int height, const std::string &windowTitle) : _window(VideoMode(width, height), windowTitle) {
+game::game(int width, int height, const std::string &windowTitle) : _window(VideoMode(width, height), windowTitle), _menu(_textures, _window) {
+    _menu.setCurrentState(GameState::MAIN_MENU);
     cout << "Window created with size {" << width << ", " << height << "}." << endl;
     boost::asio::io_context io_context;
     ClientUDP client(io_context, "127.0.0.1", 12345);
@@ -31,17 +32,23 @@ game::game(int width, int height, const std::string &windowTitle) : _window(Vide
     });
     initParallax(_textures);
     _players.push_back(player(1, "local", _textures.getShipsTexture()));
-    createSound(_sound, _buffer, "../../client/assets/sound-fx/shot_2.wav");
+    createSound(_sound, _buffer, "./assets/sound_fx/shot2.wav");
     windowLoop(client);
     client.stop();
     client_thread.join();
 }
 
-
 void game::ticUpdates() {
-    resetParallax();
-    moveParallax();
-    moveLocalPlayer();
+    GameState state = _menu.getCurrentState();
+
+    if (state == GameState::MAIN_MENU) {
+        resetParallax();
+        moveParallax();
+    } else if (state == GameState::GAME_RUNNING) {
+        resetParallax();
+        moveParallax();
+        moveLocalPlayer();
+    }
 }
 
 void game::makePlayerAnimation(player &player) {

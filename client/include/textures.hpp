@@ -8,11 +8,21 @@ protected:
     Texture _parallax;
     Texture _ships;
     Texture _planet;
+    Texture _play;
+    Texture _settings;
+    Texture _exit;
+    Texture _tutorial;
+    Texture _about;
 public:
     textures();
     Texture &getParallaxTexture();
     Texture &getShipsTexture();
     Texture &getPlanetTexture();
+    Texture &getPlayTexture();
+    Texture &getSettingsTexture();
+    Texture &getExitTexture();
+    Texture &getTutorialTexture();
+    Texture &getAboutTexture();
     ~textures();
 };
 

@@ -5,6 +5,7 @@
 #include "client.hpp"
 #include "textures.hpp"
 #include "player.hpp"
+#include "menu.hpp"
 
 class game {
 private:
@@ -23,7 +24,9 @@ protected:
     Sound _sound;
     queue<string> _messages;
     mutex _messages_mutex;
-public:
+    Menu _menu;
+
+  public:
     game(int width, int height, const string &windowTitle);
     string makeAnimation(player &player, int left, int top, int width, int height, float time, int totalFrames, string animation);
     void makeInfiniteAnimation(Sprite &sprite, Clock &clock, int left, int top, int width, int height, float time, int totalFrames);

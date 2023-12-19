@@ -6,19 +6,39 @@ void game::windowLoop(ClientUDP &client) {
     Time displayElapsedTime;
     Time ticElapsedTime;
     Event event;
+    Menu menu(_textures, _window);
     while(_window.isOpen()) {
         checkEvents(event);
         displayElapsedTime = displayClock.getElapsedTime();
         ticElapsedTime = ticClock.getElapsedTime();
-        if (ticElapsedTime.asSeconds() >= 0.005f) {
-            ticUpdates();
-            ticClock.restart();
-        } if (displayElapsedTime.asSeconds() >= 0.016f) {
-            _window.clear();
-            displayUpdates();
-            _window.display();
-            displayClock.restart();
+
+        GameState state = _menu.getCurrentState();
+
+        if (state == GameState::MAIN_MENU) {
+            if (ticElapsedTime.asSeconds() >= 0.005f) {
+                ticUpdates();
+                ticClock.restart();
+            }
+            if (displayElapsedTime.asSeconds() >= 0.016f) {
+                _window.clear();
+                _window.draw(getParallax());
+                _menu.draw(_window);
+                _window.display();
+                displayClock.restart();
+            }
+        } else if (state == GameState::GAME_RUNNING) {
+            if (ticElapsedTime.asSeconds() >= 0.005f) {
+                ticUpdates();
+                ticClock.restart();
+            }
+            if (displayElapsedTime.asSeconds() >= 0.016f) {
+                _window.clear();
+                displayUpdates();
+                _window.display();
+                displayClock.restart();
+            }
         }
+
         auto payload = client.get_payload();
     }
 }
