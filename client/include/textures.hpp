@@ -8,11 +8,12 @@ protected:
     Texture _parallax;
     Texture _ships;
     Texture _planet;
+
 public:
     textures(string assetsPath);
-    Texture &getParallaxTexture();
-    Texture &getShipsTexture();
-    Texture &getPlanetTexture();
+    Texture& getParallaxTexture();
+    Texture& getShipsTexture();
+    Texture& getPlanetTexture();
     ~textures();
 };
 
