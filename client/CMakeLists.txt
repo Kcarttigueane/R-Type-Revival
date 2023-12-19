@@ -11,8 +11,11 @@ find_package(
   COMPONENTS system
   REQUIRED)
 
+# Get all source files in the src/ directory
+file(GLOB SOURCE_FILES "src/*.cpp")
+
 # Define the client target
-add_executable(r-type_client src/main.cpp)
+add_executable(r-type_client ${SOURCE_FILES})
 
 # Link SFML to your target
 target_link_libraries(
