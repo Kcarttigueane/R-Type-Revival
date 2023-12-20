@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install clang-tidy
-        run: sudo apt-get update && sudo apt-get install -y clang-tidy libsfml-dev
+        run: sudo apt-get update && sudo apt-get install -y clang-tidy libsfml-dev libboost-all-dev
       - name: Format with clang-tidy
         run: |
           files=$(find . -name '*.cpp' -o -name '*.hpp')
