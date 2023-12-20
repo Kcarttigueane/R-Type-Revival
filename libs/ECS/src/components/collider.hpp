@@ -6,9 +6,7 @@
 
 struct ColliderComponent {
   enum class ColliderType { BOX, CIRCLE, POLYGON } type;
-  std::vector<float> data; // Coordinates for collider shape
-  // Collision response data can include callback functions or references to
-  // handling systems
+  std::vector<float> data;
 };
 
 #endif // ECS_COLLIDER_COMPONENT_HPP

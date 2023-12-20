@@ -3,8 +3,8 @@
 
 struct HealthComponent {
   int healthPoints;
-  float invulnerabilityDuration; // Time in seconds of invulnerability after hit
-  float invulnerabilityTimer;    // Current timer for invulnerability
+  float invulnerabilityDuration;
+  float invulnerabilityTimer;
 
   HealthComponent(float health, float maxHealth, float anotherParameter)
       : healthPoints(health), invulnerabilityDuration(maxHealth),
