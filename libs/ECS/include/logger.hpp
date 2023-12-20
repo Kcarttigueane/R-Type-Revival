@@ -1,3 +1,6 @@
+#if !defined(LOGGER_HPP)
+#define LOGGER_HPP
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -41,5 +44,4 @@ private:
   }
 };
 
-// Global logger instance
-Logger logger;
+#endif // LOGGER_HPP

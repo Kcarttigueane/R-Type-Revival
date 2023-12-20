@@ -11,10 +11,10 @@
 
 */
 struct TransformComponent {
-  float x, y;           // Position in 2D space
-  float rotation;       // Rotation in degrees
-  float scaleX, scaleY; // Scale in X and Y
-  float orientation;    // Orientation in space, useful for side-scrolling
+  float x, y;
+  float rotation;
+  float scaleX, scaleY;
+  float orientation;
 };
 
 #endif // ECS_TRANSFORM_COMPONENT_HPP

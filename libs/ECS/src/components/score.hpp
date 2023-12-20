@@ -3,8 +3,8 @@
 
 struct ScoreComponent {
   int score;
-  float multiplier; // Score multiplier for combos or special actions
-  int bonusPoints;  // Bonus points earned through specific actions
+  float multiplier;
+  int bonusPoints;
 };
 
 #endif // ECS_SCORE_COMPONENT_HPP

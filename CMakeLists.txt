@@ -20,7 +20,7 @@ set(CPACK_PACKAGE_VERSION_MINOR "${r-type-revival_VERSION_MINOR}")
 include(CPack)
 
 add_custom_target(run_tests
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+    COMMAND ${CMAKE_CTEST_COMMAND} --verbose --output-on-failure
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running tests"
 )
