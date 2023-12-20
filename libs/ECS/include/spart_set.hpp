@@ -15,11 +15,15 @@ private:
   std::vector<Component> dense;
   // Mapping from dense to sparse for removals
   std::vector<Entity> denseToSparse;
-  size_t size = 0;
+  Entity size = 0;
 
 public:
   SparseSet() = default;
   ~SparseSet() = default;
+
+  Entity getSize() {
+    return size;
+  }
 
   /**
    * @brief Add a component to an entity.
