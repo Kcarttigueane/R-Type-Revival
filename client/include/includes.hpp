@@ -1,18 +1,18 @@
 #ifndef INCLUDES_HPP_
 #define INCLUDES_HPP_
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
 #include <SFML/System.hpp>
-#include <boost/asio.hpp>
+#include <SFML/Window.hpp>
 #include <boost/array.hpp>
-#include <thread>
+#include <boost/asio.hpp>
 #include <iostream>
-#include <string>
-#include <vector>
 #include <mutex>
 #include <queue>
+#include <string>
+#include <thread>
+#include <vector>
 
 using namespace std;
 using namespace boost;
