@@ -11,95 +11,78 @@
 
 template <typename Component> class SparseSet {
 private:
-  std::vector<Entity> sparse;
-  std::vector<Component> dense;
-  // Mapping from dense to sparse for removals
-  std::vector<Entity> denseToSparse;
+  std::vector<Entity> _sparse;
+  std::vector<Component> _dense;
+  // Mapping from _dense to _sparse for removals
+  std::vector<Entity> _denseToSparse;
   size_t size = 0;
 
 public:
   SparseSet() = default;
   ~SparseSet() = default;
 
-  /**
-   * @brief Add a component to an entity.
-   *
-   * @param entityId The ID of the entity to which the component is being added.
-   * @param component The component being added to the entity.
-   * @throws std::runtime_error If the component already exists for the entity.
-   */
   void add(Entity entityId, const Component &component) {
-    if (entityId >= sparse.size()) {
-      sparse.resize(entityId + 1, std::numeric_limits<Entity>::max());
+    if (entityId >= _sparse.size()) {
+      _sparse.resize(entityId + 1, std::numeric_limits<Entity>::max());
     }
 
     assert(!has(entityId) && "Component already exists for this entity.");
 
-    sparse[entityId] = size;
-    denseToSparse.push_back(entityId);
-    dense.push_back(component);
+    _sparse[entityId] = size;
+    _denseToSparse.push_back(entityId);
+    _dense.push_back(component);
     ++size;
   }
 
-  /**
-   * @brief Remove a component from an entity.
-   *
-   * @param entityId The ID of the entity from which the component is being
-   * removed.
-   * @throws std::runtime_error If the component does not exist for the entity.
-   */
   void remove(Entity entityId) {
+    if (size == 0) {
+      return;
+    }
     assert(has(entityId) && "Component does not exist for this entity.");
 
-    Entity denseIndex = sparse[entityId];
-    Entity lastEntityId = denseToSparse[size - 1];
+    Entity denseIndex = _sparse[entityId];
+    Entity lastEntityId = _denseToSparse[size - 1];
 
-    std::swap(dense[denseIndex], dense[size - 1]);
-    std::swap(denseToSparse[denseIndex], denseToSparse[size - 1]);
+    std::swap(_dense[denseIndex], _dense[size - 1]);
+    std::swap(_denseToSparse[denseIndex], _denseToSparse[size - 1]);
 
-    sparse[lastEntityId] = denseIndex;
-    sparse[entityId] = std::numeric_limits<Entity>::max();
+    _sparse[lastEntityId] = denseIndex;
+    _sparse[entityId] = std::numeric_limits<Entity>::max();
 
-    dense.pop_back();
-    denseToSparse.pop_back();
+    _dense.pop_back();
+    _denseToSparse.pop_back();
     --size;
   }
 
-  /**
-   * @brief Get a component from an entity.
-   *
-   * @param entityId The ID of the entity from which the component is being
-   * retrieved.
-   * @return std::optional<std::reference_wrapper<const Component>> The
-   * component being retrieved.
-   */
   std::optional<std::reference_wrapper<const Component>>
   get(Entity entityId) const {
     if (has(entityId)) {
-      return dense[sparse[entityId]];
+      return _dense[_sparse[entityId]];
     }
     return std::nullopt;
   }
 
   bool has(Entity entityId) const {
-    return entityId < sparse.size() &&
-           sparse[entityId] != std::numeric_limits<Entity>::max();
+    std::cout << "entityId: " << entityId << std::endl;
+    std::cout << "_sparse.size(): " << _sparse.size() << std::endl;
+    return entityId < _sparse.size() &&
+           _sparse[entityId] != std::numeric_limits<Entity>::max();
   }
 
   void clear() {
-    sparse.clear();
-    dense.clear();
-    denseToSparse.clear();
+    _sparse.clear();
+    _dense.clear();
+    _denseToSparse.clear();
     size = 0;
   }
 
-  auto begin() { return dense.begin(); }
+  auto begin() { return _dense.begin(); }
 
-  auto begin() const { return dense.begin(); }
+  auto begin() const { return _dense.begin(); }
 
-  auto end() { return dense.end(); }
+  auto end() { return _dense.end(); }
 
-  auto end() const { return dense.end(); }
+  auto end() const { return _dense.end(); }
 };
 
 #endif // SPARSE_SET_HPP
