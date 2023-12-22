@@ -79,7 +79,6 @@ public:
                         : nullptr;
   }
 
-  // Const version of getComponent
   template <typename Component>
   const Component *getComponent(Entity entity) const {
     auto componentOpt = getComponentSet<Component>().get(entity);

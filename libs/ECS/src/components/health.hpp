@@ -9,6 +9,8 @@ struct HealthComponent {
   HealthComponent(float health, float maxHealth, float anotherParameter)
       : healthPoints(health), invulnerabilityDuration(maxHealth),
         invulnerabilityTimer(anotherParameter) {}
+
+  int getHealth() { return healthPoints; }
 };
 
 #endif // ECS_COMPONENTS_HEALTH_HPP

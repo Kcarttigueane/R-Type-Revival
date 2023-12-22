@@ -15,7 +15,7 @@ private:
   std::vector<Component> _dense;
   // Mapping from _dense to _sparse for removals
   std::vector<Entity> _denseToSparse;
-  size_t size = 0;
+  Entity size = 0;
 
 public:
   SparseSet() = default;
@@ -83,6 +83,8 @@ public:
   auto end() { return _dense.end(); }
 
   auto end() const { return _dense.end(); }
+
+  Entity getSize() { return size; }
 };
 
 #endif // SPARSE_SET_HPP
