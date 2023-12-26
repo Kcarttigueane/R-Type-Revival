@@ -14,7 +14,8 @@ private:
     int _move_down = 0;
 
 protected:
-    string assetsPath = ASSETS_DIR;
+    string assetsPath =
+        "/home/kc/Epitech/S5/R-TYPE/R-Type-Revival/client/assets";
     RenderWindow _window;
     textures _textures;
     vector<player> _players;
@@ -28,12 +29,14 @@ protected:
 
 public:
     game(int width, int height, const string& windowTitle);
-    string makeAnimation(player& player, int left, int top, int width,
-                         int height, float time, int totalFrames,
-                         string animation);
-    void makeInfiniteAnimation(Sprite& sprite, Clock& clock, int left, int top,
-                               int width, int height, float time,
-                               int totalFrames);
+    string makeAnimation(
+        player& player, sf::IntRect rect, float time, int totalFrames,
+        string animation
+    );
+    void makeInfiniteAnimation(
+        Sprite& sprite, Clock& clock, sf::IntRect rect, float time,
+        int totalFrames
+    );
     void windowLoop(ClientUDP& client);
     void ticUpdates();
     void displayUpdates();
@@ -49,8 +52,9 @@ public:
     void checkMovementKeyPress(Event& event);
     void checkMovementKeyRelease(Event& event);
     void makePlayerAnimation(player& player);
-    void createSound(Sound& sound, SoundBuffer& soundBuffer,
-                     const string filepath);
+    void createSound(
+        Sound& sound, SoundBuffer& soundBuffer, const string filepath
+    );
     queue<string>& getMessages();
     mutex& getMessagesMutex();
     ~game();

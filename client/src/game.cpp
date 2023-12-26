@@ -15,6 +15,7 @@ game::game(int width, int height, const std::string& windowTitle)
 {
     cout << "Window created with size {" << width << ", " << height << "}."
          << endl;
+
     boost::asio::io_context io_context;
     ClientUDP client(io_context, "127.0.0.1", 12345);
     std::thread client_thread([this, &io_context, &client]() {
@@ -55,11 +56,13 @@ void game::makePlayerAnimation(player& player)
     string playerAnimation = player.getAnimation();
     if (playerAnimation == "down") {
         player.setAnimation(
-            makeAnimation(player, 66, 0, 33, 17, 0.3f, -3, "down"));
+            makeAnimation(player, sf::IntRect(66, 0, 33, 17), 0.3f, 3, "down")
+        );
     }
     if (playerAnimation == "up") {
         player.setAnimation(
-            makeAnimation(player, 66, 0, 33, 17, 0.3f, 3, "up"));
+            makeAnimation(player, sf::IntRect(66, 0, 33, 17), 0.3f, 3, "up")
+        );
     }
     if (playerAnimation == "static") {
         player.getSprite().setTextureRect(IntRect(66, 0, 33, 17));

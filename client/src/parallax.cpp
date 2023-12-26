@@ -4,6 +4,7 @@ void game::initParallax(textures& textures)
 {
     _parallax.setTexture(textures.getParallaxTexture());
     _parallax.setPosition(Vector2f(0.0f, 0.0f));
+
     _planet.setTexture(textures.getPlanetTexture());
     _planet.setScale(Vector2f(2.0f, 2.0f));
     _planet.setPosition(Vector2f(220.0f, 220.0f));

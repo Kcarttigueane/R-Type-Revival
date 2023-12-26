@@ -16,10 +16,12 @@ target_compile_definitions(r-type_client PRIVATE ASSETS_DIR="${ASSETS_DIR}")
 
 target_link_libraries(
   r-type_client
-  PRIVATE sfml-system
-          sfml-window
-          sfml-graphics
-          sfml-network
-          sfml-audio
-          Boost::boost
-          Boost::system)
+  PRIVATE
+  sfml-system
+  sfml-window
+  sfml-graphics
+  sfml-network
+  sfml-audio
+  Boost::boost
+  Boost::system
+)

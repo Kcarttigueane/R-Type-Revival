@@ -29,7 +29,9 @@ void game::displayUpdates()
 {
     _window.draw(getParallax());
     _window.draw(getPlanet());
-    makeInfiniteAnimation(getPlanet(), _planetClock, 0, 0, 64, 64, 15.0f, 255);
+    makeInfiniteAnimation(
+        getPlanet(), _planetClock, sf::IntRect(0, 0, 64, 64), 15.0f, 255
+    );
     for (player& player : _players) {
         _window.draw(player.getSprite());
         makePlayerAnimation(player);
@@ -39,6 +41,10 @@ void game::displayUpdates()
 void game::closeWindow(Event& event)
 {
     if (event.type == Event::Closed) {
+        _window.close();
+    }
+    if (event.type == sf::Event::KeyPressed &&
+        event.key.code == sf::Keyboard::Escape) {
         _window.close();
     }
 }

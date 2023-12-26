@@ -3,6 +3,17 @@
 
 #include "includes.hpp"
 
+// ! to keep please
+enum class GameScenes {
+    InGame,
+    MainMenu,
+    Settings,
+    PauseMenu,
+    GameOver,
+    Credits,
+    Quit,
+};
+
 enum class Type { PLAYER, BULLET, ENEMY, WALL, BONUS };
 
 struct Payload {
@@ -21,12 +32,16 @@ struct Life {
 class ClientUDP {
 public:
     bool stop_requested_{false};
-    ClientUDP(boost::asio::io_context& io_context, const std::string& server_ip,
-              unsigned short server_port);
+    ClientUDP(
+        boost::asio::io_context& io_context, const std::string& server_ip,
+        unsigned short server_port
+    );
+
     void send(const std::string& message);
     void start_receive();
-    void handle_receive(const boost::system::error_code& error,
-                        std::size_t bytes_received);
+    void handle_receive(
+        const boost::system::error_code& error, std::size_t bytes_received
+    );
     void stop();
     Payload get_payload();
     ~ClientUDP();

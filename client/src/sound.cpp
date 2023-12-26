@@ -1,7 +1,8 @@
 #include "../include/game.hpp"
 
-void game::createSound(Sound& sound, SoundBuffer& soundBuffer,
-                       const string filepath)
+void game::createSound(
+    Sound& sound, SoundBuffer& soundBuffer, const string filepath
+)
 {
     soundBuffer.loadFromFile(filepath);
     sound.setBuffer(soundBuffer);
