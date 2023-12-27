@@ -7,6 +7,7 @@
 #    include "./health.hpp"
 #    include "./parallax.hpp"
 #    include "./renderable.hpp"
+#    include "./scene.hpp"
 #    include "./score.hpp"
 #    include "./transform.hpp"
 #    include "./velocity.hpp"

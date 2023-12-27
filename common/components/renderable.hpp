@@ -10,6 +10,7 @@
 
 struct RenderableComponent {
     std::shared_ptr<sf::Texture> texture;
+    sf::Text text;
     sf::Sprite sprite;
     sf::IntRect frameRect;
 };

@@ -43,6 +43,36 @@ private:
     SceneManager _scene_manager;
     SettingsManager _settings_manager;
 
+    static std::string getSceneName(GameScenes scene)
+    {
+        switch (scene) {
+            case GameScenes::MainMenu:
+                return "MainMenu";
+                break;
+            case GameScenes::InGame:
+                return "InGame";
+                break;
+            case GameScenes::GameOver:
+                return "GameOver";
+                break;
+            case GameScenes::Settings:
+                return "Settings";
+                break;
+            case GameScenes::Credits:
+                return "Credits";
+                break;
+            case GameScenes::Quit:
+                return "Quit";
+                break;
+            case GameScenes::PauseMenu:
+                return "PauseMenu";
+                break;
+            default:
+                return "Unknown";
+                break;
+        }
+    }
+
 public:
     GameManager()
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
@@ -61,6 +91,7 @@ public:
 
     void start_game()
     {
+        createMainMenu();
         createPlayer();
         createBackground();
     }
@@ -101,17 +132,43 @@ public:
             }
             _window.clear();
 
-            auto view = _registry.view<RenderableComponent>();
-            for (auto entity : view) {
+            parallaxSystem(deltaTime.asSeconds());
+            renderSystem();
+            _window.display();
+        }
+    }
+
+    void renderSystem()
+    {
+        debugPrintCurrentScene();
+        _scene_manager.getCurrentSceneName();
+        auto view = _registry.view<RenderableComponent, SceneComponent>();
+        for (auto entity : view) {
+            auto& sceneComponent = view.get<SceneComponent>(entity);
+            // printf("Scene: %d\n", sceneComponent.scene.value_or(-1));
+            if (sceneComponent.scene.has_value() &&
+                sceneComponent.scene == _scene_manager.getCurrentScene()) {
                 auto& renderable = view.get<RenderableComponent>(entity);
 
-                // Update frameRect for animations if needed
-
+                if (renderable.text.getFont()) {
+                    printf(
+                        "Text: %s\n",
+                        renderable.text.getString().toAnsiString().c_str()
+                    );
+                    _window.draw(renderable.text);
+                }
+                // if (renderable.sprite.getTexture()) {
+                //     _window.draw(renderable.sprite);
+                // }
+            }
+            if (!sceneComponent.scene.has_value()) {
+                auto& renderable = view.get<RenderableComponent>(entity);
                 _window.draw(renderable.sprite);
             }
 
-            parallaxSystem(deltaTime.asSeconds());
-            _window.display();
+            else {
+                continue;
+            }
         }
     }
 
@@ -124,24 +181,24 @@ public:
                event.type == sf::Event::MouseButtonReleased;
     }
 
-    entt::entity createSpriteEntity(
-        const std::string& texturePath, const sf::IntRect& frameRect,
-        const sf::Vector2f& scale = sf::Vector2f(1.0f, 1.0f)
-    )
-    {
-        auto texture = _resource_manager.loadTexture(texturePath);
+    // entt::entity createSpriteEntity(
+    //     const std::string& texturePath, const sf::IntRect& frameRect,
+    //     const sf::Vector2f& scale = sf::Vector2f(1.0f, 1.0f)
+    // )
+    // {
+    //     auto texture = _resource_manager.loadTexture(texturePath);
 
-        auto entity = _registry.create();
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setTextureRect(frameRect);
-        renderable.sprite.setScale(scale);
+    //     auto entity = _registry.create();
+    //     RenderableComponent renderable;
+    //     renderable.texture = texture;
+    //     renderable.sprite.setTexture(*texture);
+    //     renderable.sprite.setTextureRect(frameRect);
+    //     renderable.sprite.setScale(scale);
 
-        _registry.emplace<RenderableComponent>(entity, std::move(renderable));
+    //     _registry.emplace<RenderableComponent>(entity, std::move(renderable));
 
-        return entity;
-    }
+    //     return entity;
+    // }
 
     entt::entity createPlayer()
     {
@@ -199,8 +256,44 @@ public:
             background, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
         );
         _registry.emplace<ParallaxComponent>(background, 100.0f);
+        _registry.emplace<SceneComponent>(background);
 
         return background;
+    };
+
+    entt::entity createMainMenu()
+    {
+        auto font =
+            _resource_manager.loadFont(_assetsPath + "/fonts/francis.ttf");
+
+        auto mainMenuTitle = _registry.create();
+        RenderableComponent renderable;
+
+        renderable.text.setFont(*font);
+
+        renderable.text.setString("R-Type");
+        renderable.text.setCharacterSize(96);
+        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
+        renderable.text.setOrigin(
+            titleBounds.width / 2, titleBounds.height / 2
+        );
+        renderable.text.setPosition(
+            _window.getSize().x / 2, _window.getSize().y * 0.20
+        );
+
+        _registry.emplace<RenderableComponent>(
+            mainMenuTitle, std::move(renderable)
+        );
+        _registry.emplace<SceneComponent>(mainMenuTitle, GameScenes::MainMenu);
+
+        return mainMenuTitle;
+    };
+
+    void debugPrintCurrentScene() const
+    {
+        GameScenes currentScene = _scene_manager.getCurrentScene();
+        std::string sceneName = getSceneName(currentScene);
+        std::cout << "Current scene: " << sceneName << std::endl;
     };
 };
 
