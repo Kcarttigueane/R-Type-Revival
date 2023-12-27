@@ -1,13 +1,17 @@
-
 #ifndef ECS_RENDERABLE_COMPONENT_HPP
 #define ECS_RENDERABLE_COMPONENT_HPP
 
-#include "../../include/ecs.hpp"
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+
+#include <memory>
 
 struct RenderableComponent {
-  std::string spriteID; // Reference to a sprite or image asset
-  int layer;            // Render layer for depth effect
-  int zIndex;           // Z-index for sorting objects within the same layer
+    std::shared_ptr<sf::Texture> texture;
+    sf::Sprite sprite;
+    sf::IntRect frameRect;
 };
 
-#endif // ECS_RENDERABLE_COMPONENT_HPP
+#endif  // ECS_RENDERABLE_COMPONENT_HPP

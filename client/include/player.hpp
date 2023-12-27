@@ -14,7 +14,7 @@ protected:
 
 public:
     player(int id, string type, Texture& shipsTextures);
-    void setPosition(float x, float y);
+    // void setPosition(float x, float y);
     Vector2f getPosition();
     Sprite& getSprite();
     string getType();

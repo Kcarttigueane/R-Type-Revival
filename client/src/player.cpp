@@ -9,10 +9,10 @@ player::player(int id, string type, Texture& shipsTexture)
     _sprite.setScale(Vector2f(5.0, 5.0));
 }
 
-void player::setPosition(float x, float y)
-{
-    _position = Vector2f(x, y);
-}
+// void player::setPosition(float x, float y)
+// {
+//     _position = Vector2f(x, y);
+// }
 
 Vector2f player::getPosition()
 {

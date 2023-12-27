@@ -2,13 +2,9 @@
 #define ECS_COMPONENTS_HEALTH_HPP
 
 struct HealthComponent {
-  int healthPoints;
-  float invulnerabilityDuration;
-  float invulnerabilityTimer;
-
-  HealthComponent(float health, float maxHealth, float anotherParameter)
-      : healthPoints(health), invulnerabilityDuration(maxHealth),
-        invulnerabilityTimer(anotherParameter) {}
+    int healthPoints;
+    // float invulnerabilityDuration;
+    // float invulnerabilityTimer;
 };
 
-#endif // ECS_COMPONENTS_HEALTH_HPP
+#endif  // ECS_COMPONENTS_HEALTH_HPP

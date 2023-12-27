@@ -3,6 +3,7 @@
 
 #    include <SFML/Audio.hpp>
 #    include <SFML/Graphics.hpp>
+#    include <iostream>
 #    include <map>
 #    include <memory>
 #    include <stdexcept>
@@ -41,6 +42,7 @@ private:
         ResourceMap& resourceMap, const std::string& filename
     )
     {
+        std::cout << "Loading resource: " << filename << std::endl;
         auto iter = resourceMap.find(filename);
         if (iter != resourceMap.end()) {
             return iter->second;
