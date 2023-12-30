@@ -6,12 +6,12 @@
 class SceneManager {
 private:
     GameScenes _current_scene = GameScenes::MainMenu;
-    InputManager& _input_manager;
+    InputManager& _inputManager;
 
 public:
     SceneManager() = delete;
 
-    SceneManager(InputManager& input_manager) : _input_manager(input_manager) {}
+    SceneManager(InputManager& input_manager) : _inputManager(input_manager) {}
 
     ~SceneManager() = default;
 

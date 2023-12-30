@@ -2,25 +2,26 @@
 #    define PLAYER_PROFILE_MANAGER_HPP
 
 #    include <string>
+#    include "../../../libs/EnTT/entt.hpp"
 
 using std::string;
 
 class PlayerProfileManager {
 private:
     string player_name;
-    string player_id;
+    entt::entity playerEntity;
 
 public:
-    PlayerProfileManager(/* args */) = default;
+    PlayerProfileManager() = default;
     ~PlayerProfileManager() = default;
+
+    void setPlayerEntity(entt::entity entity) { playerEntity = entity; }
+
+    entt::entity getPlayerEntity() const { return playerEntity; }
 
     [[nodiscard]] string getPlayerName() const { return player_name; }
 
     void setPlayerName(string name) { player_name = name; }
-
-    [[nodiscard]] string getPlayerId() const { return player_id; }
-
-    void setPlayerId(string id) { player_id = id; }
 };
 
 #endif  // PLAYER_PROFILE_MANAGER_HPP

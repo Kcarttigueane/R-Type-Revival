@@ -1,6 +1,8 @@
 #ifndef GAME_MANAGER_HPP
 #define GAME_MANAGER_HPP
 
+#include "../config.hpp"
+
 // Managers
 #include "./input_manager.hpp"
 #include "./network_manager.hpp"
@@ -8,6 +10,9 @@
 #include "./resource_manager.hpp"
 #include "./scene_manager.hpp"
 #include "./settings_manager.hpp"
+
+// Factories
+#include "../entity_factory.hpp"
 
 // Libraries
 #include <fmt/color.h>
@@ -22,9 +27,9 @@
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 
+#include <cstdlib>
 #include <iostream>
 #include <random>
-#include <cstdlib>
 #include <vector>
 
 #define WINDOW_WIDTH 1920
@@ -40,12 +45,14 @@ private:
     sf::Clock enemyClock;
 
     // ! Managers
-    InputManager _input_manager;
-    NetworkManager _network_manager;
-    PlayerProfileManager _player_profile_manager;
-    ResourceManager _resource_manager;
-    SceneManager _scene_manager;
-    SettingsManager _settings_manager;
+    InputManager _inputManager;
+    NetworkManager _networkManager;
+    PlayerProfileManager _playerProfileManager;
+    ResourceManager _resourceManager;
+    SceneManager _sceneManager;
+    SettingsManager _settingsManager;
+
+    EntityFactory _entityFactory;
 
     static std::string getSceneName(GameScenes scene)
     {
@@ -56,6 +63,7 @@ private:
             case GameScenes::InGame:
                 return "InGame";
                 break;
+
             case GameScenes::GameOver:
                 return "GameOver";
                 break;
@@ -80,12 +88,13 @@ private:
 public:
     GameManager()
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _input_manager(),
-          _network_manager(),
-          _player_profile_manager(),
-          _resource_manager(),
-          _scene_manager(_input_manager),
-          _settings_manager(_resource_manager)
+          _inputManager(),
+          _networkManager(),
+          _playerProfileManager(),
+          _resourceManager(),
+          _sceneManager(_inputManager),
+          _settingsManager(_resourceManager),
+          _entityFactory(_registry, _resourceManager, _window)
     {
         _window.setFramerateLimit(60);
         std::cout << "GameManager created!" << std::endl;
@@ -93,7 +102,8 @@ public:
 
     ~GameManager() = default;
 
-    float getRandomFloat(float min, float max) {
+    float getRandomFloat(float min, float max)
+    {
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_real_distribution<float> distribution(min, max);
@@ -102,9 +112,9 @@ public:
 
     void start_game()
     {
-        createMainMenu();
-        createPlayer();
-        createBackground();
+        _entityFactory.createMainMenu();
+        _entityFactory.createPlayer();
+        _entityFactory.createBackground();
     }
 
     void parallaxSystem(float deltaTime)
@@ -138,13 +148,14 @@ public:
                     _window.close();
                 }
                 if (isInputEvent(event)) {
-                    _input_manager.processInput(event);
+                    _inputManager.processInput(event);
                 }
-            } if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+            }
+            if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
                 float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                createNormalEnemy(randomY, randomSpeed);
+                _entityFactory.createNormalEnemy(randomY, randomSpeed);
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
@@ -154,26 +165,25 @@ public:
         }
     }
 
-    // void playerSystem() {
-    //     auto players = _registry.view<PlayerComponent, RenderableComponent>();
-    //     for (auto &entity : players) {
-    //         auto& player = players.get<RenderableComponent>();
-    //         Vector2f 
-    //     }
-    // }
-
-    void enemySystem() {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, VelocityComponent>();
+    void enemySystem()
+    {
+        auto enemies =
+            _registry
+                .view<EnemyAIComponent, RenderableComponent, VelocityComponent>(
+                );
         std::vector<entt::entity> entitiesToDestroy;
-        for (auto &entity : enemies) {
+        for (auto& entity : enemies) {
             auto& enemy = enemies.get<RenderableComponent>(entity);
             auto& velocity = enemies.get<VelocityComponent>(entity);
-            Vector2f enemyPosition = enemy.sprite.getPosition();
+            sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
             if (enemyPosition.x < -128.0f) {
                 entitiesToDestroy.push_back(entity);
             } else {
-                enemy.sprite.setPosition(Vector2f(enemyPosition.x + velocity.x * velocity.speed, enemyPosition.y + velocity.y * velocity.speed));
+                enemy.sprite.setPosition(sf::Vector2f(
+                    enemyPosition.x + velocity.x * velocity.speed,
+                    enemyPosition.y + velocity.y * velocity.speed
+                ));
             }
         }
         for (auto entity : entitiesToDestroy) {
@@ -181,7 +191,6 @@ public:
             printf("Entity Deleted\n");
         }
     }
-
 
     void renderSystem()
     {
@@ -194,11 +203,12 @@ public:
                 auto& renderable = view.get<RenderableComponent>(entity);
                 _window.draw(renderable.sprite);
             }
-        } for (auto entity : view) {
+        }
+        for (auto entity : view) {
             auto& sceneComponent = view.get<SceneComponent>(entity);
             // printf("Scene: %d\n", sceneComponent.scene.value_or(-1));
             if (sceneComponent.scene.has_value() &&
-                sceneComponent.scene == _scene_manager.getCurrentScene()) {
+                sceneComponent.scene == _sceneManager.getCurrentScene()) {
                 auto& renderable = view.get<RenderableComponent>(entity);
 
                 if (renderable.text.getFont()) {
@@ -220,183 +230,9 @@ public:
                event.type == sf::Event::MouseButtonReleased;
     }
 
-    // entt::entity createSpriteEntity(
-    //     const std::string& texturePath, const sf::IntRect& frameRect,
-    //     const sf::Vector2f& scale = sf::Vector2f(1.0f, 1.0f)
-    // )
-    // {
-    //     auto texture = _resource_manager.loadTexture(texturePath);
-
-    //     auto entity = _registry.create();
-    //     RenderableComponent renderable;
-    //     renderable.texture = texture;
-    //     renderable.sprite.setTexture(*texture);
-    //     renderable.sprite.setTextureRect(frameRect);
-    //     renderable.sprite.setScale(scale);
-
-    //     _registry.emplace<RenderableComponent>(entity, std::move(renderable));
-
-    //     return entity;
-    // }
-
-    entt::entity createPlayer()
-    {
-        auto player = _registry.create();
-        auto texture = _resource_manager.loadTexture(
-            _assetsPath + "/Player/spaceship.gif"
-        );
-        sf::IntRect initialFrameRect(66, 0, 33, 17);
-
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(Vector2f(5.0, 5.0));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-
-        _registry.emplace<RenderableComponent>(player, std::move(renderable));
-
-        _registry.emplace<TransformComponent>(
-            player, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-
-        _registry.emplace<VelocityComponent>(player, 0.0f, 0.0f, 1.0f);
-
-        _registry.emplace<WeaponComponent>(
-            player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100,
-            false
-        );
-
-        _registry.emplace<ScoreComponent>(player, 0, 1.0f, 0);
-
-        _registry.emplace<HealthComponent>(player, 100);
-
-        _registry.emplace<SceneComponent>(player, GameScenes::MainMenu);
-
-        _registry.emplace<PlayerComponent>(player);
-        return player;
-    }
-
-    entt::entity createNormalEnemy(float spawnHeight, float speed)
-    {
-        auto enemy = _registry.create();
-        auto texture = _resource_manager.loadTexture(
-            _assetsPath + "/Bydos/Bydos.png"
-        );
-        sf::IntRect initialFrameRect(0, 32, 128, 64);
-
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setPosition(Vector2f(2100.0f, spawnHeight));
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(Vector2f(-2.0, 2.0));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-
-        _registry.emplace<EnemyAIComponent>(enemy);
-
-        _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
-
-        _registry.emplace<TransformComponent>(
-            enemy, 2100.0f, spawnHeight, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-
-        _registry.emplace<VelocityComponent>(enemy, -1.0f, 0.0f, speed);
-
-        _registry.emplace<WeaponComponent>(
-            enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100,
-            false
-        );
-
-        _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-
-        _registry.emplace<HealthComponent>(enemy, 100);
-
-        _registry.emplace<SceneComponent>(enemy, GameScenes::MainMenu);
-        return enemy;
-    }
-
-    entt::entity createProjectile(float dx, float dy, float x, float y, float velocity) {
-        auto projectile = _registry.create();
-        auto texture = _resource_manager.loadTexture(
-            _assetsPath + "/Player/Player_shots.png"
-        );
-        sf::IntRect initialFrameRect(0, 0, 128, 128);
-
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setPosition(Vector2f(x, y));
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(Vector2f(0.5f, 0.5f));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-
-        _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
-
-        _registry.emplace<TransformComponent>(
-            projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-
-        _registry.emplace<VelocityComponent>(projectile, 1.0f, 0.0f, velocity);
-
-    }
-
-    entt::entity createBackground()
-    {
-        auto texture = _resource_manager.loadTexture(
-            _assetsPath + "/Background/Layer 3/Space_background.png"
-        );
-
-        auto background = _registry.create();
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setPosition(Vector2f(0.0f, 0.0f));
-
-        _registry.emplace<RenderableComponent>(
-            background, std::move(renderable)
-        );
-
-        _registry.emplace<TransformComponent>(
-            background, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<ParallaxComponent>(background, 100.0f);
-        _registry.emplace<SceneComponent>(background);
-
-        return background;
-    };
-
-    entt::entity createMainMenu()
-    {
-        auto font =
-            _resource_manager.loadFont(_assetsPath + "/fonts/francis.ttf");
-
-        auto mainMenuTitle = _registry.create();
-        RenderableComponent renderable;
-
-        renderable.text.setFont(*font);
-
-        renderable.text.setString("R-Type");
-        renderable.text.setCharacterSize(96);
-        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
-        renderable.text.setOrigin(
-            titleBounds.width / 2, titleBounds.height / 2
-        );
-        renderable.text.setPosition(
-            _window.getSize().x / 2, _window.getSize().y * 0.20
-        );
-
-        _registry.emplace<RenderableComponent>(
-            mainMenuTitle, std::move(renderable)
-        );
-        _registry.emplace<SceneComponent>(mainMenuTitle, GameScenes::MainMenu);
-
-        return mainMenuTitle;
-    };
-
     void debugPrintCurrentScene() const
     {
-        GameScenes currentScene = _scene_manager.getCurrentScene();
+        GameScenes currentScene = _sceneManager.getCurrentScene();
         std::string sceneName = getSceneName(currentScene);
         std::cout << "Current scene: " << sceneName << std::endl;
     };
