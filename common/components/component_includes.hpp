@@ -12,5 +12,6 @@
 #    include "./transform.hpp"
 #    include "./velocity.hpp"
 #    include "./weapon.hpp"
+#    include "./player.hpp"
 
 #endif  // COMPONENTS_INCLUDE

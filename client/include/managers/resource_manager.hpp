@@ -42,7 +42,6 @@ private:
         ResourceMap& resourceMap, const std::string& filename
     )
     {
-        std::cout << "Loading resource: " << filename << std::endl;
         auto iter = resourceMap.find(filename);
         if (iter != resourceMap.end()) {
             return iter->second;
@@ -51,6 +50,7 @@ private:
             // TODO : music should be openFromFile
 
             if (resource->loadFromFile(filename)) {
+                std::cout << "Loading resource: " << filename << std::endl;
                 resourceMap[filename] = resource;
                 return resource;
             } else {
