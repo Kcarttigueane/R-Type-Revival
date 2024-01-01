@@ -43,6 +43,9 @@ private:
     entt::registry _registry;
     sf::Clock clock;
     sf::Clock enemyClock;
+    boost::asio::io_context _io_context;
+    std::string _server_ip = "127.0.0.1";
+    unsigned short _server_port = 8080;
 
     // ! Managers
     InputManager _inputManager;
@@ -70,7 +73,7 @@ private:
             case GameScenes::Settings:
                 return "Settings";
                 break;
-            case GameScenes::Credits:
+            case GameScenes::Tutorial:
                 return "Credits";
                 break;
             case GameScenes::Quit:
@@ -88,8 +91,8 @@ private:
 public:
     GameManager()
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(),
-          _networkManager(),
+          _inputManager(_registry, _window),
+          _networkManager(_io_context, _server_ip, _server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
@@ -113,30 +116,14 @@ public:
     void start_game()
     {
         //_entityFactory.createMainMenu();
-        _entityFactory.createPlayer();
+        _entityFactory.createMainMenu();
+
+        auto playerEntity = _entityFactory.createPlayer();
+        _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
     }
 
-    void parallaxSystem(float deltaTime)
-    {
-        auto view = _registry.view<
-            ParallaxComponent, RenderableComponent, TransformComponent>();
-
-        for (auto entity : view) {
-            auto& parallax = view.get<ParallaxComponent>(entity);
-            auto& renderable = view.get<RenderableComponent>(entity);
-            auto& transform = view.get<TransformComponent>(entity);
-
-            transform.x -= parallax.speed * deltaTime;
-
-            if (transform.x < -WINDOW_WIDTH) {
-                transform.x = 0.0f;
-            }
-
-            renderable.sprite.setPosition(sf::Vector2f(transform.x, transform.y)
-            );
-        }
-    };
+    void parallaxSystem(float deltaTime);
 
     void game_loop()
     {
@@ -163,6 +150,7 @@ public:
                     );
                 }
             }
+            // processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
@@ -206,30 +194,43 @@ public:
         }
     }
 
-    void enemySystem()
+    void processPlayerActions(float deltaTime)
     {
-        auto enemies = _registry.view<
-            EnemyAIComponent, RenderableComponent, VelocityComponent,
-            HealthComponent>();
-        std::vector<entt::entity> entitiesToDestroy;
-        for (auto& entity : enemies) {
-            auto& enemy = enemies.get<RenderableComponent>(entity);
-            auto& velocity = enemies.get<VelocityComponent>(entity);
-            float& health = enemies.get<HealthComponent>(entity).healthPoints;
-            sf::Vector2f enemyPosition = enemy.sprite.getPosition();
+        auto& actionsQueue = _inputManager.getPlayerActionsQueue();
+        while (!actionsQueue.empty()) {
+            PlayerAction action = actionsQueue.front();
+            actionsQueue.pop();
 
-            if (enemyPosition.x < -128.0f || health <= 0.0f) {
-                entitiesToDestroy.push_back(entity);
-            } else {
-                enemy.sprite.setPosition(sf::Vector2f(
-                    enemyPosition.x + velocity.dx * velocity.speed,
-                    enemyPosition.y + velocity.dy * velocity.speed
-                ));
+            auto playerEntity = _playerProfileManager.getPlayerEntity();
+
+            if (!_registry.all_of<TransformComponent>(playerEntity)) {
+                printf(
+                    "Player entity does not have a "
+                    "TransformComponent\n"
+                );
+                continue;
             }
-        }
-        for (auto entity : entitiesToDestroy) {
-            _registry.destroy(entity);
-            printf("Entity Deleted\n");
+
+            auto& transform = _registry.get<TransformComponent>(playerEntity);
+
+            switch (action) {
+                case PlayerAction::Shoot:
+                    break;
+                case PlayerAction::MoveLeft:
+                    transform.x -= 10.0f;
+                    break;
+                case PlayerAction::MoveRight:
+                    transform.x += 10.0f;
+                    break;
+                case PlayerAction::MoveUp:
+                    transform.y -= 10.0f;
+                    break;
+                case PlayerAction::MoveDown:
+                    transform.y += 10.0f;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -260,6 +261,8 @@ public:
         }
     }
 
+    void enemySystem();
+
     void renderSystem()
     {
         // debugPrintCurrentScene();
@@ -273,11 +276,18 @@ public:
             }
         }
         for (auto entity : view) {
+            auto& renderable = view.get<RenderableComponent>(entity);
             auto& sceneComponent = view.get<SceneComponent>(entity);
-            // printf("Scene: %d\n", sceneComponent.scene.value_or(-1));
+            // ! @TomDesalmand : Decomment when making the player movement
+            // if (_registry.all_of<TransformComponent>(entity)) {
+            //     auto& transform = _registry.get<TransformComponent>(entity);
+            //     renderable.sprite.setPosition(
+            //         sf::Vector2f(transform.x, transform.y)
+            //     );
+            // }
+
             if (sceneComponent.scene.has_value() &&
                 sceneComponent.scene == _sceneManager.getCurrentScene()) {
-                auto& renderable = view.get<RenderableComponent>(entity);
 
                 if (renderable.text.getFont()) {
                     _window.draw(renderable.text);
