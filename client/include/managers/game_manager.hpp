@@ -170,19 +170,18 @@ public:
 
             switch (action) {
                 case PlayerAction::Shoot:
-                    // Implement shooting logic
                     break;
                 case PlayerAction::MoveLeft:
-                    transform.x -= 10.0f;  // Move left
+                    transform.x -= 10.0f;
                     break;
                 case PlayerAction::MoveRight:
-                    transform.x += 10.0f;  // Move right
+                    transform.x += 10.0f;
                     break;
                 case PlayerAction::MoveUp:
-                    transform.y -= 10.0f;  // Move up
+                    transform.y -= 10.0f;
                     break;
                 case PlayerAction::MoveDown:
-                    transform.y += 10.0f;  // Move down
+                    transform.y += 10.0f;
                     break;
                 default:
                     break;
