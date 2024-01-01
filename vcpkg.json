@@ -1,3 +1,6 @@
 {
-  "dependencies": ["sfml", "boost-asio"]
+  "dependencies" : [ "sfml", "boost-asio", "spdlog", "fmt", {
+    "name" : "fmt",
+    "version>=" : "10.1.1"
+  } ]
 }
