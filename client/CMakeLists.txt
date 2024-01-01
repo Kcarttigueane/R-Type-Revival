@@ -6,7 +6,7 @@ find_package(Boost COMPONENTS system REQUIRED)
 
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
-file(GLOB SOURCE_FILES "src/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
 
 add_executable(r-type_client ${SOURCE_FILES})
 

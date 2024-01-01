@@ -43,6 +43,9 @@ private:
     entt::registry _registry;
     sf::Clock clock;
     sf::Clock enemyClock;
+    boost::asio::io_context _io_context;
+    std::string _server_ip = "127.0.0.1";
+    unsigned short _server_port = 8080;
 
     // ! Managers
     InputManager _inputManager;
@@ -70,7 +73,7 @@ private:
             case GameScenes::Settings:
                 return "Settings";
                 break;
-            case GameScenes::Credits:
+            case GameScenes::Tutorial:
                 return "Credits";
                 break;
             case GameScenes::Quit:
@@ -88,8 +91,8 @@ private:
 public:
     GameManager()
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(),
-          _networkManager(),
+          _inputManager(_registry, _window),
+          _networkManager(_io_context, _server_ip, _server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
@@ -117,26 +120,7 @@ public:
         _entityFactory.createBackground();
     }
 
-    void parallaxSystem(float deltaTime)
-    {
-        auto view = _registry.view<
-            ParallaxComponent, RenderableComponent, TransformComponent>();
-
-        for (auto entity : view) {
-            auto& parallax = view.get<ParallaxComponent>(entity);
-            auto& renderable = view.get<RenderableComponent>(entity);
-            auto& transform = view.get<TransformComponent>(entity);
-
-            transform.x -= parallax.speed * deltaTime;
-
-            if (transform.x < -WINDOW_WIDTH) {
-                transform.x = 0.0f;
-            }
-
-            renderable.sprite.setPosition(sf::Vector2f(transform.x, transform.y)
-            );
-        }
-    };
+    void parallaxSystem(float deltaTime);
 
     void game_loop()
     {

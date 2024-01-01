@@ -34,7 +34,7 @@ public:
             case GameScenes::Settings:
                 std::cout << "Settings" << std::endl;
                 break;
-            case GameScenes::Credits:
+            case GameScenes::Tutorial:
                 std::cout << "Credits" << std::endl;
                 break;
             case GameScenes::Quit:
