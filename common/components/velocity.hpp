@@ -2,7 +2,7 @@
 #define ECS_VELOCITY_COMPONENT_HPP
 
 struct VelocityComponent {
-    float x, y;
+    float dx, dy;
     float speed;
 };
 

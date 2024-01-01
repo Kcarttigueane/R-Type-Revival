@@ -57,7 +57,7 @@ public:
 
         _registry.emplace<ScoreComponent>(player, 0, 1.0f, 0);
 
-        _registry.emplace<HealthComponent>(player, 100);
+        _registry.emplace<HealthComponent>(player, 100.0f);
 
         _registry.emplace<SceneComponent>(player, GameScenes::InGame);
 
@@ -70,7 +70,7 @@ public:
         auto enemy = _registry.create();
         auto texture =
             _resourceManager.loadTexture(_assetsPath + "/Bydos/Bydos.png");
-        sf::IntRect initialFrameRect(0, 32, 128, 64);
+        sf::IntRect initialFrameRect(32, 48, 64, 32);
 
         RenderableComponent renderable;
         renderable.texture = texture;
@@ -97,9 +97,9 @@ public:
 
         _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
 
-        _registry.emplace<HealthComponent>(enemy, 100);
+        _registry.emplace<HealthComponent>(enemy, 100.0f);
 
-        _registry.emplace<SceneComponent>(enemy, GameScenes::MainMenu);
+        _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
         return enemy;
     }
 
@@ -111,13 +111,13 @@ public:
         auto texture = _resourceManager.loadTexture(
             _assetsPath + "/Player/Player_shots.png"
         );
-        sf::IntRect initialFrameRect(0, 0, 128, 128);
+        sf::IntRect initialFrameRect(45, 62, 32, 8);
 
         RenderableComponent renderable;
         renderable.texture = texture;
         renderable.sprite.setPosition(sf::Vector2f(x, y));
         renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(0.5f, 0.5f));
+        renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
         renderable.frameRect = initialFrameRect;
         renderable.sprite.setTextureRect(initialFrameRect);
 
@@ -129,7 +129,11 @@ public:
             projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f
         );
 
-        _registry.emplace<VelocityComponent>(projectile, 1.0f, 0.0f, velocity);
+        _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
+
+        _registry.emplace<DamageComponent>(projectile, 100.0f);
+
+        _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
 
         return projectile;
     }
