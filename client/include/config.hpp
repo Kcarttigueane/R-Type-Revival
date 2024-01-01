@@ -7,7 +7,7 @@ enum class GameScenes {
     Settings,
     PauseMenu,
     GameOver,
-    Credits,
+    Tutorial,
     Quit,
 };
 
