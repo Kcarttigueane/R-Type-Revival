@@ -150,10 +150,17 @@ public:
                 if (isInputEvent(event)) {
                     _inputManager.processInput(event);
                 }
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                    entt::entity player = _playerProfileManager.getPlayerEntity();
-                    const sf::Vector2f& playerPosition = _registry.get<RenderableComponent>(player).sprite.getPosition();
-                    _entityFactory.createProjectile(1.0f, 0.0f, playerPosition.x + 130.0f, playerPosition.y + 64.0f, 5.0f);
+                if (event.type == sf::Event::KeyPressed &&
+                    event.key.code == sf::Keyboard::Space) {
+                    entt::entity player =
+                        _playerProfileManager.getPlayerEntity();
+                    const sf::Vector2f& playerPosition =
+                        _registry.get<RenderableComponent>(player)
+                            .sprite.getPosition();
+                    _entityFactory.createProjectile(
+                        1.0f, 0.0f, playerPosition.x + 130.0f,
+                        playerPosition.y + 64.0f, 5.0f
+                    );
                 }
             }
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
@@ -172,16 +179,26 @@ public:
         }
     }
 
-    void collisionProjectileAndEnemy() {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
+    void collisionProjectileAndEnemy()
+    {
+        auto enemies =
+            _registry
+                .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
+        auto projectiles =
+            _registry.view<RenderableComponent, DamageComponent>();
         for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
+            sf::Sprite& enemySprite =
+                enemies.get<RenderableComponent>(enemy).sprite;
+            float& enemyHealth =
+                enemies.get<HealthComponent>(enemy).healthPoints;
             for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite = projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
+                sf::Sprite& projectileSprite =
+                    projectiles.get<RenderableComponent>(projectile).sprite;
+                float projectileDamage =
+                    projectiles.get<DamageComponent>(projectile).damage;
+                if (enemySprite.getGlobalBounds().intersects(
+                        projectileSprite.getGlobalBounds()
+                    )) {
                     enemyHealth -= projectileDamage;
                     _registry.destroy(projectile);
                 }
@@ -189,13 +206,11 @@ public:
         }
     }
 
-
     void enemySystem()
     {
-        auto enemies =
-            _registry
-                .view<EnemyAIComponent, RenderableComponent, VelocityComponent, HealthComponent>(
-                );
+        auto enemies = _registry.view<
+            EnemyAIComponent, RenderableComponent, VelocityComponent,
+            HealthComponent>();
         std::vector<entt::entity> entitiesToDestroy;
         for (auto& entity : enemies) {
             auto& enemy = enemies.get<RenderableComponent>(entity);
@@ -220,18 +235,22 @@ public:
 
     void projectileSystem()
     {
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent, VelocityComponent>();
+        auto projectiles =
+            _registry
+                .view<RenderableComponent, DamageComponent, VelocityComponent>(
+                );
         std::vector<entt::entity> entitiesToDestroy;
         for (auto& entity : projectiles) {
             auto& projectile = projectiles.get<RenderableComponent>(entity);
             auto& velocity = projectiles.get<VelocityComponent>(entity);
             sf::Vector2f projectilePosition = projectile.sprite.getPosition();
-            if (projectilePosition.x > WINDOW_WIDTH || projectilePosition.x < -64.0f) {
+            if (projectilePosition.x > WINDOW_WIDTH ||
+                projectilePosition.x < -64.0f) {
                 entitiesToDestroy.push_back(entity);
             } else {
                 projectile.sprite.setPosition(sf::Vector2f(
                     projectilePosition.x + velocity.dx * velocity.speed,
-                    projectilePosition.y + velocity.dy  * velocity.speed
+                    projectilePosition.y + velocity.dy * velocity.speed
                 ));
             };
         }
