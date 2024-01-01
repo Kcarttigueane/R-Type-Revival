@@ -2,7 +2,7 @@
 #    define INPUT_MANAGER_HPP
 
 // Managers
-#    include "../client.hpp"
+#    include "../config.hpp"
 
 // Libraries
 #    include <fmt/color.h>

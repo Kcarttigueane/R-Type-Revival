@@ -112,7 +112,7 @@ public:
 
     void start_game()
     {
-        _entityFactory.createMainMenu();
+        //_entityFactory.createMainMenu();
         _entityFactory.createPlayer();
         _entityFactory.createBackground();
     }
@@ -150,6 +150,11 @@ public:
                 if (isInputEvent(event)) {
                     _inputManager.processInput(event);
                 }
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
+                    entt::entity player = _playerProfileManager.getPlayerEntity();
+                    const sf::Vector2f& playerPosition = _registry.get<RenderableComponent>(player).sprite.getPosition();
+                    _entityFactory.createProjectile(1.0f, 0.0f, playerPosition.x + 130.0f, playerPosition.y + 64.0f, 5.0f);
+                }
             }
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
@@ -161,34 +166,78 @@ public:
             parallaxSystem(deltaTime.asSeconds());
             enemySystem();
             renderSystem();
+            projectileSystem();
+            collisionProjectileAndEnemy();
             _window.display();
         }
     }
+
+    void collisionProjectileAndEnemy() {
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
+        auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
+        for (auto& enemy : enemies) {
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
+            for (auto& projectile : projectiles) {
+                sf::Sprite& projectileSprite = projectiles.get<RenderableComponent>(projectile).sprite;
+                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
+                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
+                    enemyHealth -= projectileDamage;
+                    _registry.destroy(projectile);
+                }
+            }
+        }
+    }
+
 
     void enemySystem()
     {
         auto enemies =
             _registry
-                .view<EnemyAIComponent, RenderableComponent, VelocityComponent>(
+                .view<EnemyAIComponent, RenderableComponent, VelocityComponent, HealthComponent>(
                 );
         std::vector<entt::entity> entitiesToDestroy;
         for (auto& entity : enemies) {
             auto& enemy = enemies.get<RenderableComponent>(entity);
             auto& velocity = enemies.get<VelocityComponent>(entity);
+            float& health = enemies.get<HealthComponent>(entity).healthPoints;
             sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
-            if (enemyPosition.x < -128.0f) {
+            if (enemyPosition.x < -128.0f || health <= 0.0f) {
                 entitiesToDestroy.push_back(entity);
             } else {
                 enemy.sprite.setPosition(sf::Vector2f(
-                    enemyPosition.x + velocity.x * velocity.speed,
-                    enemyPosition.y + velocity.y * velocity.speed
+                    enemyPosition.x + velocity.dx * velocity.speed,
+                    enemyPosition.y + velocity.dy * velocity.speed
                 ));
             }
         }
         for (auto entity : entitiesToDestroy) {
             _registry.destroy(entity);
             printf("Entity Deleted\n");
+        }
+    }
+
+    void projectileSystem()
+    {
+        auto projectiles = _registry.view<RenderableComponent, DamageComponent, VelocityComponent>();
+        std::vector<entt::entity> entitiesToDestroy;
+        for (auto& entity : projectiles) {
+            auto& projectile = projectiles.get<RenderableComponent>(entity);
+            auto& velocity = projectiles.get<VelocityComponent>(entity);
+            sf::Vector2f projectilePosition = projectile.sprite.getPosition();
+            if (projectilePosition.x > WINDOW_WIDTH || projectilePosition.x < -64.0f) {
+                entitiesToDestroy.push_back(entity);
+            } else {
+                projectile.sprite.setPosition(sf::Vector2f(
+                    projectilePosition.x + velocity.dx * velocity.speed,
+                    projectilePosition.y + velocity.dy  * velocity.speed
+                ));
+            };
+        }
+        for (auto entity : entitiesToDestroy) {
+            _registry.destroy(entity);
+            printf("Projectile Deleted\n");
         }
     }
 
@@ -216,6 +265,13 @@ public:
                 }
                 if (renderable.sprite.getTexture()) {
                     _window.draw(renderable.sprite);
+                    // sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
+                    // sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.width, hitbox.height));
+                    // hitboxShape.setPosition(hitbox.left, hitbox.top);
+                    // hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
+                    // hitboxShape.setOutlineColor(sf::Color::Red);
+                    // hitboxShape.setOutlineThickness(2.0f);
+                    // _window.draw(hitboxShape);
                 }
             }
         }
