@@ -5,7 +5,7 @@
 
 class SceneManager {
 private:
-    GameScenes _current_scene = GameScenes::MainMenu;
+    GameScenes _current_scene = GameScenes::InGame;
     InputManager& _inputManager;
 
 public:

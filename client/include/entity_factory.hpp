@@ -48,7 +48,7 @@ public:
             player, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
         );
 
-        _registry.emplace<VelocityComponent>(player, 0.0f, 0.0f, 1.0f);
+        _registry.emplace<VelocityComponent>(player, 0.0f, 0.0f, 10.0f);
 
         _registry.emplace<WeaponComponent>(
             player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100,
@@ -59,7 +59,7 @@ public:
 
         _registry.emplace<HealthComponent>(player, 100);
 
-        _registry.emplace<SceneComponent>(player, GameScenes::MainMenu);
+        _registry.emplace<SceneComponent>(player, GameScenes::InGame);
 
         _registry.emplace<PlayerComponent>(player);
         return player;

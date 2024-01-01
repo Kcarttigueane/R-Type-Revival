@@ -34,7 +34,6 @@ enum class PlayerAction {
     MoveRight,
     MoveUp,
     MoveDown,
-    UsePowerUp,
 };
 
 class InputManager {
@@ -52,7 +51,7 @@ public:
     InputManager() = delete;
 
     InputManager(entt::registry& _registry, sf::RenderWindow& window)
-        : _currentScene(GameScenes::MainMenu),
+        : _currentScene(GameScenes::InGame),
           _registry(_registry),
           _window(window)
     {

@@ -116,7 +116,9 @@ public:
     void start_game()
     {
         _entityFactory.createMainMenu();
-        _entityFactory.createPlayer();
+
+        auto playerEntity = _entityFactory.createPlayer();
+        _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
     }
 
@@ -135,6 +137,7 @@ public:
                     _inputManager.processInput(event);
                 }
             }
+            processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
@@ -149,32 +152,45 @@ public:
         }
     }
 
-    void enemySystem()
+    void processPlayerActions(float deltaTime)
     {
-        auto enemies =
-            _registry
-                .view<EnemyAIComponent, RenderableComponent, VelocityComponent>(
-                );
-        std::vector<entt::entity> entitiesToDestroy;
-        for (auto& entity : enemies) {
-            auto& enemy = enemies.get<RenderableComponent>(entity);
-            auto& velocity = enemies.get<VelocityComponent>(entity);
-            sf::Vector2f enemyPosition = enemy.sprite.getPosition();
+        auto& actionsQueue = _inputManager.getPlayerActionsQueue();
+        while (!actionsQueue.empty()) {
+            PlayerAction action = actionsQueue.front();
+            actionsQueue.pop();
 
-            if (enemyPosition.x < -128.0f) {
-                entitiesToDestroy.push_back(entity);
-            } else {
-                enemy.sprite.setPosition(sf::Vector2f(
-                    enemyPosition.x + velocity.x * velocity.speed,
-                    enemyPosition.y + velocity.y * velocity.speed
-                ));
+            auto playerEntity = _playerProfileManager.getPlayerEntity();
+
+            if (!_registry.all_of<TransformComponent>(playerEntity)) {
+                printf("Player entity does not have a TransformComponent\n");
+                continue;
+            }
+
+            auto& transform = _registry.get<TransformComponent>(playerEntity);
+
+            switch (action) {
+                case PlayerAction::Shoot:
+                    // Implement shooting logic
+                    break;
+                case PlayerAction::MoveLeft:
+                    transform.x -= 10.0f;  // Move left
+                    break;
+                case PlayerAction::MoveRight:
+                    transform.x += 10.0f;  // Move right
+                    break;
+                case PlayerAction::MoveUp:
+                    transform.y -= 10.0f;  // Move up
+                    break;
+                case PlayerAction::MoveDown:
+                    transform.y += 10.0f;  // Move down
+                    break;
+                default:
+                    break;
             }
         }
-        for (auto entity : entitiesToDestroy) {
-            _registry.destroy(entity);
-            printf("Entity Deleted\n");
-        }
     }
+
+    void enemySystem();
 
     void renderSystem()
     {
@@ -189,11 +205,17 @@ public:
             }
         }
         for (auto entity : view) {
+            auto& renderable = view.get<RenderableComponent>(entity);
             auto& sceneComponent = view.get<SceneComponent>(entity);
-            // printf("Scene: %d\n", sceneComponent.scene.value_or(-1));
+            if (_registry.all_of<TransformComponent>(entity)) {
+                auto& transform = _registry.get<TransformComponent>(entity);
+                renderable.sprite.setPosition(
+                    sf::Vector2f(transform.x, transform.y)
+                );
+            }
+
             if (sceneComponent.scene.has_value() &&
                 sceneComponent.scene == _sceneManager.getCurrentScene()) {
-                auto& renderable = view.get<RenderableComponent>(entity);
 
                 if (renderable.text.getFont()) {
                     _window.draw(renderable.text);
