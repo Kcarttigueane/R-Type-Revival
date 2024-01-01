@@ -150,7 +150,7 @@ public:
                     );
                 }
             }
-            // processPlayerActions(deltaTime.asSeconds());
+            processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
@@ -238,21 +238,20 @@ public:
     {
         auto projectiles =
             _registry
-                .view<RenderableComponent, DamageComponent, VelocityComponent>(
+                .view<RenderableComponent, DamageComponent, VelocityComponent, TransformComponent>(
                 );
         std::vector<entt::entity> entitiesToDestroy;
         for (auto& entity : projectiles) {
             auto& projectile = projectiles.get<RenderableComponent>(entity);
             auto& velocity = projectiles.get<VelocityComponent>(entity);
+            auto& postion = projectiles.get<TransformComponent>(entity);
             sf::Vector2f projectilePosition = projectile.sprite.getPosition();
             if (projectilePosition.x > WINDOW_WIDTH ||
                 projectilePosition.x < -64.0f) {
                 entitiesToDestroy.push_back(entity);
             } else {
-                projectile.sprite.setPosition(sf::Vector2f(
-                    projectilePosition.x + velocity.dx * velocity.speed,
-                    projectilePosition.y + velocity.dy * velocity.speed
-                ));
+                postion.x = projectilePosition.x + velocity.dx * velocity.speed;
+                postion.y = projectilePosition.y + velocity.dy * velocity.speed;
             };
         }
         for (auto entity : entitiesToDestroy) {
@@ -278,13 +277,12 @@ public:
         for (auto entity : view) {
             auto& renderable = view.get<RenderableComponent>(entity);
             auto& sceneComponent = view.get<SceneComponent>(entity);
-            // ! @TomDesalmand : Decomment when making the player movement
-            // if (_registry.all_of<TransformComponent>(entity)) {
-            //     auto& transform = _registry.get<TransformComponent>(entity);
-            //     renderable.sprite.setPosition(
-            //         sf::Vector2f(transform.x, transform.y)
-            //     );
-            // }
+            if (_registry.all_of<TransformComponent>(entity)) {
+                auto& transform = _registry.get<TransformComponent>(entity);
+                renderable.sprite.setPosition(
+                    sf::Vector2f(transform.x, transform.y)
+                );
+            }
 
             if (sceneComponent.scene.has_value() &&
                 sceneComponent.scene == _sceneManager.getCurrentScene()) {
@@ -294,13 +292,13 @@ public:
                 }
                 if (renderable.sprite.getTexture()) {
                     _window.draw(renderable.sprite);
-                    // sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
-                    // sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.width, hitbox.height));
-                    // hitboxShape.setPosition(hitbox.left, hitbox.top);
-                    // hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
-                    // hitboxShape.setOutlineColor(sf::Color::Red);
-                    // hitboxShape.setOutlineThickness(2.0f);
-                    // _window.draw(hitboxShape);
+                    sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
+                    sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.width, hitbox.height));
+                    hitboxShape.setPosition(hitbox.left, hitbox.top);
+                    hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
+                    hitboxShape.setOutlineColor(sf::Color::Red);
+                    hitboxShape.setOutlineThickness(2.0f);
+                    _window.draw(hitboxShape);
                 }
             }
         }
