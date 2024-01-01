@@ -136,6 +136,8 @@ public:
                 }
                 if (isInputEvent(event)) {
                     _inputManager.processInput(event);
+                    _inputManager.update();
+                    processPlayerActions(deltaTime.asSeconds());
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Space) {
@@ -150,7 +152,6 @@ public:
                     );
                 }
             }
-            // processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
@@ -279,12 +280,12 @@ public:
             auto& renderable = view.get<RenderableComponent>(entity);
             auto& sceneComponent = view.get<SceneComponent>(entity);
             // ! @TomDesalmand : Decomment when making the player movement
-            // if (_registry.all_of<TransformComponent>(entity)) {
-            //     auto& transform = _registry.get<TransformComponent>(entity);
-            //     renderable.sprite.setPosition(
-            //         sf::Vector2f(transform.x, transform.y)
-            //     );
-            // }
+            if (_registry.all_of<TransformComponent>(entity)) {
+                auto& transform = _registry.get<TransformComponent>(entity);
+                renderable.sprite.setPosition(
+                    sf::Vector2f(transform.x, transform.y)
+                );
+            }
 
             if (sceneComponent.scene.has_value() &&
                 sceneComponent.scene == _sceneManager.getCurrentScene()) {

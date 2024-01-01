@@ -44,8 +44,7 @@ private:
     std::map<GameScenes, std::map<sf::Keyboard::Key, std::function<void()>>>
         _actionBindings;
     std::queue<PlayerAction> _playerActionsQueue;
-    // std::map<sf::Mouse::Button, std::function<void()>> _mouseButtonBindings;
-    // std::set<sf::Keyboard::Key> _heldKeys;
+    std::map<sf::Keyboard::Key, bool> _keyState;
 
 public:
     InputManager() = delete;
@@ -82,15 +81,19 @@ public:
         };
         _actionBindings[GameScenes::InGame][sf::Keyboard::Left] = [this]() {
             _playerActionsQueue.push(PlayerAction::MoveLeft);
+            printf("Left pressed\n");
         };
         _actionBindings[GameScenes::InGame][sf::Keyboard::Right] = [this]() {
             _playerActionsQueue.push(PlayerAction::MoveRight);
+            printf("Right pressed\n");
         };
         _actionBindings[GameScenes::InGame][sf::Keyboard::Up] = [this]() {
             _playerActionsQueue.push(PlayerAction::MoveUp);
+            printf("Up pressed\n");
         };
         _actionBindings[GameScenes::InGame][sf::Keyboard::Down] = [this]() {
             _playerActionsQueue.push(PlayerAction::MoveDown);
+            printf("Down pressed\n");
         };
     }
 
@@ -108,20 +111,17 @@ public:
 
         _actionBindings[GameScenes::MainMenu][sf::Keyboard::Enter] = [this]() {
             // TODO: Call function to go to a new scene
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Enter] pressed!"
-                      << std::endl;
+            std::cout << "[GameScenes::MainMenu] [Enter] pressed!" << std::endl;
         };
 
         _actionBindings[GameScenes::MainMenu][sf::Keyboard::Left] = [this]() {
             // TODO: Call function to go to left item in the menu list
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Left] pressed!"
-                      << std::endl;
+            std::cout << "[GameScenes::MainMenu] [Left] pressed!" << std::endl;
         };
 
         _actionBindings[GameScenes::MainMenu][sf::Keyboard::Right] = [this]() {
             // TODO: Call function to go to the right item in the menu list
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Right] pressed!"
-                      << std::endl;
+            std::cout << "[GameScenes::MainMenu] [Right] pressed!" << std::endl;
         };
     }
 
@@ -138,9 +138,19 @@ public:
 
     void processInput(sf::Event& event)
     {
-        auto& action = _actionBindings[_currentScene][event.key.code];
-        if (action) {
-            action();
+        if (event.type == sf::Event::KeyPressed) {
+            _keyState[event.key.code] = true;
+        } else if (event.type == sf::Event::KeyReleased) {
+            _keyState[event.key.code] = false;
+        }
+    }
+
+    void update()
+    {
+        for (const auto& pair : _actionBindings[_currentScene]) {
+            if (_keyState[pair.first]) {
+                pair.second();
+            }
         }
     }
 };
