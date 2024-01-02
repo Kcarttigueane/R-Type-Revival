@@ -23,7 +23,7 @@ public:
 
     [[nodiscard]] int getVolume() const { return _volume; }
 
-    void setVolume(int volume) { _volume = volume; }
+    void setSettingVolume(int volume) { _volume = volume; }
 
     [[nodiscard]] int getMusic() const { return _music; }
 

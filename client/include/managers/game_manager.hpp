@@ -10,7 +10,6 @@
 #include "./resource_manager.hpp"
 #include "./scene_manager.hpp"
 #include "./settings_manager.hpp"
-#include "../utility/audio_utility.hpp"
 
 // Factories
 #include "../entity_factory.hpp"
@@ -93,6 +92,7 @@ public:
           _settingsManager(_resourceManager),
           _entityFactory(_registry, _resourceManager, _window)
     {
+        _window.setFramerateLimit(60);
         std::cout << "GameManager created!" << std::endl;
     }
 
@@ -112,9 +112,7 @@ public:
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
-        auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav");
-
-    }
+    };
 
     void parallaxSystem(float deltaTime);
 
@@ -124,10 +122,16 @@ public:
 
     void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
 
-    void makeInfiniteAnimation(entt::entity& entity,sf::IntRect rectangle);
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
 
     void game_loop()
     {
+        auto soundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/shot2.wav"
+        );
+        SoundComponent sound(*soundBuffer);
+        sound.setVolumeLevel(2.5f);
+
         while (_window.isOpen()) {
             sf::Time deltaTime = clock.restart();
             sf::Event event;
@@ -141,6 +145,8 @@ public:
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Space) {
+                    sound.playSound();
+
                     entt::entity player =
                         _playerProfileManager.getPlayerEntity();
                     const sf::Vector2f& playerPosition =

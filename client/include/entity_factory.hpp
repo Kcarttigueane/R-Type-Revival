@@ -83,6 +83,17 @@ public:
         _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
         _registry.emplace<HealthComponent>(enemy, 100.0f);
         _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
+
+        auto soundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/explosion.wav"
+        );
+
+        SoundComponent sound(*soundBuffer);
+        sound.setVolumeLevel(100.0f);
+        sound.playSound();
+
+        _registry.emplace<SoundComponent>(enemy, std::move(sound));
+
         return enemy;
     }
 
@@ -115,7 +126,8 @@ public:
         return projectile;
     }
 
-    entt::entity createExplosion(float x, float y) {
+    entt::entity createExplosion(float x, float y)
+    {
         auto explosion = _registry.create();
         auto texture = _resourceManager.loadTexture(
             _assetsPath + "/explosions/ships_explosions.png"
