@@ -40,11 +40,11 @@ You can see more detailed docs on how our games works on this [link](https://r-t
 
 ## Core maintainers :sunglasses:
 
-- [Tom DESALMAND] (https://github.com/TomDesalmand) / tom.desalmand@epitech.eu
+- [Tom DESALMAND](https://github.com/TomDesalmand) / tom.desalmand@epitech.eu
 - [Jules DUTEL](https://github.com/jvlxz) / jules.dutel@epitech.eu
 - [Lucas HISSINGER](https://github.com/LucasHissinger) / lucas.hissinger@epitech.eu
 - [Dylan WINTER](https://github.com/DylanWTR) / dylan.winter@epitech.eu 
-- [Kevin CARTTIGUEANE] (https://github.com/Kcarttigueane) / kevin.carttigueane@epitech.eu
+- [Kevin CARTTIGUEANE](https://github.com/Kcarttigueane) / kevin.carttigueane@epitech.eu
 
 ## Troubleshooting :scream:
 
