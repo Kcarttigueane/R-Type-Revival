@@ -38,8 +38,6 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
     boost::asio::io_context _io_context;
-    std::string _server_ip = "127.0.0.1";
-    unsigned short _server_port = 8080;
 
     // ! Managers
     InputManager _inputManager;
@@ -82,10 +80,10 @@ private:
     }
 
 public:
-    GameManager()
+    GameManager(std::string server_ip, unsigned short server_port)
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
           _inputManager(_registry, _window),
-          _networkManager(_io_context, _server_ip, _server_port),
+          _networkManager(_io_context, server_ip, server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
