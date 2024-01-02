@@ -77,7 +77,7 @@ public:
         std::cout << "GameManager created!" << std::endl;
     }
 
-    ~GameManager() = default;
+    ~GameManager() { _registry.clear(); }
 
     /**
      * \brief Generates a random float within a range.
@@ -153,6 +153,10 @@ public:
                         1.0f, 0.0f, playerPosition.x + 145.0f,
                         playerPosition.y + 47.5f, 5.0f
                     );
+                }
+                if (event.type == sf::Event::KeyPressed &&
+                    event.key.code == sf::Keyboard::Escape) {
+                    _window.close();
                 }
             }
             if (musicSound.sound.getStatus() == sf::Music::Stopped) {
