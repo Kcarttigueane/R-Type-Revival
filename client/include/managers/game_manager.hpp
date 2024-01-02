@@ -110,7 +110,6 @@ public:
 
     void start_game()
     {
-        //_entityFactory.createMainMenu();
         _entityFactory.createMainMenu();
 
         auto playerEntity = _entityFactory.createPlayer();
