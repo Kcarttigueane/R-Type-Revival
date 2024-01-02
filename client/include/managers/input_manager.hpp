@@ -14,7 +14,7 @@
 
 #    include "../../../libs/EnTT/entt.hpp"
 
-#    include <format>
+// #    include <format>
 #    include <functional>
 #    include <iostream>
 #    include <map>
@@ -128,10 +128,10 @@ public:
     void initializeTutorialBindings();
     void initializeQuitBindings();
 
-    void debugPrintBindings();
+    // void debugPrintBindings();
 
-    std::string getContextName(GameScenes context);
-    std::string getKeyName(sf::Keyboard::Key key);
+    // std::string getContextName(GameScenes context);
+    // std::string getKeyName(sf::Keyboard::Key key);
 
     void processInput(sf::Event& event)
     {

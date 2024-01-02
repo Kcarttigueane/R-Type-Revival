@@ -40,56 +40,56 @@ void InputManager::initializeQuitBindings()
     };
 }
 
-void InputManager::debugPrintBindings()
-{
-    std::ostringstream stream;
+// void InputManager::debugPrintBindings()
+// {
+//     std::ostringstream stream;
 
-    stream << "Debugging Input Bindings:\n";
+//     stream << "Debugging Input Bindings:\n";
 
-    for (const auto& [context, bindings] : _actionBindings) {
-        std::string contextName = getContextName(context);
-        stream << std::format("Context: {}\n", contextName);
+//     for (const auto& [context, bindings] : _actionBindings) {
+//         std::string contextName = getContextName(context);
+//         stream << std::format("Context: {}\n", contextName);
 
-        for (const auto& [key, action] : bindings) {
-            std::string keyName = getKeyName(key);
-            stream << std::format("  Key: {}\n", keyName);
-        }
-    }
+//         for (const auto& [key, action] : bindings) {
+//             std::string keyName = getKeyName(key);
+//             stream << std::format("  Key: {}\n", keyName);
+//         }
+//     }
 
-    std::cout << stream.str();
-}
+//     std::cout << stream.str();
+// }
 
-std::string InputManager::getContextName(GameScenes context)
-{
-    switch (context) {
-        case GameScenes::InGame:
-            return "InGame";
-        case GameScenes::MainMenu:
-            return "MainMenu";
-        case GameScenes::PauseMenu:
-            return "PauseMenu";
-        case GameScenes::Quit:
-            return "Quit";
-        case GameScenes::Settings:
-            return "Settings";
-        case GameScenes::GameOver:
-            return "GameOver";
-        case GameScenes::Tutorial:
-            return "Tutorial";
-        default:
-            return "Unknown";
-    }
-}
+// std::string InputManager::getContextName(GameScenes context)
+// {
+//     switch (context) {
+//         case GameScenes::InGame:
+//             return "InGame";
+//         case GameScenes::MainMenu:
+//             return "MainMenu";
+//         case GameScenes::PauseMenu:
+//             return "PauseMenu";
+//         case GameScenes::Quit:
+//             return "Quit";
+//         case GameScenes::Settings:
+//             return "Settings";
+//         case GameScenes::GameOver:
+//             return "GameOver";
+//         case GameScenes::Tutorial:
+//             return "Tutorial";
+//         default:
+//             return "Unknown";
+//     }
+// }
 
-std::string InputManager::getKeyName(sf::Keyboard::Key key)
-{
-    switch (key) {
-        case sf::Keyboard::Space:
-            return "Space";
-        case sf::Keyboard::Enter:
-            return "Enter";
-        // TODO -> Ajouter les autres cas quand vous en avez besoin les gars
-        default:
-            return "Unknown";
-    }
-}
+// std::string InputManager::getKeyName(sf::Keyboard::Key key)
+// {
+//     switch (key) {
+//         case sf::Keyboard::Space:
+//             return "Space";
+//         case sf::Keyboard::Enter:
+//             return "Enter";
+//         // TODO -> Ajouter les autres cas quand vous en avez besoin les gars
+//         default:
+//             return "Unknown";
+//     }
+// }
