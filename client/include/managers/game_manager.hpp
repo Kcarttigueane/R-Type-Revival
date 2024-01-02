@@ -15,9 +15,6 @@
 #include "../entity_factory.hpp"
 
 // Libraries
-#include <fmt/color.h>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
 #include "../../../common/components/component_includes.hpp"
 #include "../../../libs/EnTT/entt.hpp"
