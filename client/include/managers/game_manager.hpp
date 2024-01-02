@@ -78,7 +78,7 @@ public:
         std::cout << "GameManager created!" << std::endl;
     }
 
-    ~GameManager() = default;
+    ~GameManager() { _registry.clear(); }
 
     /**
      * \brief Generates a random float within a range.
