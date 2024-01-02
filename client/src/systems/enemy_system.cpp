@@ -1,6 +1,6 @@
 #include "../../include/managers/game_manager.hpp"
 
-void GameManager::enemySystem(sf::Sound &explosionSound)
+void GameManager::enemySystem(sf::Sound& explosionSound)
 {
     auto enemies = _registry.view<
         EnemyAIComponent, RenderableComponent, VelocityComponent,

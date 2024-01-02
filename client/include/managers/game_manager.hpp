@@ -29,6 +29,14 @@
 #include <random>
 #include <vector>
 
+/**
+ * \class GameManager
+ * \brief Main controller for the game, handling game loop and systems.
+ *
+ * The GameManager class is responsible for initializing and controlling
+ * the main game loop, managing entities, and handling user input and
+ * interactions between different game systems.
+ */
 class GameManager {
 private:
     // Game
@@ -49,37 +57,12 @@ private:
 
     EntityFactory _entityFactory;
 
-    static std::string getSceneName(GameScenes scene)
-    {
-        switch (scene) {
-            case GameScenes::MainMenu:
-                return "MainMenu";
-                break;
-            case GameScenes::InGame:
-                return "InGame";
-                break;
-            case GameScenes::GameOver:
-                return "GameOver";
-                break;
-            case GameScenes::Settings:
-                return "Settings";
-                break;
-            case GameScenes::Tutorial:
-                return "Credits";
-                break;
-            case GameScenes::Quit:
-                return "Quit";
-                break;
-            case GameScenes::PauseMenu:
-                return "PauseMenu";
-                break;
-            default:
-                return "Unknown";
-                break;
-        }
-    }
-
 public:
+    /**
+     * \brief Constructor for GameManager.
+     * \param server_ip IP address for the server.
+     * \param server_port Port number for the server.
+     */
     GameManager(std::string server_ip, unsigned short server_port)
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
           _inputManager(_registry, _window),
@@ -96,6 +79,12 @@ public:
 
     ~GameManager() = default;
 
+    /**
+     * \brief Generates a random float within a range.
+     * \param min Minimum value of the range.
+     * \param max Maximum value of the range.
+     * \return Randomly generated float.
+     */
     float getRandomFloat(float min, float max)
     {
         std::random_device rd;
@@ -241,77 +230,17 @@ public:
         }
     }
 
-    void projectileSystem()
-    {
-        auto projectiles = _registry.view<
-            RenderableComponent, DamageComponent, VelocityComponent,
-            TransformComponent>();
-        std::vector<entt::entity> entitiesToDestroy;
-        for (auto& entity : projectiles) {
-            auto& projectile = projectiles.get<RenderableComponent>(entity);
-            auto& velocity = projectiles.get<VelocityComponent>(entity);
-            auto& postion = projectiles.get<TransformComponent>(entity);
-            sf::Vector2f projectilePosition = projectile.sprite.getPosition();
-            if (projectilePosition.x > WINDOW_WIDTH ||
-                projectilePosition.x < -64.0f) {
-                entitiesToDestroy.push_back(entity);
-            } else {
-                postion.x = projectilePosition.x + velocity.dx * velocity.speed;
-                postion.y = projectilePosition.y + velocity.dy * velocity.speed;
-            };
-        }
-        for (auto entity : entitiesToDestroy) {
-            _registry.destroy(entity);
-            printf("Projectile Deleted\n");
-        }
-    }
+    void projectileSystem();
 
     void enemySystem(sf::Sound& explosionSound);
 
-    void renderSystem()
-    {
-        // debugPrintCurrentScene();
-        // _scene_manager.getCurrentSceneName();
-        auto view = _registry.view<RenderableComponent, SceneComponent>();
-        for (auto entity : view) {
-            auto& sceneComponent = view.get<SceneComponent>(entity);
-            if (!sceneComponent.scene.has_value()) {
-                auto& renderable = view.get<RenderableComponent>(entity);
-                _window.draw(renderable.sprite);
-            }
-        }
-        for (auto entity : view) {
-            auto& renderable = view.get<RenderableComponent>(entity);
-            auto& sceneComponent = view.get<SceneComponent>(entity);
-            if (_registry.all_of<TransformComponent>(entity)) {
-                auto& transform = _registry.get<TransformComponent>(entity);
-                renderable.sprite.setPosition(
-                    sf::Vector2f(transform.x, transform.y)
-                );
-            }
+    void renderSystem();
 
-            if (sceneComponent.scene.has_value() &&
-                sceneComponent.scene == _sceneManager.getCurrentScene()) {
-
-                if (renderable.text.getFont()) {
-                    _window.draw(renderable.text);
-                }
-                if (renderable.sprite.getTexture()) {
-                    _window.draw(renderable.sprite);
-                    // sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
-                    // sf::RectangleShape hitboxShape(
-                    //     sf::Vector2f(hitbox.width, hitbox.height)
-                    // );
-                    // hitboxShape.setPosition(hitbox.left, hitbox.top);
-                    // hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
-                    // hitboxShape.setOutlineColor(sf::Color::Red);
-                    // hitboxShape.setOutlineThickness(2.0f);
-                    // _window.draw(hitboxShape);
-                }
-            }
-        }
-    }
-
+    /**
+     * \brief Checks if an event is related to input.
+     * \param event The SFML event to check.
+     * \return True if the event is an input event, false otherwise.
+     */
     bool isInputEvent(const sf::Event& event)
     {
         // TODO: Add more input events if needed define scope with gars
@@ -320,13 +249,6 @@ public:
                event.type == sf::Event::MouseButtonPressed ||
                event.type == sf::Event::MouseButtonReleased;
     }
-
-    void debugPrintCurrentScene() const
-    {
-        GameScenes currentScene = _sceneManager.getCurrentScene();
-        std::string sceneName = getSceneName(currentScene);
-        std::cout << "Current scene: " << sceneName << std::endl;
-    };
 };
 
 #endif  // GAME_MANAGER_HPP

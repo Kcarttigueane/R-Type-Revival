@@ -47,9 +47,7 @@ public:
         : _currentScene(GameScenes::InGame),
           _registry(_registry),
           _window(window)
-    {
-
-    }
+    {}
 
     ~InputManager() = default;
 
@@ -64,11 +62,14 @@ public:
         if (event.type == event.KeyPressed) {
             if (event.key.code == sf::Keyboard::Left) {
                 keyboardActions.Left = true;
-            } if (event.key.code == sf::Keyboard::Right) {
+            }
+            if (event.key.code == sf::Keyboard::Right) {
                 keyboardActions.Right = true;
-            } if (event.key.code == sf::Keyboard::Up) {
+            }
+            if (event.key.code == sf::Keyboard::Up) {
                 keyboardActions.Up = true;
-            } if (event.key.code == sf::Keyboard::Down) {
+            }
+            if (event.key.code == sf::Keyboard::Down) {
                 keyboardActions.Down = true;
             }
         }
@@ -79,11 +80,14 @@ public:
         if (event.type == event.KeyReleased) {
             if (event.key.code == sf::Keyboard::Left) {
                 keyboardActions.Left = false;
-            } if (event.key.code == sf::Keyboard::Right) {
+            }
+            if (event.key.code == sf::Keyboard::Right) {
                 keyboardActions.Right = false;
-            } if (event.key.code == sf::Keyboard::Up) {
+            }
+            if (event.key.code == sf::Keyboard::Up) {
                 keyboardActions.Up = false;
-            } if (event.key.code == sf::Keyboard::Down) {
+            }
+            if (event.key.code == sf::Keyboard::Down) {
                 keyboardActions.Down = false;
             }
         }

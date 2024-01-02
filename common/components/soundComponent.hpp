@@ -13,11 +13,7 @@ struct SoundComponent {
 
     SoundComponent(const sf::SoundBuffer& buffer) { sound.setBuffer(buffer); }
 
-    void playSound()
-    {
-        sound.play();
-        std::cout << "Sound played" << std::endl;
-    }
+    void playSound() { sound.play(); }
 
     void stop() { sound.stop(); }
 

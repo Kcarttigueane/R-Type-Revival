@@ -3,6 +3,14 @@
 
 #    include "input_manager.hpp"
 
+/**
+ * \class SceneManager
+ * \brief Manages different scenes in the game.
+ *
+ * This class is responsible for managing the transitions between
+ * different scenes in the game. It interacts with the InputManager
+ * to manage scene changes.
+ */
 class SceneManager {
 private:
     GameScenes _current_scene = GameScenes::InGame;

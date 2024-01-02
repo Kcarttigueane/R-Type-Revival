@@ -3,6 +3,14 @@
 
 #    include "resource_manager.hpp"
 
+/**
+ * \class SettingsManager
+ * \brief Manages game settings like volume and music levels.
+ *
+ * This class is responsible for handling the settings of the game,
+ * including volume and music. It interacts with the ResourceManager
+ * to manage these settings.
+ */
 class SettingsManager {
 private:
     int _volume = 50;
