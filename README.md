@@ -36,4 +36,4 @@ and for the server
 
 
 ## More details 
-You can see more detailed docs on how our games works on this [link](https://app.gitbook.com/invite/6emgh2ubKFLLL8vMQKRI/XPxGcRlrbhbtnaN0uxJf)
+You can see more detailed docs on how our games works on this [link](https://r-type-4.gitbook.io/r-type/)
