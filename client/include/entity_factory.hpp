@@ -32,7 +32,7 @@ public:
     {
         auto player = _registry.create();
         auto texture =
-            _resourceManager.loadTexture(_assetsPath + "/Player/spaceship.gif");
+            _resourceManager.loadTexture(_assetsPath + "/player/spaceship.gif");
         sf::IntRect initialFrameRect(66, 0, 33, 17);
 
         RenderableComponent renderable;
@@ -69,7 +69,7 @@ public:
     {
         auto enemy = _registry.create();
         auto texture =
-            _resourceManager.loadTexture(_assetsPath + "/Bydos/Bydos.png");
+            _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
         sf::IntRect initialFrameRect(32, 48, 64, 32);
 
         RenderableComponent renderable;
@@ -109,7 +109,7 @@ public:
     {
         auto projectile = _registry.create();
         auto texture = _resourceManager.loadTexture(
-            _assetsPath + "/Player/Player_shots.png"
+            _assetsPath + "/player/player_shots.png"
         );
         sf::IntRect initialFrameRect(45, 62, 32, 8);
 
@@ -141,7 +141,7 @@ public:
     entt::entity createBackground()
     {
         auto texture = _resourceManager.loadTexture(
-            _assetsPath + "/Background/Layer 3/Space_background.png"
+            _assetsPath + "/background/layer_3/space_background.png"
         );
 
         auto background = _registry.create();
