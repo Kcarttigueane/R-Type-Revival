@@ -46,6 +46,7 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
     boost::asio::io_context _io_context;
+    int _score = 0;
 
     // ! Managers
     InputManager _inputManager;
@@ -96,6 +97,8 @@ public:
     void start_game()
     {
         _entityFactory.createMainMenu();
+        _entityFactory.createWinScene();
+        _entityFactory.createLoseScene();
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
@@ -123,11 +126,11 @@ public:
             _assetsPath + "/sound_fx/music.wav"
         );
         SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(2.5f);
+        sound.setVolumeLevel(1.5f);
         SoundComponent explosionSound(*explosionSoundBuffer);
-        explosionSound.setVolumeLevel(5.0f);
+        explosionSound.setVolumeLevel(7.5f);
         SoundComponent musicSound(*musicSoundBuffer);
-        musicSound.setVolumeLevel(10.0f);
+        musicSound.setVolumeLevel(2.0f);
         musicSound.sound.play();
         while (_window.isOpen()) {
             sf::Time deltaTime = clock.restart();
@@ -154,12 +157,16 @@ public:
                         playerPosition.y + 47.5f, 5.0f
                     );
                 }
+                if (event.type == sf::Event::KeyPressed &&
+                    event.key.code == sf::Keyboard::Escape) {
+                    _sceneManager.setCurrentScene(GameScenes::InGame);
+                }
             }
             if (musicSound.sound.getStatus() == sf::Music::Stopped) {
                 musicSound.sound.play();
             }
             processPlayerActions(deltaTime.asSeconds());
-            if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+            if (enemyClock.getElapsedTime().asSeconds() > 0.5f && _sceneManager.getCurrentScene() == GameScenes::InGame) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
                 float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
@@ -172,6 +179,8 @@ public:
             projectileSystem();
             collisionProjectileAndEnemy();
             makeAllAnimations();
+            collisionEnemyAndPlayer();
+            checkWin();
             _window.display();
         }
     }
@@ -182,7 +191,8 @@ public:
             _registry
                 .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
         auto projectiles =
-            _registry.view<RenderableComponent, DamageComponent>();
+            _registry.view<RenderableComponent, DamageComponent>(); 
+        
         for (auto& enemy : enemies) {
             sf::Sprite& enemySprite =
                 enemies.get<RenderableComponent>(enemy).sprite;
@@ -200,6 +210,35 @@ public:
                     _registry.destroy(projectile);
                 }
             }
+        }
+    }
+
+    void collisionEnemyAndPlayer() {
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
+        auto player = _playerProfileManager.getPlayerEntity();
+        for (auto& enemy : enemies) {
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
+            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
+                deleteAIEnemies();
+                _score = 0;
+                _sceneManager.setCurrentScene(GameScenes::Lose);
+            }
+        }
+    }
+
+    void checkWin() {
+        if (_score >= 20) {
+            deleteAIEnemies();
+            _score = 0;
+            _sceneManager.setCurrentScene(GameScenes::Win);
+        }
+    }
+
+    void deleteAIEnemies() {
+        auto enemies = _registry.view<EnemyAIComponent>();
+        for (auto enemy : enemies) {
+            _registry.destroy(enemy);
         }
     }
 
