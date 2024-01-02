@@ -32,13 +32,13 @@ public:
     {
         auto player = _registry.create();
         auto texture =
-            _resourceManager.loadTexture(_assetsPath + "/Player/spaceship.gif");
-        sf::IntRect initialFrameRect(66, 0, 33, 17);
+            _resourceManager.loadTexture(_assetsPath + "/Bydos/Bydos.png");
+        sf::IntRect initialFrameRect(277, 44, 86, 40);
 
         RenderableComponent renderable;
         renderable.texture = texture;
         renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(5.0, 5.0));
+        renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
         renderable.frameRect = initialFrameRect;
         renderable.sprite.setTextureRect(initialFrameRect);
 
@@ -85,7 +85,7 @@ public:
         _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
 
         _registry.emplace<TransformComponent>(
-            enemy, 2100.0f, spawnHeight, 0.0f, 1.0f, 1.0f, 0.0f
+            enemy, WINDOW_WIDTH + 128.0f, spawnHeight, 0.0f, 1.0f, 1.0f, 0.0f
         );
 
         _registry.emplace<VelocityComponent>(enemy, -1.0f, 0.0f, speed);
@@ -111,7 +111,7 @@ public:
         auto texture = _resourceManager.loadTexture(
             _assetsPath + "/Player/Player_shots.png"
         );
-        sf::IntRect initialFrameRect(45, 62, 32, 8);
+        sf::IntRect initialFrameRect(128, 56, 128, 16);
 
         RenderableComponent renderable;
         renderable.texture = texture;
@@ -134,6 +134,8 @@ public:
         _registry.emplace<DamageComponent>(projectile, 100.0f);
 
         _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
+
+        _registry.emplace<HoldAnimationComponent>(projectile, 5, 0.5f, true);
 
         return projectile;
     }

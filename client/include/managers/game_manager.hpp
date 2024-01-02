@@ -32,9 +32,6 @@
 #include <random>
 #include <vector>
 
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
-
 class GameManager {
 private:
     // Game
@@ -66,7 +63,6 @@ private:
             case GameScenes::InGame:
                 return "InGame";
                 break;
-
             case GameScenes::GameOver:
                 return "GameOver";
                 break;
@@ -125,6 +121,14 @@ public:
 
     void parallaxSystem(float deltaTime);
 
+    void makeAllAnimations();
+
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeInfiniteAnimation(entt::entity& entity,sf::IntRect rectangle);
+
     void game_loop()
     {
         while (_window.isOpen()) {
@@ -135,7 +139,8 @@ public:
                     _window.close();
                 }
                 if (isInputEvent(event)) {
-                    _inputManager.processInput(event);
+                    _inputManager.processKeyPress(event);
+                    _inputManager.processKeyRelease(event);
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Space) {
@@ -145,8 +150,8 @@ public:
                         _registry.get<RenderableComponent>(player)
                             .sprite.getPosition();
                     _entityFactory.createProjectile(
-                        1.0f, 0.0f, playerPosition.x + 130.0f,
-                        playerPosition.y + 64.0f, 5.0f
+                        1.0f, 0.0f, playerPosition.x + 145.0f,
+                        playerPosition.y + 47.5f, 5.0f
                     );
                 }
             }
@@ -163,6 +168,7 @@ public:
             renderSystem();
             projectileSystem();
             collisionProjectileAndEnemy();
+            makeAllAnimations();
             _window.display();
         }
     }
@@ -196,50 +202,36 @@ public:
 
     void processPlayerActions(float deltaTime)
     {
-        auto& actionsQueue = _inputManager.getPlayerActionsQueue();
-        while (!actionsQueue.empty()) {
-            PlayerAction action = actionsQueue.front();
-            actionsQueue.pop();
+        auto& actions = _inputManager.getKeyboardActions();
+        auto playerEntity = _playerProfileManager.getPlayerEntity();
 
-            auto playerEntity = _playerProfileManager.getPlayerEntity();
-
-            if (!_registry.all_of<TransformComponent>(playerEntity)) {
-                printf(
-                    "Player entity does not have a "
-                    "TransformComponent\n"
-                );
-                continue;
-            }
-
-            auto& transform = _registry.get<TransformComponent>(playerEntity);
-
-            switch (action) {
-                case PlayerAction::Shoot:
-                    break;
-                case PlayerAction::MoveLeft:
-                    transform.x -= 10.0f;
-                    break;
-                case PlayerAction::MoveRight:
-                    transform.x += 10.0f;
-                    break;
-                case PlayerAction::MoveUp:
-                    transform.y -= 10.0f;
-                    break;
-                case PlayerAction::MoveDown:
-                    transform.y += 10.0f;
-                    break;
-                default:
-                    break;
-            }
+        if (!_registry.all_of<TransformComponent>(playerEntity)) {
+            printf(
+                "Player entity does not have a "
+                "TransformComponent\n"
+            );
+            return;
+        }
+        auto& transform = _registry.get<TransformComponent>(playerEntity);
+        if (actions.Up == true && transform.y >= 0.0f) {
+            transform.y -= 500.0f * deltaTime;
+        }
+        if (actions.Down == true && transform.y <= WINDOW_HEIGHT) {
+            transform.y += 500.0f * deltaTime;
+        }
+        if (actions.Right == true && transform.x <= WINDOW_WIDTH) {
+            transform.x += 500.0f * deltaTime;
+        }
+        if (actions.Left == true && transform.x >= 0.0f) {
+            transform.x -= 500.0f * deltaTime;
         }
     }
 
     void projectileSystem()
     {
-        auto projectiles =
-            _registry
-                .view<RenderableComponent, DamageComponent, VelocityComponent, TransformComponent>(
-                );
+        auto projectiles = _registry.view<
+            RenderableComponent, DamageComponent, VelocityComponent,
+            TransformComponent>();
         std::vector<entt::entity> entitiesToDestroy;
         for (auto& entity : projectiles) {
             auto& projectile = projectiles.get<RenderableComponent>(entity);
@@ -293,7 +285,9 @@ public:
                 if (renderable.sprite.getTexture()) {
                     _window.draw(renderable.sprite);
                     sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
-                    sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.width, hitbox.height));
+                    sf::RectangleShape hitboxShape(
+                        sf::Vector2f(hitbox.width, hitbox.height)
+                    );
                     hitboxShape.setPosition(hitbox.left, hitbox.top);
                     hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
                     hitboxShape.setOutlineColor(sf::Color::Red);
