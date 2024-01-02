@@ -129,9 +129,19 @@ public:
         auto soundBuffer = _resourceManager.loadSoundBuffer(
             _assetsPath + "/sound_fx/shot2.wav"
         );
+        auto explosionSoundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/explosion.wav"
+        );
+        auto musicSoundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/music.wav"
+        );
         SoundComponent sound(*soundBuffer);
         sound.setVolumeLevel(2.5f);
-
+        SoundComponent explosionSound(*explosionSoundBuffer);
+        explosionSound.setVolumeLevel(5.0f);
+        SoundComponent musicSound(*musicSoundBuffer);
+        musicSound.setVolumeLevel(10.0f);
+        musicSound.sound.play();
         while (_window.isOpen()) {
             sf::Time deltaTime = clock.restart();
             sf::Event event;
@@ -158,6 +168,9 @@ public:
                     );
                 }
             }
+            if (musicSound.sound.getStatus() == sf::Music::Stopped) {
+                musicSound.sound.play();
+            }
             processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
@@ -167,7 +180,7 @@ public:
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
-            enemySystem();
+            enemySystem(explosionSound.sound);
             renderSystem();
             projectileSystem();
             collisionProjectileAndEnemy();
@@ -255,7 +268,7 @@ public:
         }
     }
 
-    void enemySystem();
+    void enemySystem(sf::Sound& explosionSound);
 
     void renderSystem()
     {

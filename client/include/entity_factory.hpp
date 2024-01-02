@@ -89,8 +89,7 @@ public:
         );
 
         SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(100.0f);
-        sound.playSound();
+        sound.setVolumeLevel(10.0f);
 
         _registry.emplace<SoundComponent>(enemy, std::move(sound));
 

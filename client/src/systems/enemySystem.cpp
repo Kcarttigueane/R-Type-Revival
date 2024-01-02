@@ -1,6 +1,6 @@
 #include "../../include/managers/game_manager.hpp"
 
-void GameManager::enemySystem()
+void GameManager::enemySystem(sf::Sound &explosionSound)
 {
     auto enemies = _registry.view<
         EnemyAIComponent, RenderableComponent, VelocityComponent,
@@ -12,14 +12,12 @@ void GameManager::enemySystem()
         auto& velocity = enemies.get<VelocityComponent>(entity);
         auto& position = enemies.get<TransformComponent>(entity);
         float& health = enemies.get<HealthComponent>(entity).healthPoints;
+        auto& soundEntity = _registry.get<SoundComponent>(entity);
 
         sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
         if (enemyPosition.x < -128.0f || health <= 0.0f) {
-            if (_registry.all_of<SoundComponent>(entity)) {
-                auto& soundEntity = _registry.get<SoundComponent>(entity);
-                soundEntity.playSound();
-            }
+            explosionSound.play();
             entitiesToDestroy.push_back(entity);
             _entityFactory.createExplosion(
                 enemy.sprite.getPosition().x - 200,
