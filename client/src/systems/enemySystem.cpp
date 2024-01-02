@@ -9,15 +9,16 @@ void GameManager::enemySystem()
     for (auto& entity : enemies) {
         auto& enemy = enemies.get<RenderableComponent>(entity);
         auto& velocity = enemies.get<VelocityComponent>(entity);
-        auto& postion = enemies.get<TransformComponent>(entity);
+        auto& position = enemies.get<TransformComponent>(entity);
         float& health = enemies.get<HealthComponent>(entity).healthPoints;
         sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
         if (enemyPosition.x < -128.0f || health <= 0.0f) {
             entitiesToDestroy.push_back(entity);
+            _entityFactory.createExplosion(enemy.sprite.getPosition().x - 200, enemy.sprite.getPosition().y - 60);
         } else {
-            postion.x = enemyPosition.x + velocity.dx * velocity.speed;
-            postion.y = enemyPosition.y + velocity.dy * velocity.speed;
+            position.x = enemyPosition.x + velocity.dx * velocity.speed;
+            position.y = enemyPosition.y + velocity.dy * velocity.speed;
         }
     }
     for (auto entity : entitiesToDestroy) {

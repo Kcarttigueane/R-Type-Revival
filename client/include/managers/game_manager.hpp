@@ -10,14 +10,12 @@
 #include "./resource_manager.hpp"
 #include "./scene_manager.hpp"
 #include "./settings_manager.hpp"
+#include "../utility/audio_utility.hpp"
 
 // Factories
 #include "../entity_factory.hpp"
 
 // Libraries
-#include <fmt/color.h>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
 #include "../../../common/components/component_includes.hpp"
 #include "../../../libs/EnTT/entt.hpp"
@@ -95,7 +93,6 @@ public:
           _settingsManager(_resourceManager),
           _entityFactory(_registry, _resourceManager, _window)
     {
-        _window.setFramerateLimit(60);
         std::cout << "GameManager created!" << std::endl;
     }
 
@@ -111,12 +108,12 @@ public:
 
     void start_game()
     {
-        //_entityFactory.createMainMenu();
         _entityFactory.createMainMenu();
-
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
+        auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav");
+
     }
 
     void parallaxSystem(float deltaTime);
@@ -284,15 +281,15 @@ public:
                 }
                 if (renderable.sprite.getTexture()) {
                     _window.draw(renderable.sprite);
-                    sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
-                    sf::RectangleShape hitboxShape(
-                        sf::Vector2f(hitbox.width, hitbox.height)
-                    );
-                    hitboxShape.setPosition(hitbox.left, hitbox.top);
-                    hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
-                    hitboxShape.setOutlineColor(sf::Color::Red);
-                    hitboxShape.setOutlineThickness(2.0f);
-                    _window.draw(hitboxShape);
+                    // sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
+                    // sf::RectangleShape hitboxShape(
+                    //     sf::Vector2f(hitbox.width, hitbox.height)
+                    // );
+                    // hitboxShape.setPosition(hitbox.left, hitbox.top);
+                    // hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
+                    // hitboxShape.setOutlineColor(sf::Color::Red);
+                    // hitboxShape.setOutlineThickness(2.0f);
+                    // _window.draw(hitboxShape);
                 }
             }
         }
