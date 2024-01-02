@@ -18,12 +18,50 @@ public:
     ClientUDP(boost::asio::io_context& io_context, const std::string& server_ip, unsigned short server_port)
         : socket_(io_context), server_endpoint_(boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(server_ip), server_port)) {
         socket_.open(boost::asio::ip::udp::v4());
-        rtype::Event event;
-        event.set_event(rtype::EventType::MOVEDOWN);
-        send_payload(event);
-        receive_payload();
+        IdEntity_ = 0;
+        rtype::Connect connect;
+        connect.set_message("OK");
+        std::string serialized_payload = connect.SerializeAsString();
+        rtype::PayloadHeader header;
+        header.set_body_size(serialized_payload.size());
+
+        // Send the header containing the size
+        socket_.async_send_to(boost::asio::buffer(&header, sizeof(header)), server_endpoint_, [](const boost::system::error_code&, std::size_t){});
+
+        // Send the serialized payload
+        socket_.async_send_to(boost::asio::buffer(serialized_payload), server_endpoint_, [](const boost::system::error_code&, std::size_t){});
+        receive_connect();
     }
 
+    void receive_connect() {
+        socket_.async_receive_from(
+            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
+            server_endpoint_,
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
+                if (!error) {
+
+                    current_payload_data_.resize(current_payload_header_.body_size());
+
+                    socket_.async_receive_from(
+                        boost::asio::buffer(current_payload_data_),
+                        server_endpoint_,
+                        [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
+                            if (!error) {
+                                rtype::ID message;
+                                message.ParseFromString(current_payload_data_);
+                                std::cout << "Message : " << message.ShortDebugString() << std::endl;
+                                IdEntity_ = message.id();
+                                if (IdEntity_ != 0)
+                                    receive_payload();
+                            } else {
+                                std::cerr << "Error in receive_payload data: " << error.message() << std::endl;
+                            }
+                        });
+                } else {
+                    std::cerr << "Error in receive_payload header: " << error.message() << std::endl;
+                }
+            });
+    }
 
     void receive_payload() {
         socket_.async_receive_from(
@@ -39,7 +77,6 @@ public:
     }
 
     void handle_receive_header(std::size_t bytes_transferred) {
-        std::cout << "Received payload header of size  " << current_payload_header_.body_size() << std::endl;
 
         current_payload_data_.resize(current_payload_header_.body_size());
 
@@ -77,6 +114,14 @@ public:
         return frameIndex_;
     }
 
+    uint32_t getIdEntity() {
+        return IdEntity_;
+    }
+
+    void setIdEntity(uint32_t id) {
+        IdEntity_ = id;
+    }
+
     void setFrameIndex(int frameIndex) {
         frameIndex_ = frameIndex;
     }
@@ -90,12 +135,12 @@ public:
         std::string serialized_payload = event.SerializeAsString();
         rtype::PayloadHeader header;
         header.set_body_size(serialized_payload.size());
-
         // Send the header containing the size
         socket_.async_send_to(boost::asio::buffer(&header, sizeof(header)), server_endpoint_, [](const boost::system::error_code&, std::size_t){});
 
         // Send the serialized payload
         socket_.async_send_to(boost::asio::buffer(serialized_payload), server_endpoint_, [](const boost::system::error_code&, std::size_t){});
+        std::cout << "Send payload : " << event.ShortDebugString() << std::endl;
     }
 
 private:
@@ -107,6 +152,7 @@ private:
     int frameIndex_;
     rtype::PayloadHeader current_payload_header_;
     std::string current_payload_data_;
+    uint32_t IdEntity_;
 };
 
 
@@ -136,7 +182,7 @@ rtype::Event handle_key(sf::Keyboard::Key key) {
 
 int main() {
     boost::asio::io_context io_context;
-    ClientUDP client(io_context, "127.0.0.1", 12345);
+    ClientUDP client(io_context, "127.0.0.1", 1234);
 
     std::queue<rtype::Event> messages;
     std::mutex messages_mutex;
@@ -191,7 +237,7 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                window.close();
+                window.close(); // Close the window
             }
 
             // Handle other events and add messages to the queue

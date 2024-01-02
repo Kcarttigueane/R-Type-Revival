@@ -15,7 +15,7 @@ enum Type {
 }
 
 message Payload {
-    uint32 idSprite = 1;
+    uint32 idEntity = 1;
     uint32 posX = 2;
     uint32 posY = 3;
     uint32 width = 4;
@@ -35,4 +35,12 @@ enum EventType {
 
 message Event {
     EventType event = 1;
+}
+
+message Connect {
+    string message = 1;
+}
+
+message ID {
+    uint32 id = 1;
 }
