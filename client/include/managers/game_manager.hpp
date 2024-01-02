@@ -15,9 +15,6 @@
 #include "../entity_factory.hpp"
 
 // Libraries
-#include <fmt/color.h>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 
 #include "../../../common/components/component_includes.hpp"
 #include "../../../libs/EnTT/entt.hpp"
@@ -32,9 +29,14 @@
 #include <random>
 #include <vector>
 
-#define WINDOW_WIDTH 1920
-#define WINDOW_HEIGHT 1080
-
+/**
+ * \class GameManager
+ * \brief Main controller for the game, handling game loop and systems.
+ *
+ * The GameManager class is responsible for initializing and controlling
+ * the main game loop, managing entities, and handling user input and
+ * interactions between different game systems.
+ */
 class GameManager {
 private:
     // Game
@@ -44,8 +46,6 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
     boost::asio::io_context _io_context;
-    std::string _server_ip = "127.0.0.1";
-    unsigned short _server_port = 8080;
 
     // ! Managers
     InputManager _inputManager;
@@ -57,42 +57,16 @@ private:
 
     EntityFactory _entityFactory;
 
-    static std::string getSceneName(GameScenes scene)
-    {
-        switch (scene) {
-            case GameScenes::MainMenu:
-                return "MainMenu";
-                break;
-            case GameScenes::InGame:
-                return "InGame";
-                break;
-
-            case GameScenes::GameOver:
-                return "GameOver";
-                break;
-            case GameScenes::Settings:
-                return "Settings";
-                break;
-            case GameScenes::Tutorial:
-                return "Credits";
-                break;
-            case GameScenes::Quit:
-                return "Quit";
-                break;
-            case GameScenes::PauseMenu:
-                return "PauseMenu";
-                break;
-            default:
-                return "Unknown";
-                break;
-        }
-    }
-
 public:
-    GameManager()
+    /**
+     * \brief Constructor for GameManager.
+     * \param server_ip IP address for the server.
+     * \param server_port Port number for the server.
+     */
+    GameManager(std::string server_ip, unsigned short server_port)
         : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
           _inputManager(_registry, _window),
-          _networkManager(_io_context, _server_ip, _server_port),
+          _networkManager(_io_context, server_ip, server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
@@ -103,8 +77,14 @@ public:
         std::cout << "GameManager created!" << std::endl;
     }
 
-    ~GameManager() = default;
+    ~GameManager() { _registry.clear(); }
 
+    /**
+     * \brief Generates a random float within a range.
+     * \param min Minimum value of the range.
+     * \param max Maximum value of the range.
+     * \return Randomly generated float.
+     */
     float getRandomFloat(float min, float max)
     {
         std::random_device rd;
@@ -115,18 +95,40 @@ public:
 
     void start_game()
     {
-        //_entityFactory.createMainMenu();
         _entityFactory.createMainMenu();
-
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
-    }
+    };
 
     void parallaxSystem(float deltaTime);
 
+    void makeAllAnimations();
+
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
     void game_loop()
     {
+        auto soundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/shot2.wav"
+        );
+        auto explosionSoundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/explosion.wav"
+        );
+        auto musicSoundBuffer = _resourceManager.loadSoundBuffer(
+            _assetsPath + "/sound_fx/music.wav"
+        );
+        SoundComponent sound(*soundBuffer);
+        sound.setVolumeLevel(2.5f);
+        SoundComponent explosionSound(*explosionSoundBuffer);
+        explosionSound.setVolumeLevel(5.0f);
+        SoundComponent musicSound(*musicSoundBuffer);
+        musicSound.setVolumeLevel(10.0f);
+        musicSound.sound.play();
         while (_window.isOpen()) {
             sf::Time deltaTime = clock.restart();
             sf::Event event;
@@ -135,22 +137,32 @@ public:
                     _window.close();
                 }
                 if (isInputEvent(event)) {
-                    _inputManager.processInput(event);
+                    _inputManager.processKeyPress(event);
+                    _inputManager.processKeyRelease(event);
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Space) {
+                    sound.playSound();
+
                     entt::entity player =
                         _playerProfileManager.getPlayerEntity();
                     const sf::Vector2f& playerPosition =
                         _registry.get<RenderableComponent>(player)
                             .sprite.getPosition();
                     _entityFactory.createProjectile(
-                        1.0f, 0.0f, playerPosition.x + 130.0f,
-                        playerPosition.y + 64.0f, 5.0f
+                        1.0f, 0.0f, playerPosition.x + 145.0f,
+                        playerPosition.y + 47.5f, 5.0f
                     );
                 }
+                if (event.type == sf::Event::KeyPressed &&
+                    event.key.code == sf::Keyboard::Escape) {
+                    _window.close();
+                }
             }
-            // processPlayerActions(deltaTime.asSeconds());
+            if (musicSound.sound.getStatus() == sf::Music::Stopped) {
+                musicSound.sound.play();
+            }
+            processPlayerActions(deltaTime.asSeconds());
             if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 enemyClock.restart();
                 float randomSpeed = getRandomFloat(2.0f, 5.0f);
@@ -159,10 +171,11 @@ public:
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
-            enemySystem();
+            enemySystem(explosionSound.sound);
             renderSystem();
             projectileSystem();
             collisionProjectileAndEnemy();
+            makeAllAnimations();
             _window.display();
         }
     }
@@ -196,116 +209,42 @@ public:
 
     void processPlayerActions(float deltaTime)
     {
-        auto& actionsQueue = _inputManager.getPlayerActionsQueue();
-        while (!actionsQueue.empty()) {
-            PlayerAction action = actionsQueue.front();
-            actionsQueue.pop();
+        auto& actions = _inputManager.getKeyboardActions();
+        auto playerEntity = _playerProfileManager.getPlayerEntity();
 
-            auto playerEntity = _playerProfileManager.getPlayerEntity();
-
-            if (!_registry.all_of<TransformComponent>(playerEntity)) {
-                printf(
-                    "Player entity does not have a "
-                    "TransformComponent\n"
-                );
-                continue;
-            }
-
-            auto& transform = _registry.get<TransformComponent>(playerEntity);
-
-            switch (action) {
-                case PlayerAction::Shoot:
-                    break;
-                case PlayerAction::MoveLeft:
-                    transform.x -= 10.0f;
-                    break;
-                case PlayerAction::MoveRight:
-                    transform.x += 10.0f;
-                    break;
-                case PlayerAction::MoveUp:
-                    transform.y -= 10.0f;
-                    break;
-                case PlayerAction::MoveDown:
-                    transform.y += 10.0f;
-                    break;
-                default:
-                    break;
-            }
+        if (!_registry.all_of<TransformComponent>(playerEntity)) {
+            printf(
+                "Player entity does not have a "
+                "TransformComponent\n"
+            );
+            return;
+        }
+        auto& transform = _registry.get<TransformComponent>(playerEntity);
+        if (actions.Up == true && transform.y >= 0.0f) {
+            transform.y -= 500.0f * deltaTime;
+        }
+        if (actions.Down == true && transform.y <= WINDOW_HEIGHT) {
+            transform.y += 500.0f * deltaTime;
+        }
+        if (actions.Right == true && transform.x <= WINDOW_WIDTH) {
+            transform.x += 500.0f * deltaTime;
+        }
+        if (actions.Left == true && transform.x >= 0.0f) {
+            transform.x -= 500.0f * deltaTime;
         }
     }
 
-    void projectileSystem()
-    {
-        auto projectiles =
-            _registry
-                .view<RenderableComponent, DamageComponent, VelocityComponent>(
-                );
-        std::vector<entt::entity> entitiesToDestroy;
-        for (auto& entity : projectiles) {
-            auto& projectile = projectiles.get<RenderableComponent>(entity);
-            auto& velocity = projectiles.get<VelocityComponent>(entity);
-            sf::Vector2f projectilePosition = projectile.sprite.getPosition();
-            if (projectilePosition.x > WINDOW_WIDTH ||
-                projectilePosition.x < -64.0f) {
-                entitiesToDestroy.push_back(entity);
-            } else {
-                projectile.sprite.setPosition(sf::Vector2f(
-                    projectilePosition.x + velocity.dx * velocity.speed,
-                    projectilePosition.y + velocity.dy * velocity.speed
-                ));
-            };
-        }
-        for (auto entity : entitiesToDestroy) {
-            _registry.destroy(entity);
-            printf("Projectile Deleted\n");
-        }
-    }
+    void projectileSystem();
 
-    void enemySystem();
+    void enemySystem(sf::Sound& explosionSound);
 
-    void renderSystem()
-    {
-        // debugPrintCurrentScene();
-        // _scene_manager.getCurrentSceneName();
-        auto view = _registry.view<RenderableComponent, SceneComponent>();
-        for (auto entity : view) {
-            auto& sceneComponent = view.get<SceneComponent>(entity);
-            if (!sceneComponent.scene.has_value()) {
-                auto& renderable = view.get<RenderableComponent>(entity);
-                _window.draw(renderable.sprite);
-            }
-        }
-        for (auto entity : view) {
-            auto& renderable = view.get<RenderableComponent>(entity);
-            auto& sceneComponent = view.get<SceneComponent>(entity);
-            // ! @TomDesalmand : Decomment when making the player movement
-            // if (_registry.all_of<TransformComponent>(entity)) {
-            //     auto& transform = _registry.get<TransformComponent>(entity);
-            //     renderable.sprite.setPosition(
-            //         sf::Vector2f(transform.x, transform.y)
-            //     );
-            // }
+    void renderSystem();
 
-            if (sceneComponent.scene.has_value() &&
-                sceneComponent.scene == _sceneManager.getCurrentScene()) {
-
-                if (renderable.text.getFont()) {
-                    _window.draw(renderable.text);
-                }
-                if (renderable.sprite.getTexture()) {
-                    _window.draw(renderable.sprite);
-                    // sf::FloatRect hitbox = renderable.sprite.getGlobalBounds();
-                    // sf::RectangleShape hitboxShape(sf::Vector2f(hitbox.width, hitbox.height));
-                    // hitboxShape.setPosition(hitbox.left, hitbox.top);
-                    // hitboxShape.setFillColor(sf::Color(0, 0, 0, 0));
-                    // hitboxShape.setOutlineColor(sf::Color::Red);
-                    // hitboxShape.setOutlineThickness(2.0f);
-                    // _window.draw(hitboxShape);
-                }
-            }
-        }
-    }
-
+    /**
+     * \brief Checks if an event is related to input.
+     * \param event The SFML event to check.
+     * \return True if the event is an input event, false otherwise.
+     */
     bool isInputEvent(const sf::Event& event)
     {
         // TODO: Add more input events if needed define scope with gars
@@ -314,13 +253,6 @@ public:
                event.type == sf::Event::MouseButtonPressed ||
                event.type == sf::Event::MouseButtonReleased;
     }
-
-    void debugPrintCurrentScene() const
-    {
-        GameScenes currentScene = _sceneManager.getCurrentScene();
-        std::string sceneName = getSceneName(currentScene);
-        std::cout << "Current scene: " << sceneName << std::endl;
-    };
 };
 
 #endif  // GAME_MANAGER_HPP
