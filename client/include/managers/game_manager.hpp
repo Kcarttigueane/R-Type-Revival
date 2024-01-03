@@ -221,45 +221,51 @@ public:
             if (musicSound.sound.getStatus() == sf::Music::Stopped) {
                 musicSound.sound.play();
             }
-            auto payload = client.get_payload();
+            auto payloads = client.get_payloads();
+            for (auto payload : payloads) {
+
+                std::cout << "Payload : " << payload.ShortDebugString()
+                          << std::endl;
+                if (_playerPresent.find(payload.identity()) ==
+                    _playerPresent.end()) {
+                    printf(
+                        "Player %u joined the game\n",
+                        static_cast<unsigned int>(payload.identity())
+                    );
+                    _playerPresent.insert(payload.identity());
+
+                    entt::entity player =
+                        static_cast<entt::entity>(payload.identity());
+                    auto playerEntity = _entityFactory.createPlayer(player);
+                    if (_isFirstPlayer) {
+                        _playerProfileManager.setPlayerEntity(playerEntity);
+                        _isFirstPlayer = false;
+                    }
+                }
+                if (!_playerPresent.empty()) {
+                    processPlayerActions(deltaTime.asSeconds());
+                    // Update player position
+                    entt::entity playerEntity =
+                        static_cast<entt::entity>(payload.identity());
+
+                    auto& transform =
+                        _registry.get<TransformComponent>(playerEntity);
+                    transform.x = payload.posx();
+                    transform.y = payload.posy();
+
+                    if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+                        enemyClock.restart();
+                        float randomSpeed = getRandomFloat(2.0f, 5.0f);
+                        float randomY =
+                            getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+                        _entityFactory.createNormalEnemy(randomY, randomSpeed);
+                    }
+                }
+            }
             // std::cout << "identity : " << payload.identity() << std::endl;
             // std::cout << "posx : " << payload.posx() << std::endl;
             // std::cout << "posy : " << payload.posy() << std::endl;
 
-            if (_playerPresent.find(payload.identity()) ==
-                _playerPresent.end()) {
-                printf(
-                    "Player %u joined the game\n",
-                    static_cast<unsigned int>(payload.identity())
-                );
-                _playerPresent.insert(payload.identity());
-
-                entt::entity player =
-                    static_cast<entt::entity>(payload.identity());
-                auto playerEntity = _entityFactory.createPlayer(player);
-                if (_isFirstPlayer) {
-                    _playerProfileManager.setPlayerEntity(playerEntity);
-                    _isFirstPlayer = false;
-                }
-            }
-            if (!_playerPresent.empty()) {
-                processPlayerActions(deltaTime.asSeconds());
-                // Update player position
-                entt::entity playerEntity =
-                    static_cast<entt::entity>(payload.identity());
-
-                auto& transform =
-                    _registry.get<TransformComponent>(playerEntity);
-                transform.x = payload.posx();
-                transform.y = payload.posy();
-
-                if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                    enemyClock.restart();
-                    float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                    float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                    _entityFactory.createNormalEnemy(randomY, randomSpeed);
-                }
-            }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
 
