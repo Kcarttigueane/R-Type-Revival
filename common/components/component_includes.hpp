@@ -15,5 +15,6 @@
 #    include "./transform.hpp"
 #    include "./velocity.hpp"
 #    include "./weapon.hpp"
+#    include "./planet.hpp"
 
 #endif  // COMPONENTS_INCLUDE

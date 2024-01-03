@@ -101,10 +101,13 @@ public:
         _entityFactory.createLoseScene();
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
+        _entityFactory.createPlanet(WINDOW_WIDTH / 2 - 320, WINDOW_HEIGHT / 2 - 320, "/background/layer_1/dry_256.png");
         _entityFactory.createBackground();
     };
 
     void parallaxSystem(float deltaTime);
+
+    void planetSystem(float deltaTime);
 
     void makeAllAnimations();
 
@@ -174,6 +177,7 @@ public:
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
+            planetSystem(deltaTime.asSeconds());
             enemySystem(explosionSound.sound);
             renderSystem();
             projectileSystem();
