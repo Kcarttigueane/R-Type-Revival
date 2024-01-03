@@ -10,7 +10,7 @@ public:
     std::string ip_address;
     int port;
 
-    CommandLineArgs() : ip_address("127.0.0.1"), port(5000) {}
+    CommandLineArgs() : ip_address("127.0.0.1"), port(12345) {}
 
     bool parse(int argc, char* argv[])
     {

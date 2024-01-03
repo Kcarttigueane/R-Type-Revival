@@ -45,18 +45,24 @@ private:
     entt::registry _registry;
     sf::Clock clock;
     sf::Clock enemyClock;
-    boost::asio::io_context _io_context;
+
     int _score = 0;
 
     // ! Managers
     InputManager _inputManager;
-    NetworkManager _networkManager;
+    // NetworkManager _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
     SettingsManager _settingsManager;
 
     EntityFactory _entityFactory;
+
+    std::set<uint32_t> _playerPresent;
+    bool _isFirstPlayer = true;
+
+    std::string _server_ip;
+    unsigned short _server_port;
 
 public:
     /**
@@ -65,9 +71,11 @@ public:
      * \param server_port Port number for the server.
      */
     GameManager(std::string server_ip, unsigned short server_port)
-        : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
+        : _server_ip(server_ip),
+          _server_port(server_port),
+          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
           _inputManager(_registry, _window),
-          _networkManager(_io_context, server_ip, server_port),
+          //   _networkManager(_io_context, server_ip, server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
@@ -78,7 +86,13 @@ public:
         std::cout << "GameManager created!" << std::endl;
     }
 
-    ~GameManager() { _registry.clear(); }
+    ~GameManager()
+    {
+        _registry.clear();
+        // Signal the client thread to stop
+
+        // client_thread.join();
+    }
 
     /**
      * \brief Generates a random float within a range.
@@ -94,28 +108,69 @@ public:
         return distribution(gen);
     }
 
+    rtype::Event handle_key(sf::Keyboard::Key key)
+    {
+        rtype::Event event;
+        switch (key) {
+            case sf::Keyboard::Up:
+                event.set_event(rtype::EventType::MOVEUP);
+                break;
+            case sf::Keyboard::Down:
+                event.set_event(rtype::EventType::MOVEDOWN);
+                break;
+            case sf::Keyboard::Left:
+                event.set_event(rtype::EventType::MOVELEFT);
+                break;
+            case sf::Keyboard::Right:
+                event.set_event(rtype::EventType::MOVERIGHT);
+                break;
+            case sf::Keyboard::Space:
+                event.set_event(rtype::EventType::SHOOT);
+                break;
+            default:
+                break;
+        }
+        return event;
+    }
+
     void start_game()
     {
         _entityFactory.createMainMenu();
         _entityFactory.createWinScene();
         _entityFactory.createLoseScene();
-        auto playerEntity = _entityFactory.createPlayer();
-        _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
-    };
 
-    void parallaxSystem(float deltaTime);
+        std::queue<rtype::Event> messages;
+        std::mutex messages_mutex;
 
-    void makeAllAnimations();
+        boost::asio::io_context io_context;
+        ClientUDP client(io_context, _server_ip, _server_port);
 
-    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+        std::thread client_thread([&io_context, &client, &messages,
+                                   &messages_mutex]() {
+            while (true) {
+                io_context.poll();  // Handle asynchronous operations
 
-    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+                // Check for stop request
+                if (client.stop_requested_) {
+                    std::cout << "Stopping client thread..." << std::endl;
+                    rtype::Event event;
+                    event.set_event(rtype::EventType::QUIT);
+                    client.send_payload(event);
+                    break;
+                }
 
-    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+                // Send messages to the server
+                {
+                    std::lock_guard<std::mutex> lock(messages_mutex);
+                    while (!messages.empty()) {
+                        client.send_payload(messages.front());
+                        messages.pop();
+                    }
+                }
+            }
+        });
 
-    void game_loop()
-    {
         auto soundBuffer = _resourceManager.loadSoundBuffer(
             _assetsPath + "/sound_fx/shot2.wav"
         );
@@ -140,8 +195,10 @@ public:
                     _window.close();
                 }
                 if (isInputEvent(event)) {
-                    _inputManager.processKeyPress(event);
-                    _inputManager.processKeyRelease(event);
+                    std::lock_guard<std::mutex> lock(messages_mutex);
+                    messages.push(handle_key(event.key.code));
+                    // _inputManager.processKeyPress(event);
+                    // _inputManager.processKeyRelease(event);
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Space) {
@@ -165,25 +222,80 @@ public:
             if (musicSound.sound.getStatus() == sf::Music::Stopped) {
                 musicSound.sound.play();
             }
-            processPlayerActions(deltaTime.asSeconds());
-            if (enemyClock.getElapsedTime().asSeconds() > 0.5f && _sceneManager.getCurrentScene() == GameScenes::InGame) {
-                enemyClock.restart();
-                float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                _entityFactory.createNormalEnemy(randomY, randomSpeed);
+            auto payloads = client.get_payloads();
+            for (auto payload : payloads) {
+
+                std::cout << "Payload : " << payload.ShortDebugString()
+                          << std::endl;
+                if (_playerPresent.find(payload.identity()) ==
+                    _playerPresent.end()) {
+                    printf(
+                        "Player %u joined the game\n",
+                        static_cast<unsigned int>(payload.identity())
+                    );
+                    _playerPresent.insert(payload.identity());
+
+                    entt::entity player =
+                        static_cast<entt::entity>(payload.identity());
+                    auto playerEntity = _entityFactory.createPlayer(player);
+                    if (_isFirstPlayer) {
+                        _playerProfileManager.setPlayerEntity(playerEntity);
+                        _isFirstPlayer = false;
+                    }
+                }
+                if (!_playerPresent.empty()) {
+                    processPlayerActions(deltaTime.asSeconds());
+                    // Update player position
+                    entt::entity playerEntity =
+                        static_cast<entt::entity>(payload.identity());
+
+                    auto& transform =
+                        _registry.get<TransformComponent>(playerEntity);
+                    transform.x = payload.posx();
+                    transform.y = payload.posy();
+
+                    if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+                        enemyClock.restart();
+                        float randomSpeed = getRandomFloat(2.0f, 5.0f);
+                        float randomY =
+                            getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+                        _entityFactory.createNormalEnemy(randomY, randomSpeed);
+                    }
+                }
             }
+            // std::cout << "identity : " << payload.identity() << std::endl;
+            // std::cout << "posx : " << payload.posx() << std::endl;
+            // std::cout << "posy : " << payload.posy() << std::endl;
+
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
-            enemySystem(explosionSound.sound);
-            renderSystem();
-            projectileSystem();
-            collisionProjectileAndEnemy();
-            makeAllAnimations();
-            collisionEnemyAndPlayer();
-            checkWin();
+
+            if (!_playerPresent.empty()) {
+                enemySystem(explosionSound.sound);
+                renderSystem();
+                projectileSystem();
+                collisionProjectileAndEnemy();
+                collisionEnemyAndPlayer();
+                makeAllAnimations();
+                checkWin();
+            }
+            // printf("Payload : %s\n", payload.
+
             _window.display();
         }
     }
+
+    void parallaxSystem(float deltaTime);
+
+    void makeAllAnimations();
+
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void game_loop(){};
 
     void collisionProjectileAndEnemy()
     {
@@ -191,8 +303,8 @@ public:
             _registry
                 .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
         auto projectiles =
-            _registry.view<RenderableComponent, DamageComponent>(); 
-        
+            _registry.view<RenderableComponent, DamageComponent>();
+
         for (auto& enemy : enemies) {
             sf::Sprite& enemySprite =
                 enemies.get<RenderableComponent>(enemy).sprite;
@@ -213,21 +325,27 @@ public:
         }
     }
 
-    void collisionEnemyAndPlayer() {
+    void collisionEnemyAndPlayer()
+    {
         auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
         auto player = _playerProfileManager.getPlayerEntity();
         for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
+            sf::Sprite& enemySprite =
+                enemies.get<RenderableComponent>(enemy).sprite;
+            sf::Sprite& playerSprite =
+                enemies.get<RenderableComponent>(player).sprite;
+            if (enemySprite.getGlobalBounds().intersects(
+                    playerSprite.getGlobalBounds()
+                )) {
                 deleteAIEnemies();
                 _score = 0;
                 _sceneManager.setCurrentScene(GameScenes::Lose);
             }
         }
-    }
+    };
 
-    void checkWin() {
+    void checkWin()
+    {
         if (_score >= 20) {
             deleteAIEnemies();
             _score = 0;
@@ -235,7 +353,8 @@ public:
         }
     }
 
-    void deleteAIEnemies() {
+    void deleteAIEnemies()
+    {
         auto enemies = _registry.view<EnemyAIComponent>();
         for (auto enemy : enemies) {
             _registry.destroy(enemy);
@@ -245,27 +364,19 @@ public:
     void processPlayerActions(float deltaTime)
     {
         auto& actions = _inputManager.getKeyboardActions();
-        auto playerEntity = _playerProfileManager.getPlayerEntity();
+        rtype::Event protoEvent;
 
-        if (!_registry.all_of<TransformComponent>(playerEntity)) {
-            printf(
-                "Player entity does not have a "
-                "TransformComponent\n"
-            );
-            return;
+        if (actions.Up == true) {
+            protoEvent.set_event(rtype::EventType::MOVEUP);
         }
-        auto& transform = _registry.get<TransformComponent>(playerEntity);
-        if (actions.Up == true && transform.y >= 0.0f) {
-            transform.y -= 500.0f * deltaTime;
+        if (actions.Down == true) {
+            protoEvent.set_event(rtype::EventType::MOVEDOWN);
         }
-        if (actions.Down == true && transform.y <= WINDOW_HEIGHT) {
-            transform.y += 500.0f * deltaTime;
+        if (actions.Right == true) {
+            protoEvent.set_event(rtype::EventType::MOVERIGHT);
         }
-        if (actions.Right == true && transform.x <= WINDOW_WIDTH) {
-            transform.x += 500.0f * deltaTime;
-        }
-        if (actions.Left == true && transform.x >= 0.0f) {
-            transform.x -= 500.0f * deltaTime;
+        if (actions.Left == true) {
+            protoEvent.set_event(rtype::EventType::MOVELEFT);
         }
     }
 

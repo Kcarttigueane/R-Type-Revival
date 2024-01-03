@@ -1,5 +1,6 @@
 #include "../include/command_line_arguments.hpp"
 #include "../include/managers/game_manager.hpp"
+#include "../src/network/payload.pb.h"
 
 int main(int argc, char* argv[])
 {
@@ -10,7 +11,6 @@ int main(int argc, char* argv[])
 
     GameManager game_manager(args.ip_address, args.port);
     game_manager.start_game();
-    game_manager.game_loop();
 
     return 0;
 }

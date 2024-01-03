@@ -28,9 +28,9 @@ public:
 
     ~EntityFactory() = default;
 
-    entt::entity createPlayer()
+    entt::entity createPlayer(entt::entity hint)
     {
-        auto player = _registry.create();
+        auto player = _registry.create(hint);
         auto texture =
             _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
         sf::IntRect initialFrameRect(277, 44, 86, 40);
