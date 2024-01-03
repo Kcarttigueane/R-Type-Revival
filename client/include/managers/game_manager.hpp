@@ -46,6 +46,8 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
 
+    int _score = 0;
+
     // ! Managers
     InputManager _inputManager;
     // NetworkManager _networkManager;
@@ -134,6 +136,8 @@ public:
     void start_game()
     {
         _entityFactory.createMainMenu();
+        _entityFactory.createWinScene();
+        _entityFactory.createLoseScene();
         _entityFactory.createBackground();
 
         std::queue<rtype::Event> messages;
@@ -177,11 +181,11 @@ public:
             _assetsPath + "/sound_fx/music.wav"
         );
         SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(2.5f);
+        sound.setVolumeLevel(1.5f);
         SoundComponent explosionSound(*explosionSoundBuffer);
-        explosionSound.setVolumeLevel(5.0f);
+        explosionSound.setVolumeLevel(7.5f);
         SoundComponent musicSound(*musicSoundBuffer);
-        musicSound.setVolumeLevel(10.0f);
+        musicSound.setVolumeLevel(2.0f);
         musicSound.sound.play();
         while (_window.isOpen()) {
             sf::Time deltaTime = clock.restart();
@@ -212,7 +216,7 @@ public:
                 }
                 if (event.type == sf::Event::KeyPressed &&
                     event.key.code == sf::Keyboard::Escape) {
-                    _window.close();
+                    _sceneManager.setCurrentScene(GameScenes::InGame);
                 }
             }
             if (musicSound.sound.getStatus() == sf::Music::Stopped) {
@@ -267,22 +271,17 @@ public:
             parallaxSystem(deltaTime.asSeconds());
 
             if (!_playerPresent.empty()) {
-
                 enemySystem(explosionSound.sound);
                 renderSystem();
                 projectileSystem();
                 collisionProjectileAndEnemy();
                 makeAllAnimations();
+                checkWin();
             }
-
             // printf("Payload : %s\n", payload.
 
             _window.display();
         }
-
-        // Signal the client thread to stop
-        client.stop();
-        client_thread.join();  // Wait for the client thread to finish
     }
 
     void parallaxSystem(float deltaTime);
@@ -295,7 +294,7 @@ public:
 
     void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
 
-    void game_loop() {}
+    void game_loop(){};
 
     void collisionProjectileAndEnemy()
     {
@@ -304,6 +303,7 @@ public:
                 .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
         auto projectiles =
             _registry.view<RenderableComponent, DamageComponent>();
+
         for (auto& enemy : enemies) {
             sf::Sprite& enemySprite =
                 enemies.get<RenderableComponent>(enemy).sprite;
@@ -324,12 +324,40 @@ public:
         }
     }
 
-    void setPlayerPosition(float x, float y)
+    void collisionEnemyAndPlayer()
     {
-        auto playerEntity = _playerProfileManager.getPlayerEntity();
-        auto& transform = _registry.get<TransformComponent>(playerEntity);
-        transform.x = x;
-        transform.y = y;
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
+        auto player = _playerProfileManager.getPlayerEntity();
+        for (auto& enemy : enemies) {
+            sf::Sprite& enemySprite =
+                enemies.get<RenderableComponent>(enemy).sprite;
+            sf::Sprite& playerSprite =
+                enemies.get<RenderableComponent>(player).sprite;
+            if (enemySprite.getGlobalBounds().intersects(
+                    playerSprite.getGlobalBounds()
+                )) {
+                deleteAIEnemies();
+                _score = 0;
+                _sceneManager.setCurrentScene(GameScenes::Lose);
+            }
+        }
+    };
+
+    void checkWin()
+    {
+        if (_score >= 20) {
+            deleteAIEnemies();
+            _score = 0;
+            _sceneManager.setCurrentScene(GameScenes::Win);
+        }
+    }
+
+    void deleteAIEnemies()
+    {
+        auto enemies = _registry.view<EnemyAIComponent>();
+        for (auto enemy : enemies) {
+            _registry.destroy(enemy);
+        }
     }
 
     void processPlayerActions(float deltaTime)
