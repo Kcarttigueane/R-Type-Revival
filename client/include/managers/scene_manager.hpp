@@ -51,6 +51,12 @@ public:
             case GameScenes::PauseMenu:
                 std::cout << "PauseMenu" << std::endl;
                 break;
+            case GameScenes::Lose:
+                std::cout << "Lose" << std::endl;
+                break;
+            case GameScenes::Win:
+                std::cout << "Win" << std::endl;
+                break;
             default:
                 std::cout << "Unknown" << std::endl;
                 break;

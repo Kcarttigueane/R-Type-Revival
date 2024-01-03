@@ -87,7 +87,8 @@ public:
         auto soundBuffer = _resourceManager.loadSoundBuffer(
             _assetsPath + "/sound_fx/explosion.wav"
         );
-
+        if (!soundBuffer)
+            std::cerr << "Error loading sound buffer." << std::endl;
         SoundComponent sound(*soundBuffer);
         sound.setVolumeLevel(10.0f);
 
@@ -193,6 +194,52 @@ public:
         _registry.emplace<SceneComponent>(mainMenuTitle, GameScenes::MainMenu);
         return mainMenuTitle;
     };
+
+    entt::entity createLoseScene()
+    {
+        auto font =
+            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+        auto loseTitle = _registry.create();
+        RenderableComponent renderable;
+        renderable.text.setFont(*font);
+        renderable.text.setString("You lose!");
+        renderable.text.setCharacterSize(96);
+        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
+        renderable.text.setOrigin(
+            titleBounds.width / 2, titleBounds.height / 2
+        );
+        renderable.text.setPosition(
+            _window.getSize().x / 2, _window.getSize().y * 0.20
+        );
+        _registry.emplace<RenderableComponent>(
+            loseTitle, std::move(renderable)
+        );
+        _registry.emplace<SceneComponent>(loseTitle, GameScenes::Lose);
+        return loseTitle;
+    }
+
+    entt::entity createWinScene()
+    {
+        auto font =
+            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+        auto winTitle = _registry.create();
+        RenderableComponent renderable;
+        renderable.text.setFont(*font);
+        renderable.text.setString("You win!");
+        renderable.text.setCharacterSize(96);
+        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
+        renderable.text.setOrigin(
+            titleBounds.width / 2, titleBounds.height / 2
+        );
+        renderable.text.setPosition(
+            _window.getSize().x / 2, _window.getSize().y * 0.20
+        );
+        _registry.emplace<RenderableComponent>(
+            winTitle, std::move(renderable)
+        );
+        _registry.emplace<SceneComponent>(winTitle, GameScenes::Win);
+        return winTitle;
+    }
 };
 
 #endif  // ENTITY_FACTORY_HPP

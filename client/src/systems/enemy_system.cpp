@@ -12,12 +12,12 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
         auto& velocity = enemies.get<VelocityComponent>(entity);
         auto& position = enemies.get<TransformComponent>(entity);
         float& health = enemies.get<HealthComponent>(entity).healthPoints;
-        auto& soundEntity = _registry.get<SoundComponent>(entity);
 
         sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
         if (enemyPosition.x < -128.0f || health <= 0.0f) {
             explosionSound.play();
+            _score++;
             entitiesToDestroy.push_back(entity);
             _entityFactory.createExplosion(
                 enemy.sprite.getPosition().x - 200,
@@ -31,6 +31,5 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
 
     for (auto entity : entitiesToDestroy) {
         _registry.destroy(entity);
-        printf("Entity Deleted\n");
     }
 }

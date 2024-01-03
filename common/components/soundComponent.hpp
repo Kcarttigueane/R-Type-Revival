@@ -11,13 +11,22 @@
 struct SoundComponent {
     sf::Sound sound;
 
-    SoundComponent(const sf::SoundBuffer& buffer) { sound.setBuffer(buffer); }
+    SoundComponent(const sf::SoundBuffer& buffer) {
+        sound.setBuffer(buffer);
+    }
 
-    void playSound() { sound.play(); }
+    void playSound() {
+        sound.play();
+    }
 
-    void stop() { sound.stop(); }
+    void stop() {
+        sound.stop();
+    }
 
-    void setVolumeLevel(float volume) { sound.setVolume(volume); }
+    void setVolumeLevel(float volume) {
+        sound.setVolume(volume);
+    }
 };
+
 
 #endif  // SOUND_COMPONENT_HPP
