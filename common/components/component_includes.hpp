@@ -14,5 +14,6 @@
 #    include "./weapon.hpp"
 #    include "./player.hpp"
 #    include "./damage.hpp"
+#    include "./menu_items.hpp"
 
 #endif  // COMPONENTS_INCLUDE
