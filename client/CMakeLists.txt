@@ -3,8 +3,10 @@ project(r-type_client)
 
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
 
+# include_directories(${PROTOBUF_INCLUDE_DIRS})
+# include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
