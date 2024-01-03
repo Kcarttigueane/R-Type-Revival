@@ -12,8 +12,7 @@ using std::string;
 
 class EntityFactory {
 private:
-    string _assetsPath =
-        "/home/kc/Epitech/S5/R-TYPE/R-Type-Revival/client/assets";
+    string _assetsPath = ASSETS_DIR;
     entt::registry& _registry;
     ResourceManager& _resourceManager;
     sf::RenderWindow& _window;

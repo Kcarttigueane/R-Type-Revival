@@ -40,8 +40,7 @@
 class GameManager {
 private:
     // Game
-    string _assetsPath =
-        "/home/kc/Epitech/S5/R-TYPE/R-Type-Revival/client/assets";
+    string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
     sf::Clock clock;
