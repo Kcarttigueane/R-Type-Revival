@@ -275,6 +275,7 @@ public:
                 renderSystem();
                 projectileSystem();
                 collisionProjectileAndEnemy();
+                collisionEnemyAndPlayer();
                 makeAllAnimations();
                 checkWin();
             }
