@@ -31,6 +31,5 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
 
     for (auto entity : entitiesToDestroy) {
         _registry.destroy(entity);
-        printf("Entity Deleted\n");
     }
 }

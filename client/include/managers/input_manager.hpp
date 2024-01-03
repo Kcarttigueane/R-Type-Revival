@@ -24,6 +24,7 @@
 #    include <queue>
 
 #    include "../../../common/components/component_includes.hpp"
+#    include "../../src/network/payload.pb.h"
 
 struct Actions {
     bool Spacebar;
@@ -61,9 +62,11 @@ public:
     {
         if (event.type == event.KeyPressed) {
             if (event.key.code == sf::Keyboard::Left) {
+
                 keyboardActions.Left = true;
             }
             if (event.key.code == sf::Keyboard::Right) {
+
                 keyboardActions.Right = true;
             }
             if (event.key.code == sf::Keyboard::Up) {

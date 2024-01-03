@@ -12,7 +12,8 @@ using std::string;
 
 class EntityFactory {
 private:
-    string _assetsPath = ASSETS_DIR;
+    string _assetsPath =
+        "/home/kc/Epitech/S5/R-TYPE/R-Type-Revival/client/assets";
     entt::registry& _registry;
     ResourceManager& _resourceManager;
     sf::RenderWindow& _window;
@@ -28,9 +29,9 @@ public:
 
     ~EntityFactory() = default;
 
-    entt::entity createPlayer()
+    entt::entity createPlayer(entt::entity hint)
     {
-        auto player = _registry.create();
+        auto player = _registry.create(hint);
         auto texture =
             _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
         sf::IntRect initialFrameRect(277, 44, 86, 40);
