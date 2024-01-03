@@ -135,15 +135,13 @@ public:
     void start_game()
     {
         _entityFactory.createMainMenu();
-        // auto playerEntity = _entityFactory.createPlayer();
-        // _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
 
         std::queue<rtype::Event> messages;
         std::mutex messages_mutex;
 
         boost::asio::io_context io_context;
-        ClientUDP client(io_context, "127.0.0.1", 12345);
+        ClientUDP client(io_context, _server_ip, _server_port);
 
         std::thread client_thread([&io_context, &client, &messages,
                                    &messages_mutex]() {
