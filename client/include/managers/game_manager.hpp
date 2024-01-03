@@ -283,6 +283,9 @@ public:
 
             _window.display();
         }
+
+        client.stop();
+        client_thread.join();
     }
 
     void parallaxSystem(float deltaTime);
