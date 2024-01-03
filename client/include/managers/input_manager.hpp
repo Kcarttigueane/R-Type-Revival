@@ -5,9 +5,6 @@
 #    include "../config.hpp"
 
 // Libraries
-#    include <fmt/color.h>
-#    include <fmt/core.h>
-#    include <fmt/ranges.h>
 #    include <queue>
 
 #    include <SFML/Audio.hpp>
@@ -17,7 +14,7 @@
 
 #    include "../../../libs/EnTT/entt.hpp"
 
-#    include <format>
+// #    include <format>
 #    include <functional>
 #    include <iostream>
 #    include <map>
@@ -28,12 +25,13 @@
 
 #    include "../../../common/components/component_includes.hpp"
 
-enum class PlayerAction {
-    Shoot,
-    MoveLeft,
-    MoveRight,
-    MoveUp,
-    MoveDown,
+struct Actions {
+    bool Spacebar;
+    bool Up;
+    bool Down;
+    bool Right;
+    bool Left;
+    bool Enter;
 };
 
 class InputManager {
@@ -41,11 +39,7 @@ private:
     GameScenes _currentScene;
     entt::registry& _registry;
     sf::RenderWindow& _window;
-    std::map<GameScenes, std::map<sf::Keyboard::Key, std::function<void()>>>
-        _actionBindings;
-    std::queue<PlayerAction> _playerActionsQueue;
-    // std::map<sf::Mouse::Button, std::function<void()>> _mouseButtonBindings;
-    // std::set<sf::Keyboard::Key> _heldKeys;
+    Actions keyboardActions;
 
 public:
     InputManager() = delete;
@@ -54,15 +48,7 @@ public:
         : _currentScene(GameScenes::InGame),
           _registry(_registry),
           _window(window)
-    {
-        initializeInGameBindings();
-        initializeMainMenuBindings();
-        initializeSettingsBindings();
-        initializePauseMenuBindings();
-        initializeGameOverBindings();
-        initializeTutorialBindings();
-        initializeQuitBindings();
-    }
+    {}
 
     ~InputManager() = default;
 
@@ -70,77 +56,47 @@ public:
 
     void setContext(GameScenes context) { _currentScene = context; }
 
-    [[nodiscard]] std::queue<PlayerAction>& getPlayerActionsQueue()
+    [[nodiscard]] Actions& getKeyboardActions() { return keyboardActions; }
+
+    void processKeyPress(sf::Event& event)
     {
-        return _playerActionsQueue;
-    }
-
-    void initializeInGameBindings()
-    {
-        _actionBindings[GameScenes::InGame][sf::Keyboard::Space] = [this]() {
-            _playerActionsQueue.push(PlayerAction::Shoot);
-        };
-        _actionBindings[GameScenes::InGame][sf::Keyboard::Left] = [this]() {
-            _playerActionsQueue.push(PlayerAction::MoveLeft);
-        };
-        _actionBindings[GameScenes::InGame][sf::Keyboard::Right] = [this]() {
-            _playerActionsQueue.push(PlayerAction::MoveRight);
-        };
-        _actionBindings[GameScenes::InGame][sf::Keyboard::Up] = [this]() {
-            _playerActionsQueue.push(PlayerAction::MoveUp);
-        };
-        _actionBindings[GameScenes::InGame][sf::Keyboard::Down] = [this]() {
-            _playerActionsQueue.push(PlayerAction::MoveDown);
-        };
-    }
-
-    void initializeMainMenuBindings()
-
-    {
-        _actionBindings[GameScenes::MainMenu][sf::Keyboard::Escape] = [this]() {
-            auto view = _registry.view<entt::entity>();
-
-            for (auto entity : view) {
-                _registry.destroy(entity);
+        if (event.type == event.KeyPressed) {
+            if (event.key.code == sf::Keyboard::Left) {
+                keyboardActions.Left = true;
             }
-            exit(0);
-        };
-
-        _actionBindings[GameScenes::MainMenu][sf::Keyboard::Enter] = [this]() {
-            // TODO: Call function to go to a new scene
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Enter] pressed!"
-                      << std::endl;
-        };
-
-        _actionBindings[GameScenes::MainMenu][sf::Keyboard::Left] = [this]() {
-            // TODO: Call function to go to left item in the menu list
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Left] pressed!"
-                      << std::endl;
-        };
-
-        _actionBindings[GameScenes::MainMenu][sf::Keyboard::Right] = [this]() {
-            // TODO: Call function to go to the right item in the menu list
-            std::cout << "[GameScenes::MainMenu] [sf::Keyboard::Right] pressed!"
-                      << std::endl;
-        };
+            if (event.key.code == sf::Keyboard::Right) {
+                keyboardActions.Right = true;
+            }
+            if (event.key.code == sf::Keyboard::Up) {
+                keyboardActions.Up = true;
+            }
+            if (event.key.code == sf::Keyboard::Down) {
+                keyboardActions.Down = true;
+            }
+            if (event.key.code == sf::Keyboard::Enter) {
+                keyboardActions.Enter = true;
+            }
+        }
     }
 
-    void initializeSettingsBindings();
-    void initializePauseMenuBindings();
-    void initializeGameOverBindings();
-    void initializeTutorialBindings();
-    void initializeQuitBindings();
-
-    void debugPrintBindings();
-
-    std::string getContextName(GameScenes context);
-    std::string getKeyName(sf::Keyboard::Key key);
-
-    void processInput(sf::Event& event)
+    void processKeyRelease(sf::Event& event)
     {
-        auto& action = _actionBindings[_currentScene][event.key.code];
-        if (action) {
-            action();
+        if (event.type == event.KeyReleased) {
+            if (event.key.code == sf::Keyboard::Left) {
+                keyboardActions.Left = false;
+            }
+            if (event.key.code == sf::Keyboard::Right) {
+                keyboardActions.Right = false;
+            }
+            if (event.key.code == sf::Keyboard::Up) {
+                keyboardActions.Up = false;
+            }
+            if (event.key.code == sf::Keyboard::Down) {
+                keyboardActions.Down = false;
+            }
+            if (event.key.code == sf::Keyboard::Enter) {
+                keyboardActions.Enter = false;
+            }
         }
     }
 };

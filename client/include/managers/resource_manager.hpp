@@ -20,23 +20,44 @@ public:
     ResourceManager() = default;
     ~ResourceManager() = default;
 
+    /**
+     * \brief Loads a texture resource from a file.
+     * \param filename Path to the texture file.
+     * \return Shared pointer to the loaded texture.
+     */
     std::shared_ptr<sf::Texture> loadTexture(const std::string& filename)
     {
         return loadResource<sf::Texture>(_textures, filename);
     }
 
+    /**
+     * \brief Loads a sound buffer resource from a file.
+     * \param filename Path to the sound buffer file.
+     * \return Shared pointer to the loaded sound buffer.
+     */
     std::shared_ptr<sf::SoundBuffer> loadSoundBuffer(const std::string& filename
     )
     {
         return loadResource<sf::SoundBuffer>(_soundBuffers, filename);
     }
 
+    /**
+     * \brief Loads a font resource from a file.
+     * \param filename Path to the font file.
+     * \return Shared pointer to the loaded font.
+     */
     std::shared_ptr<sf::Font> loadFont(const std::string& filename)
     {
         return loadResource<sf::Font>(_fonts, filename);
     }
 
 private:
+    /**
+     * \brief Generic function to load a resource.
+     * \param resourceMap Reference to the map storing the resource type.
+     * \param filename Path to the resource file.
+     * \return Shared pointer to the loaded resource.
+     */
     template <typename ResourceType, typename ResourceMap>
     std::shared_ptr<ResourceType> loadResource(
         ResourceMap& resourceMap, const std::string& filename
