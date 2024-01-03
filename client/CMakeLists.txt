@@ -5,9 +5,6 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
 find_package(Protobuf REQUIRED)
 
-# include_directories(${PROTOBUF_INCLUDE_DIRS})
-# include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
 file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.cc")
@@ -32,7 +29,7 @@ target_link_libraries(
 )
 
 set(PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/network/payload.proto")
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
-target_include_directories(r-type_client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_sources(r-type_client PRIVATE ${PROTO_SRCS} ${PROTO_HDRS})
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${PROTO_FILES})
+
+target_include_directories(r-type_client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
