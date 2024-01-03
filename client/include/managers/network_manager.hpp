@@ -148,11 +148,21 @@ public:
         rtype::Payload payload;
         payload.ParseFromString(current_payload_data_);
         payload_ = payload;
-        // std::cout << "identity : " << payload.identity() << std::endl;
-        // std::cout << "posx : " << payload.posx() << std::endl;
-        // std::cout << "posy : " << payload.posy() << std::endl;
-
-        // std::cout << "Payload : " << payload.ShortDebugString() << std::endl;
+        if (payloads_.size() == 0) {
+            payloads_.push_back(payload);
+            std::cout << "First payload " << payload.ShortDebugString()
+                      << std::endl;
+        } else {
+            bool exist = false;
+            for (auto it = payloads_.begin(); it != payloads_.end(); it++) {
+                if (it->identity() == payload.identity()) {
+                    *it = payload;
+                    exist = true;
+                }
+            }
+            if (!exist)
+                payloads_.push_back(payload);
+        }
     }
 
     void stop() { stop_requested_ = true; }
@@ -169,6 +179,12 @@ public:
     {
         std::lock_guard<std::mutex> lock(mutex_);
         return payload_;
+    }
+
+    std::vector<rtype::Payload> get_payloads()
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return payloads_;
     }
 
     void send_payload(const rtype::Event& event)
@@ -195,6 +211,7 @@ private:
     boost::asio::ip::udp::endpoint server_endpoint_;
     boost::array<char, 128> recv_buffer_;
     rtype::Payload payload_;
+    std::vector<rtype::Payload> payloads_;
     std::mutex mutex_;
     int frameIndex_;
     rtype::PayloadHeader current_payload_header_;
