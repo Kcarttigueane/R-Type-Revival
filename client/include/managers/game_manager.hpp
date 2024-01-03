@@ -115,8 +115,21 @@ public:
 
     void start_game()
     {
-        //_entityFactory.createMainMenu();
-        _entityFactory.createMainMenu();
+        std::vector<std::pair<std::string, std::string>> buttonInfo = {
+            {"/menu/quit.png", "Quit"},
+            {"/menu/settings.png", "Settings"},
+            {"/menu/play.png", "Play"},
+            {"/menu/tutorial.png", "Tutorial"},
+            {"/menu/about.png", "About"}
+        };
+
+        _entityFactory.createMainMenuTitle();
+
+        for (int i = 0; i < buttonInfo.size(); ++i) {
+            _entityFactory.createButton(
+                _assetsPath + buttonInfo[i].first, buttonInfo[i].second, i
+            );
+        }
 
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
@@ -124,6 +137,8 @@ public:
     }
 
     void parallaxSystem(float deltaTime);
+
+    void menuSystem();
 
     void game_loop()
     {
@@ -159,6 +174,7 @@ public:
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
+            menuSystem();
             enemySystem();
             renderSystem();
             projectileSystem();

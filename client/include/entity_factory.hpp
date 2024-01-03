@@ -163,7 +163,7 @@ public:
         return background;
     };
 
-    entt::entity createMainMenu()
+    entt::entity createMainMenuTitle()
     {
         auto font =
             _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
@@ -190,6 +190,39 @@ public:
 
         return mainMenuTitle;
     };
+
+    entt::entity createButton(
+        const std::string& path, const std::string& label, int index
+    )
+    {
+        auto button = _registry.create();
+        auto texture = _resourceManager.loadTexture(path);
+
+        float buttonWidth = 310.0f * 0.4f;
+        float buttonSpacing = 75.0f;
+        int totalButtons = 5;
+        float totalWidth =
+            totalButtons * buttonWidth + (totalButtons - 1) * buttonSpacing;
+        float firstButtonX =
+            _window.getSize().x / 2.0f - totalWidth / 2.0f + buttonWidth / 2.0f;
+        float buttonX = firstButtonX + index * (buttonWidth + buttonSpacing);
+        float buttonY = _window.getSize().y * 0.6f;
+
+        RenderableComponent renderable;
+        renderable.texture = texture;
+        renderable.sprite.setTexture(*texture);
+        renderable.sprite.setScale(sf::Vector2f(0.4f, 0.4f));
+
+        sf::FloatRect bounds = renderable.sprite.getLocalBounds();
+        renderable.sprite.setOrigin(bounds.width / 2.0f, bounds.height / 2.0f);
+        renderable.sprite.setPosition(buttonX, buttonY);
+
+        _registry.emplace<RenderableComponent>(button, std::move(renderable));
+        _registry.emplace<SceneComponent>(button, GameScenes::MainMenu);
+        _registry.emplace<MenuItemComponent>(button, label, index, false);
+
+        return button;
+    }
 };
 
 #endif  // ENTITY_FACTORY_HPP
