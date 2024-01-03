@@ -1,0 +1,7 @@
+
+#ifndef ECS_ENEMY_AI_COMPONENT_HPP
+#define ECS_ENEMY_AI_COMPONENT_HPP
+
+struct EnemyAIComponent {};
+
+#endif // ECS_ENEMY_AI_COMPONENT_HPP

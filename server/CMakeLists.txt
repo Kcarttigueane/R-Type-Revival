@@ -1,15 +1,22 @@
+cmake_minimum_required(VERSION 3.12)
+
+project(r-type_server)
+
 find_package(
   Boost
   COMPONENTS system
   REQUIRED)
 
-# Include directories for server target_include_directories(r-type_server
-# PRIVATE include)
+find_package(Protobuf REQUIRED)
 
-# Link libraries for the server target_link_libraries(Server some_other_library)
+file(GLOB_RECURSE SOURCE_FILES "UDP/*.cpp" "UDP/*.cc")
 
-# Define the server target
-add_executable(r-type_server src/main.cpp)
+add_executable(r-type_server ${SOURCE_FILES})
 
-# Link SFML to your target
-target_link_libraries(r-type_server PRIVATE Boost::boost Boost::system)
+# target_include_directories(r-type_server PRIVATE include)
+
+target_link_libraries(r-type_server PRIVATE Boost::boost Boost::system ${Protobuf_LIBRARIES})
+
+set(PROTO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/UDP/payload.proto")
+
+target_include_directories(r-type_server PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

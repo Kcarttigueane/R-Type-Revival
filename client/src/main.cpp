@@ -1,17 +1,16 @@
-#include <SFML/Graphics.hpp>
+#include "../include/command_line_arguments.hpp"
+#include "../include/managers/game_manager.hpp"
+#include "../src/network/payload.pb.h"
 
-int main() {
-  sf::RenderWindow window(sf::VideoMode(800, 600), "SFML window");
-  while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed)
-        window.close();
+int main(int argc, char* argv[])
+{
+    CommandLineArgs args;
+    if (!args.parse(argc, argv)) {
+        return 0;
     }
 
-    window.clear();
-    // Draw with SFML
-    window.display();
-  }
-  return 0;
+    GameManager game_manager(args.ip_address, args.port);
+    game_manager.start_game();
+
+    return 0;
 }

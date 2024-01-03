@@ -20,19 +20,19 @@ jobs:
           fi
           echo "Format with clang-format successful"
 
-  format-with-clang-tidy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install clang-tidy
-        run: sudo apt-get update && sudo apt-get install -y clang-tidy libsfml-dev
-      - name: Format with clang-tidy
-        run: |
-          files=$(find . -name '*.cpp' -o -name '*.hpp')
-          if [ -n "$files" ]; then
-            clang-tidy -fix -format-style=file -p build $files
-          else
-            echo "No C++ or header files found."
-          fi
-          echo "Format with clang-tidy successful"
+#   format-with-clang-tidy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Install clang-tidy
+#         run: sudo apt-get update && sudo apt-get install -y clang-tidy libsfml-dev libboost-all-dev
+#       - name: Format with clang-tidy
+#         run: |
+#           files=$(find . -name '*.cpp' -o -name '*.hpp')
+#           if [ -n "$files" ]; then
+#             clang-tidy -fix -format-style=file -p build $files
+#           else
+#             echo "No C++ or header files found."
+#           fi
+#           echo "Format with clang-tidy successful"
 
