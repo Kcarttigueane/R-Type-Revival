@@ -13,8 +13,6 @@ public:
 
     ~EntityManager() = default;
 
-    // Utils
-
     // Factory methods
     entt::entity createPlayer(entt::entity hint);
 
