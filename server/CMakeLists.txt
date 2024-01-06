@@ -9,11 +9,11 @@ find_package(
 
 find_package(Protobuf REQUIRED)
 
-file(GLOB_RECURSE SOURCE_FILES "UDP/*.cpp" "UDP/*.cc")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.cc")
 
 add_executable(r-type_server ${SOURCE_FILES})
 
-# target_include_directories(r-type_server PRIVATE include)
+target_include_directories(r-type_server PRIVATE include)
 
 target_link_libraries(r-type_server PRIVATE Boost::boost Boost::system ${Protobuf_LIBRARIES})
 
