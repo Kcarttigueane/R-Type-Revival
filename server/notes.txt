@@ -1,0 +1,5 @@
+pour compiler les cpp:
+
+protoc -I=. --cpp_out=. file.proto
+
+g++ -o binary file.cpp file.pb.cc -lprotobuf -lboost_system -pthread -lsfml-graphics -lsfml-window -lsfml-system -Wall -Wextra

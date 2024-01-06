@@ -3,8 +3,8 @@
 void GameManager::enemySystem(sf::Sound& explosionSound)
 {
     auto enemies = _registry.view<
-        EnemyAIComponent, RenderableComponent, VelocityComponent,
-        HealthComponent, TransformComponent, SoundComponent>();
+        EnemyAIComponent, RenderableComponent, VelocityComponent, HealthComponent,
+        TransformComponent, SoundComponent>();
     std::vector<entt::entity> entitiesToDestroy;
 
     for (auto& entity : enemies) {
@@ -20,8 +20,7 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
             _score++;
             entitiesToDestroy.push_back(entity);
             _entityFactory.createExplosion(
-                enemy.sprite.getPosition().x - 200,
-                enemy.sprite.getPosition().y - 60
+                enemy.sprite.getPosition().x - 200, enemy.sprite.getPosition().y - 60
             );
         } if (enemyPosition.x < -128.0f) {
            entitiesToDestroy.push_back(entity); 

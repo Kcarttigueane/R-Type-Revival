@@ -24,6 +24,7 @@
 #    include <queue>
 
 #    include "../../../common/components/component_includes.hpp"
+#    include "../../src/network/payload.pb.h"
 
 struct Actions {
     bool Spacebar;
@@ -51,47 +52,15 @@ public:
 
     ~InputManager() = default;
 
-    [[nodiscard]] GameScenes getContext() const { return _currentScene; }
+    [[nodiscard]] GameScenes getContext() const;
 
-    void setContext(GameScenes context) { _currentScene = context; }
+    void setContext(GameScenes context);
 
-    [[nodiscard]] Actions& getKeyboardActions() { return keyboardActions; }
+    [[nodiscard]] Actions& getKeyboardActions();
 
-    void processKeyPress(sf::Event& event)
-    {
-        if (event.type == event.KeyPressed) {
-            if (event.key.code == sf::Keyboard::Left) {
-                keyboardActions.Left = true;
-            }
-            if (event.key.code == sf::Keyboard::Right) {
-                keyboardActions.Right = true;
-            }
-            if (event.key.code == sf::Keyboard::Up) {
-                keyboardActions.Up = true;
-            }
-            if (event.key.code == sf::Keyboard::Down) {
-                keyboardActions.Down = true;
-            }
-        }
-    }
+    void processKeyPress(sf::Event& event);
 
-    void processKeyRelease(sf::Event& event)
-    {
-        if (event.type == event.KeyReleased) {
-            if (event.key.code == sf::Keyboard::Left) {
-                keyboardActions.Left = false;
-            }
-            if (event.key.code == sf::Keyboard::Right) {
-                keyboardActions.Right = false;
-            }
-            if (event.key.code == sf::Keyboard::Up) {
-                keyboardActions.Up = false;
-            }
-            if (event.key.code == sf::Keyboard::Down) {
-                keyboardActions.Down = false;
-            }
-        }
-    }
+    void processKeyRelease(sf::Event& event);
 };
 
 #endif  // INPUT_MANAGER_HPP

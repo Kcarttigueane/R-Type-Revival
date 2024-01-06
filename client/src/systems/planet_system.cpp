@@ -2,9 +2,7 @@
 
 void GameManager::planetSystem(float deltaTime)
 {
-    auto view =
-        _registry
-            .view<PlanetComponent, RenderableComponent, TransformComponent>();
+    auto view = _registry.view<PlanetComponent, RenderableComponent, TransformComponent>();
 
     for (auto entity : view) {
         auto& renderable = view.get<RenderableComponent>(entity);
