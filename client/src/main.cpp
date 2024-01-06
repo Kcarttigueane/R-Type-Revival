@@ -5,7 +5,7 @@
 int main(int argc, char* argv[])
 {
     CommandLineArgs args;
-    if (!args.parse(argc, argv)) {
+    if (!args.parse_command_line_arguments(argc, argv)) {
         return 0;
     }
 
