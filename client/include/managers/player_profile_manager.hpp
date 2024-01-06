@@ -15,13 +15,13 @@ public:
     PlayerProfileManager() = default;
     ~PlayerProfileManager() = default;
 
-    void setPlayerEntity(entt::entity entity) { playerEntity = entity; }
+    void setPlayerEntity(entt::entity entity);
 
-    entt::entity getPlayerEntity() const { return playerEntity; }
+    entt::entity getPlayerEntity() const;
 
-    [[nodiscard]] string getPlayerName() const { return player_name; }
+    [[nodiscard]] string getPlayerName() const;
 
-    void setPlayerName(string name) { player_name = name; }
+    void setPlayerName(string name);
 };
 
 #endif  // PLAYER_PROFILE_MANAGER_HPP

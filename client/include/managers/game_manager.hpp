@@ -26,7 +26,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <random>
 #include <vector>
 
 /**
@@ -94,20 +93,6 @@ public:
         // client_thread.join();
     }
 
-    /**
-     * \brief Generates a random float within a range.
-     * \param min Minimum value of the range.
-     * \param max Maximum value of the range.
-     * \return Randomly generated float.
-     */
-    float getRandomFloat(float min, float max)
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> distribution(min, max);
-        return distribution(gen);
-    }
-
     rtype::Event handle_key(sf::Keyboard::Key key)
     {
         rtype::Event event;
@@ -133,194 +118,27 @@ public:
         return event;
     }
 
-    void start_game()
-    {
-        _entityFactory.createMainMenu();
-        _entityFactory.createWinScene();
-        _entityFactory.createLoseScene();
-        _entityFactory.createBackground();
+    void start_game();
 
-        std::queue<rtype::Event> messages;
-        std::mutex messages_mutex;
+    void game_loop(
+        std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
+    );
 
-        boost::asio::io_context io_context;
-        ClientUDP client(io_context, _server_ip, _server_port);
-
-        std::thread client_thread([&io_context, &client, &messages,
-                                   &messages_mutex]() {
-            while (true) {
-                io_context.poll();  // Handle asynchronous operations
-
-                // Check for stop request
-                if (client.stop_requested_) {
-                    std::cout << "Stopping client thread..." << std::endl;
-                    rtype::Event event;
-                    event.set_event(rtype::EventType::QUIT);
-                    client.send_payload(event);
-                    break;
-                }
-
-                // Send messages to the server
-                {
-                    std::lock_guard<std::mutex> lock(messages_mutex);
-                    while (!messages.empty()) {
-                        client.send_payload(messages.front());
-                        messages.pop();
-                    }
-                }
-            }
-        });
-
-        auto soundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/shot2.wav"
-        );
-        auto explosionSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/explosion.wav"
-        );
-        auto musicSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/music.wav"
-        );
-        SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(1.5f);
-        SoundComponent explosionSound(*explosionSoundBuffer);
-        explosionSound.setVolumeLevel(7.5f);
-        SoundComponent musicSound(*musicSoundBuffer);
-        musicSound.setVolumeLevel(2.0f);
-        musicSound.sound.play();
-        while (_window.isOpen()) {
-            sf::Time deltaTime = clock.restart();
-            sf::Event event;
-            while (_window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    _window.close();
-                }
-                if (isInputEvent(event)) {
-                    std::lock_guard<std::mutex> lock(messages_mutex);
-                    messages.push(handle_key(event.key.code));
-                    // _inputManager.processKeyPress(event);
-                    // _inputManager.processKeyRelease(event);
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Space) {
-                    sound.playSound();
-
-                    entt::entity player =
-                        _playerProfileManager.getPlayerEntity();
-                    const sf::Vector2f& playerPosition =
-                        _registry.get<RenderableComponent>(player)
-                            .sprite.getPosition();
-                    _entityFactory.createProjectile(
-                        1.0f, 0.0f, playerPosition.x + 145.0f,
-                        playerPosition.y + 47.5f, 5.0f
-                    );
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Escape) {
-                    _sceneManager.setCurrentScene(GameScenes::InGame);
-                }
-            }
-            if (musicSound.sound.getStatus() == sf::Music::Stopped) {
-                musicSound.sound.play();
-            }
-            auto payloads = client.get_payloads();
-            for (auto payload : payloads) {
-
-                std::cout << "Payload : " << payload.ShortDebugString()
-                          << std::endl;
-                if (_playerPresent.find(payload.identity()) ==
-                    _playerPresent.end()) {
-                    printf(
-                        "Player %u joined the game\n",
-                        static_cast<unsigned int>(payload.identity())
-                    );
-                    _playerPresent.insert(payload.identity());
-
-                    entt::entity player =
-                        static_cast<entt::entity>(payload.identity());
-                    auto playerEntity = _entityFactory.createPlayer(player);
-                    if (_isFirstPlayer) {
-                        _playerProfileManager.setPlayerEntity(playerEntity);
-                        _isFirstPlayer = false;
-                    }
-                }
-                if (!_playerPresent.empty()) {
-                    processPlayerActions(deltaTime.asSeconds());
-                    // Update player position
-                    entt::entity playerEntity =
-                        static_cast<entt::entity>(payload.identity());
-
-                    auto& transform =
-                        _registry.get<TransformComponent>(playerEntity);
-                    transform.x = payload.posx();
-                    transform.y = payload.posy();
-
-                    if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                        enemyClock.restart();
-                        float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                        float randomY =
-                            getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                        _entityFactory.createNormalEnemy(randomY, randomSpeed);
-                    }
-                }
-            }
-            // std::cout << "identity : " << payload.identity() << std::endl;
-            // std::cout << "posx : " << payload.posx() << std::endl;
-            // std::cout << "posy : " << payload.posy() << std::endl;
-
-            _window.clear();
-            parallaxSystem(deltaTime.asSeconds());
-
-            if (!_playerPresent.empty()) {
-                enemySystem(explosionSound.sound);
-                renderSystem();
-                projectileSystem();
-                collisionProjectileAndEnemy();
-                collisionEnemyAndPlayer();
-                makeAllAnimations();
-                checkWin();
-            }
-            // printf("Payload : %s\n", payload.
-
-            _window.display();
-        }
-
-        client.stop();
-        client_thread.join();
-    }
-
-    void parallaxSystem(float deltaTime);
-
-    void makeAllAnimations();
-
-    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void game_loop(){};
+    // ! Collision and Event Handling methods
 
     void collisionProjectileAndEnemy()
     {
-        auto enemies =
-            _registry
-                .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles =
-            _registry.view<RenderableComponent, DamageComponent>();
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
+        auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
 
         for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite =
-                enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth =
-                enemies.get<HealthComponent>(enemy).healthPoints;
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
             for (auto& projectile : projectiles) {
                 sf::Sprite& projectileSprite =
                     projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage =
-                    projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(
-                        projectileSprite.getGlobalBounds()
-                    )) {
+                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
+                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
                     enemyHealth -= projectileDamage;
                     _registry.destroy(projectile);
                 }
@@ -332,14 +150,11 @@ public:
     {
         auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
         auto player = _playerProfileManager.getPlayerEntity();
+
         for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite =
-                enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite =
-                enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(
-                    playerSprite.getGlobalBounds()
-                )) {
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
+            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
                 deleteAIEnemies();
                 _score = 0;
                 _sceneManager.setCurrentScene(GameScenes::Lose);
@@ -383,12 +198,24 @@ public:
         }
     }
 
+    // ! Systems:
     void projectileSystem();
 
     void enemySystem(sf::Sound& explosionSound);
 
     void renderSystem();
 
+    void parallaxSystem(float deltaTime);
+
+    void makeAllAnimations();
+
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    // ! Utility methods
     /**
      * \brief Checks if an event is related to input.
      * \param event The SFML event to check.
@@ -397,11 +224,12 @@ public:
     bool isInputEvent(const sf::Event& event)
     {
         // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed ||
-               event.type == sf::Event::KeyReleased ||
+        return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
                event.type == sf::Event::MouseButtonPressed ||
                event.type == sf::Event::MouseButtonReleased;
     }
+
+    void drawHitBox(RenderableComponent& renderable);
 };
 
 #endif  // GAME_MANAGER_HPP

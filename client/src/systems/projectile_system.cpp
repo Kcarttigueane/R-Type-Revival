@@ -2,9 +2,9 @@
 
 void GameManager::projectileSystem()
 {
-    auto projectiles = _registry.view<
-        RenderableComponent, DamageComponent, VelocityComponent,
-        TransformComponent>();
+    auto projectiles =
+        _registry.view<RenderableComponent, DamageComponent, VelocityComponent, TransformComponent>(
+        );
     std::vector<entt::entity> entitiesToDestroy;
 
     for (auto& entity : projectiles) {
@@ -13,8 +13,7 @@ void GameManager::projectileSystem()
         auto& postion = projectiles.get<TransformComponent>(entity);
         sf::Vector2f projectilePosition = projectile.sprite.getPosition();
 
-        if (projectilePosition.x > WINDOW_WIDTH ||
-            projectilePosition.x < -64.0f) {
+        if (projectilePosition.x > WINDOW_WIDTH || projectilePosition.x < -64.0f) {
             entitiesToDestroy.push_back(entity);
         } else {
             postion.x = projectilePosition.x + velocity.dx * velocity.speed;
