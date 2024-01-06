@@ -39,8 +39,9 @@ public:
 
     entt::entity createLoseScene();
 
+    entt::entity createPlanet(float x, float y, std::string randomFilepath);
+
     entt::entity createWinScene();
 };
 
 #endif  // ENTITY_FACTORY_HPP
-

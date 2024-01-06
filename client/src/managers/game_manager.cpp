@@ -7,6 +7,12 @@ void GameManager::start_game()
     _entityFactory.createMainMenu();
     _entityFactory.createWinScene();
     _entityFactory.createLoseScene();
+    _entityFactory.createPlanet(
+        WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
+    );
+    _entityFactory.createPlanet(
+        WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
+    );
     _entityFactory.createBackground();
 
     std::queue<rtype::Event> messages;
@@ -94,7 +100,7 @@ void GameManager::game_loop(
         auto payloads = client.get_payloads();
         for (auto payload : payloads) {
 
-            std::cout << "Payload : " << payload.ShortDebugString() << std::endl;
+            // std::cout << "Payload : " << payload.ShortDebugString() << std::endl;
             if (_playerPresent.find(payload.identity()) == _playerPresent.end()) {
                 printf(
                     "Player %u joined the game\n", static_cast<unsigned int>(payload.identity())
@@ -128,6 +134,7 @@ void GameManager::game_loop(
 
         _window.clear();
         parallaxSystem(deltaTime.asSeconds());
+        planetSystem(deltaTime.asSeconds());
 
         if (!_playerPresent.empty()) {
             enemySystem(explosionSound.sound);

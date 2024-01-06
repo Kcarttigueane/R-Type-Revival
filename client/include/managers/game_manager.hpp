@@ -85,13 +85,7 @@ public:
         std::cout << "GameManager created!" << std::endl;
     }
 
-    ~GameManager()
-    {
-        _registry.clear();
-        // Signal the client thread to stop
-
-        // client_thread.join();
-    }
+    ~GameManager() { _registry.clear(); }
 
     rtype::Event handle_key(sf::Keyboard::Key key)
     {
@@ -206,6 +200,8 @@ public:
     void renderSystem();
 
     void parallaxSystem(float deltaTime);
+
+    void planetSystem(float deltaTime);
 
     void makeAllAnimations();
 

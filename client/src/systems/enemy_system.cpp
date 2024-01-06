@@ -15,13 +15,15 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
 
         sf::Vector2f enemyPosition = enemy.sprite.getPosition();
 
-        if (enemyPosition.x < -128.0f || health <= 0.0f) {
+        if (health <= 0.0f) {
             explosionSound.play();
             _score++;
             entitiesToDestroy.push_back(entity);
             _entityFactory.createExplosion(
                 enemy.sprite.getPosition().x - 200, enemy.sprite.getPosition().y - 60
             );
+        } if (enemyPosition.x < -128.0f) {
+           entitiesToDestroy.push_back(entity); 
         } else {
             position.x = enemyPosition.x + velocity.dx * velocity.speed;
             position.y = enemyPosition.y + velocity.dy * velocity.speed;

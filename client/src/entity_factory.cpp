@@ -164,3 +164,24 @@ entt::entity EntityFactory::createWinScene()
     _registry.emplace<SceneComponent>(winTitle, GameScenes::Win);
     return winTitle;
 }
+
+entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFilepath)
+{
+    auto planet = _registry.create();
+    auto texture = _resourceManager.loadTexture(_assetsPath + randomFilepath);
+
+    sf::IntRect initialFrameRect(0, 0, 64, 64);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(x, y));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<RenderableComponent>(planet, std::move(renderable));
+    _registry.emplace<TransformComponent>(planet, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
+    _registry.emplace<PlanetComponent>(planet);
+    _registry.emplace<SceneComponent>(planet);
+    _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
+    return planet;
+}

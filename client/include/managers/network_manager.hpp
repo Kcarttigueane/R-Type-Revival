@@ -46,45 +46,36 @@ public:
     void receive_connect()
     {
         socket_.async_receive_from(
-            boost::asio::buffer(
-                &current_payload_header_, sizeof(current_payload_header_)
-            ),
+            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
             server_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
 
-                    current_payload_data_.resize(
-                        current_payload_header_.body_size()
-                    );
+                    current_payload_data_.resize(current_payload_header_.body_size());
 
                     socket_.async_receive_from(
-                        boost::asio::buffer(current_payload_data_),
-                        server_endpoint_,
+                        boost::asio::buffer(current_payload_data_), server_endpoint_,
                         [this](
-                            const boost::system::error_code& error,
-                            std::size_t bytes_transferred
+                            const boost::system::error_code& error, std::size_t bytes_transferred
                         ) {
                             if (!error) {
                                 rtype::ID message;
                                 message.ParseFromString(current_payload_data_);
-                                std::cout << "Message : "
-                                          << message.ShortDebugString()
-                                          << std::endl;
+                                // std::cout << "Message : "
+                                //           << message.ShortDebugString()
+                                //           << std::endl;
                                 IdEntity_ = message.id();
                                 if (IdEntity_ != 0)
                                     receive_payload();
                             } else {
-                                std::cerr << "Error in receive_payload data: "
-                                          << error.message() << std::endl;
+                                std::cerr << "Error in receive_payload data: " << error.message()
+                                          << std::endl;
                             }
                         }
                     );
                 } else {
-                    std::cerr << "Error in receive_payload header: "
-                              << error.message() << std::endl;
+                    std::cerr << "Error in receive_payload header: " << error.message()
+                              << std::endl;
                 }
             }
         );
@@ -93,19 +84,14 @@ public:
     void receive_payload()
     {
         socket_.async_receive_from(
-            boost::asio::buffer(
-                &current_payload_header_, sizeof(current_payload_header_)
-            ),
+            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
             server_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     handle_receive_header(bytes_transferred);
                 } else {
-                    std::cerr << "Error in receive_payload header: "
-                              << error.message() << std::endl;
+                    std::cerr << "Error in receive_payload header: " << error.message()
+                              << std::endl;
                 }
             }
         );
@@ -118,26 +104,18 @@ public:
 
         socket_.async_receive_from(
             boost::asio::buffer(current_payload_data_), server_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     handle_receive_payload(bytes_transferred);
                     receive_payload();  // Receive the next payload
                 } else {
-                    std::cerr
-                        << "Error in receive_payload data: " << error.message()
-                        << std::endl;
+                    std::cerr << "Error in receive_payload data: " << error.message() << std::endl;
                 }
             }
         );
     }
 
-    void handle_receive_payload(std::size_t bytes_transferred)
-    {
-        process_payload();
-    }
+    void handle_receive_payload(std::size_t bytes_transferred) { process_payload(); }
 
     void process_payload()
     {
@@ -150,8 +128,7 @@ public:
         payload_ = payload;
         if (payloads_.size() == 0) {
             payloads_.push_back(payload);
-            std::cout << "First payload " << payload.ShortDebugString()
-                      << std::endl;
+            // std::cout << "First payload " << payload.ShortDebugString() << std::endl;
         } else {
             bool exist = false;
             for (auto it = payloads_.begin(); it != payloads_.end(); it++) {
@@ -203,7 +180,7 @@ public:
             boost::asio::buffer(serialized_payload), server_endpoint_,
             [](const boost::system::error_code&, std::size_t) {}
         );
-        std::cout << "Send payload : " << event.ShortDebugString() << std::endl;
+        // std::cout << "Send payload : " << event.ShortDebugString() << std::endl;
     }
 
 private:
