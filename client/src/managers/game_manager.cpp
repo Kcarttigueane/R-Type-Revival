@@ -75,10 +75,8 @@ void GameManager::game_loop(
                 _window.close();
             }
             if (isInputEvent(event)) {
-                std::lock_guard<std::mutex> lock(messages_mutex);
-                messages.push(handle_key(event.key.code));
-                // _inputManager.processKeyPress(event);
-                // _inputManager.processKeyRelease(event);
+                _inputManager.processKeyPress(event);
+                _inputManager.processKeyRelease(event);
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
                 sound.playSound();
@@ -115,8 +113,9 @@ void GameManager::game_loop(
                 }
             }
             if (!_playerPresent.empty()) {
-                processPlayerActions(deltaTime.asSeconds());
                 // Update player position
+                std::lock_guard<std::mutex> lock(messages_mutex);
+                processPlayerActions(deltaTime.asSeconds(), messages);
                 entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
 
                 auto& transform = _registry.get<TransformComponent>(playerEntity);

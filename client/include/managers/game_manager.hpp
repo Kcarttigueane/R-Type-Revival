@@ -87,31 +87,6 @@ public:
 
     ~GameManager() { _registry.clear(); }
 
-    rtype::Event handle_key(sf::Keyboard::Key key)
-    {
-        rtype::Event event;
-        switch (key) {
-            case sf::Keyboard::Up:
-                event.set_event(rtype::EventType::MOVEUP);
-                break;
-            case sf::Keyboard::Down:
-                event.set_event(rtype::EventType::MOVEDOWN);
-                break;
-            case sf::Keyboard::Left:
-                event.set_event(rtype::EventType::MOVELEFT);
-                break;
-            case sf::Keyboard::Right:
-                event.set_event(rtype::EventType::MOVERIGHT);
-                break;
-            case sf::Keyboard::Space:
-                event.set_event(rtype::EventType::SHOOT);
-                break;
-            default:
-                break;
-        }
-        return event;
-    }
-
     void start_game();
 
     void game_loop(
@@ -173,22 +148,26 @@ public:
         }
     }
 
-    void processPlayerActions(float deltaTime)
+    void processPlayerActions(float deltaTime, std::queue<rtype::Event>& messages)
     {
         auto& actions = _inputManager.getKeyboardActions();
         rtype::Event protoEvent;
 
         if (actions.Up == true) {
             protoEvent.set_event(rtype::EventType::MOVEUP);
+            messages.push(protoEvent);
         }
         if (actions.Down == true) {
             protoEvent.set_event(rtype::EventType::MOVEDOWN);
+            messages.push(protoEvent);
         }
         if (actions.Right == true) {
             protoEvent.set_event(rtype::EventType::MOVERIGHT);
+            messages.push(protoEvent);
         }
         if (actions.Left == true) {
             protoEvent.set_event(rtype::EventType::MOVELEFT);
+            messages.push(protoEvent);
         }
     }
 
