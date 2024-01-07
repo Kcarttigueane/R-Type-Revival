@@ -402,7 +402,8 @@ class PlayerState final :
     kPlayerIdFieldNumber = 1,
     kPosXFieldNumber = 2,
     kPosYFieldNumber = 3,
-    kIsShootingFieldNumber = 5,
+    kHealthFieldNumber = 5,
+    kIsShootingFieldNumber = 6,
   };
   // uint32 player_id = 1;
   void clear_player_id();
@@ -431,7 +432,16 @@ class PlayerState final :
   void _internal_set_pos_y(float value);
   public:
 
-  // bool is_shooting = 5;
+  // float health = 5;
+  void clear_health();
+  float health() const;
+  void set_health(float value);
+  private:
+  float _internal_health() const;
+  void _internal_set_health(float value);
+  public:
+
+  // bool is_shooting = 6;
   void clear_is_shooting();
   bool is_shooting() const;
   void set_is_shooting(bool value);
@@ -450,6 +460,7 @@ class PlayerState final :
   uint32_t player_id_;
   float pos_x_;
   float pos_y_;
+  float health_;
   bool is_shooting_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_r_5ftype_2eproto;
@@ -598,13 +609,13 @@ class EnemyState final :
   std::string* _internal_mutable_type();
   public:
 
-  // uint32 enemyId = 1;
-  void clear_enemyid();
-  uint32_t enemyid() const;
-  void set_enemyid(uint32_t value);
+  // uint32 enemy_id = 1;
+  void clear_enemy_id();
+  uint32_t enemy_id() const;
+  void set_enemy_id(uint32_t value);
   private:
-  uint32_t _internal_enemyid() const;
-  void _internal_set_enemyid(uint32_t value);
+  uint32_t _internal_enemy_id() const;
+  void _internal_set_enemy_id(uint32_t value);
   public:
 
   // float pos_x = 2;
@@ -642,7 +653,7 @@ class EnemyState final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr type_;
-  uint32_t enemyid_;
+  uint32_t enemy_id_;
   float pos_x_;
   float pos_y_;
   float health_;
@@ -1122,13 +1133,13 @@ class BulletState final :
     kSpeedFieldNumber = 6,
     kOwnerIdFieldNumber = 7,
   };
-  // uint32 bulletId = 1;
-  void clear_bulletid();
-  uint32_t bulletid() const;
-  void set_bulletid(uint32_t value);
+  // uint32 bullet_id = 1;
+  void clear_bullet_id();
+  uint32_t bullet_id() const;
+  void set_bullet_id(uint32_t value);
   private:
-  uint32_t _internal_bulletid() const;
-  void _internal_set_bulletid(uint32_t value);
+  uint32_t _internal_bullet_id() const;
+  void _internal_set_bullet_id(uint32_t value);
   public:
 
   // float pos_x = 2;
@@ -1192,7 +1203,7 @@ class BulletState final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  uint32_t bulletid_;
+  uint32_t bullet_id_;
   float pos_x_;
   float pos_y_;
   float direction_x_;
@@ -1946,23 +1957,23 @@ class Payload final :
       ::rtype::Event* event);
   ::rtype::Event* unsafe_arena_release_event();
 
-  // .rtype.GameState gameState = 4;
-  bool has_gamestate() const;
+  // .rtype.GameState game_state = 4;
+  bool has_game_state() const;
   private:
-  bool _internal_has_gamestate() const;
+  bool _internal_has_game_state() const;
   public:
-  void clear_gamestate();
-  const ::rtype::GameState& gamestate() const;
-  PROTOBUF_NODISCARD ::rtype::GameState* release_gamestate();
-  ::rtype::GameState* mutable_gamestate();
-  void set_allocated_gamestate(::rtype::GameState* gamestate);
+  void clear_game_state();
+  const ::rtype::GameState& game_state() const;
+  PROTOBUF_NODISCARD ::rtype::GameState* release_game_state();
+  ::rtype::GameState* mutable_game_state();
+  void set_allocated_game_state(::rtype::GameState* game_state);
   private:
-  const ::rtype::GameState& _internal_gamestate() const;
-  ::rtype::GameState* _internal_mutable_gamestate();
+  const ::rtype::GameState& _internal_game_state() const;
+  ::rtype::GameState* _internal_mutable_game_state();
   public:
-  void unsafe_arena_set_allocated_gamestate(
-      ::rtype::GameState* gamestate);
-  ::rtype::GameState* unsafe_arena_release_gamestate();
+  void unsafe_arena_set_allocated_game_state(
+      ::rtype::GameState* game_state);
+  ::rtype::GameState* unsafe_arena_release_game_state();
 
   void clear_payload_type();
   PayloadTypeCase payload_type_case() const;
@@ -1972,7 +1983,7 @@ class Payload final :
   void set_has_connect();
   void set_has_connect_response();
   void set_has_event();
-  void set_has_gamestate();
+  void set_has_game_state();
 
   inline bool has_payload_type() const;
   inline void clear_has_payload_type();
@@ -1987,7 +1998,7 @@ class Payload final :
     ::rtype::Connect* connect_;
     ::rtype::ConnectResponse* connect_response_;
     ::rtype::Event* event_;
-    ::rtype::GameState* gamestate_;
+    ::rtype::GameState* game_state_;
   } payload_type_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   uint32_t _oneof_case_[1];
@@ -2089,7 +2100,27 @@ inline void PlayerState::set_pos_y(float value) {
   // @@protoc_insertion_point(field_set:rtype.PlayerState.pos_y)
 }
 
-// bool is_shooting = 5;
+// float health = 5;
+inline void PlayerState::clear_health() {
+  health_ = 0;
+}
+inline float PlayerState::_internal_health() const {
+  return health_;
+}
+inline float PlayerState::health() const {
+  // @@protoc_insertion_point(field_get:rtype.PlayerState.health)
+  return _internal_health();
+}
+inline void PlayerState::_internal_set_health(float value) {
+  
+  health_ = value;
+}
+inline void PlayerState::set_health(float value) {
+  _internal_set_health(value);
+  // @@protoc_insertion_point(field_set:rtype.PlayerState.health)
+}
+
+// bool is_shooting = 6;
 inline void PlayerState::clear_is_shooting() {
   is_shooting_ = false;
 }
@@ -2113,24 +2144,24 @@ inline void PlayerState::set_is_shooting(bool value) {
 
 // EnemyState
 
-// uint32 enemyId = 1;
-inline void EnemyState::clear_enemyid() {
-  enemyid_ = 0u;
+// uint32 enemy_id = 1;
+inline void EnemyState::clear_enemy_id() {
+  enemy_id_ = 0u;
 }
-inline uint32_t EnemyState::_internal_enemyid() const {
-  return enemyid_;
+inline uint32_t EnemyState::_internal_enemy_id() const {
+  return enemy_id_;
 }
-inline uint32_t EnemyState::enemyid() const {
-  // @@protoc_insertion_point(field_get:rtype.EnemyState.enemyId)
-  return _internal_enemyid();
+inline uint32_t EnemyState::enemy_id() const {
+  // @@protoc_insertion_point(field_get:rtype.EnemyState.enemy_id)
+  return _internal_enemy_id();
 }
-inline void EnemyState::_internal_set_enemyid(uint32_t value) {
+inline void EnemyState::_internal_set_enemy_id(uint32_t value) {
   
-  enemyid_ = value;
+  enemy_id_ = value;
 }
-inline void EnemyState::set_enemyid(uint32_t value) {
-  _internal_set_enemyid(value);
-  // @@protoc_insertion_point(field_set:rtype.EnemyState.enemyId)
+inline void EnemyState::set_enemy_id(uint32_t value) {
+  _internal_set_enemy_id(value);
+  // @@protoc_insertion_point(field_set:rtype.EnemyState.enemy_id)
 }
 
 // float pos_x = 2;
@@ -2407,24 +2438,24 @@ inline void ScoreUpdate::set_score(int32_t value) {
 
 // BulletState
 
-// uint32 bulletId = 1;
-inline void BulletState::clear_bulletid() {
-  bulletid_ = 0u;
+// uint32 bullet_id = 1;
+inline void BulletState::clear_bullet_id() {
+  bullet_id_ = 0u;
 }
-inline uint32_t BulletState::_internal_bulletid() const {
-  return bulletid_;
+inline uint32_t BulletState::_internal_bullet_id() const {
+  return bullet_id_;
 }
-inline uint32_t BulletState::bulletid() const {
-  // @@protoc_insertion_point(field_get:rtype.BulletState.bulletId)
-  return _internal_bulletid();
+inline uint32_t BulletState::bullet_id() const {
+  // @@protoc_insertion_point(field_get:rtype.BulletState.bullet_id)
+  return _internal_bullet_id();
 }
-inline void BulletState::_internal_set_bulletid(uint32_t value) {
+inline void BulletState::_internal_set_bullet_id(uint32_t value) {
   
-  bulletid_ = value;
+  bullet_id_ = value;
 }
-inline void BulletState::set_bulletid(uint32_t value) {
-  _internal_set_bulletid(value);
-  // @@protoc_insertion_point(field_set:rtype.BulletState.bulletId)
+inline void BulletState::set_bullet_id(uint32_t value) {
+  _internal_set_bullet_id(value);
+  // @@protoc_insertion_point(field_set:rtype.BulletState.bullet_id)
 }
 
 // float pos_x = 2;
@@ -3076,77 +3107,77 @@ inline ::rtype::Event* Payload::mutable_event() {
   return _msg;
 }
 
-// .rtype.GameState gameState = 4;
-inline bool Payload::_internal_has_gamestate() const {
+// .rtype.GameState game_state = 4;
+inline bool Payload::_internal_has_game_state() const {
   return payload_type_case() == kGameState;
 }
-inline bool Payload::has_gamestate() const {
-  return _internal_has_gamestate();
+inline bool Payload::has_game_state() const {
+  return _internal_has_game_state();
 }
-inline void Payload::set_has_gamestate() {
+inline void Payload::set_has_game_state() {
   _oneof_case_[0] = kGameState;
 }
-inline void Payload::clear_gamestate() {
-  if (_internal_has_gamestate()) {
+inline void Payload::clear_game_state() {
+  if (_internal_has_game_state()) {
     if (GetArenaForAllocation() == nullptr) {
-      delete payload_type_.gamestate_;
+      delete payload_type_.game_state_;
     }
     clear_has_payload_type();
   }
 }
-inline ::rtype::GameState* Payload::release_gamestate() {
-  // @@protoc_insertion_point(field_release:rtype.Payload.gameState)
-  if (_internal_has_gamestate()) {
+inline ::rtype::GameState* Payload::release_game_state() {
+  // @@protoc_insertion_point(field_release:rtype.Payload.game_state)
+  if (_internal_has_game_state()) {
     clear_has_payload_type();
-      ::rtype::GameState* temp = payload_type_.gamestate_;
+      ::rtype::GameState* temp = payload_type_.game_state_;
     if (GetArenaForAllocation() != nullptr) {
       temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
     }
-    payload_type_.gamestate_ = nullptr;
+    payload_type_.game_state_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline const ::rtype::GameState& Payload::_internal_gamestate() const {
-  return _internal_has_gamestate()
-      ? *payload_type_.gamestate_
+inline const ::rtype::GameState& Payload::_internal_game_state() const {
+  return _internal_has_game_state()
+      ? *payload_type_.game_state_
       : reinterpret_cast< ::rtype::GameState&>(::rtype::_GameState_default_instance_);
 }
-inline const ::rtype::GameState& Payload::gamestate() const {
-  // @@protoc_insertion_point(field_get:rtype.Payload.gameState)
-  return _internal_gamestate();
+inline const ::rtype::GameState& Payload::game_state() const {
+  // @@protoc_insertion_point(field_get:rtype.Payload.game_state)
+  return _internal_game_state();
 }
-inline ::rtype::GameState* Payload::unsafe_arena_release_gamestate() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:rtype.Payload.gameState)
-  if (_internal_has_gamestate()) {
+inline ::rtype::GameState* Payload::unsafe_arena_release_game_state() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:rtype.Payload.game_state)
+  if (_internal_has_game_state()) {
     clear_has_payload_type();
-    ::rtype::GameState* temp = payload_type_.gamestate_;
-    payload_type_.gamestate_ = nullptr;
+    ::rtype::GameState* temp = payload_type_.game_state_;
+    payload_type_.game_state_ = nullptr;
     return temp;
   } else {
     return nullptr;
   }
 }
-inline void Payload::unsafe_arena_set_allocated_gamestate(::rtype::GameState* gamestate) {
+inline void Payload::unsafe_arena_set_allocated_game_state(::rtype::GameState* game_state) {
   clear_payload_type();
-  if (gamestate) {
-    set_has_gamestate();
-    payload_type_.gamestate_ = gamestate;
+  if (game_state) {
+    set_has_game_state();
+    payload_type_.game_state_ = game_state;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rtype.Payload.gameState)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rtype.Payload.game_state)
 }
-inline ::rtype::GameState* Payload::_internal_mutable_gamestate() {
-  if (!_internal_has_gamestate()) {
+inline ::rtype::GameState* Payload::_internal_mutable_game_state() {
+  if (!_internal_has_game_state()) {
     clear_payload_type();
-    set_has_gamestate();
-    payload_type_.gamestate_ = CreateMaybeMessage< ::rtype::GameState >(GetArenaForAllocation());
+    set_has_game_state();
+    payload_type_.game_state_ = CreateMaybeMessage< ::rtype::GameState >(GetArenaForAllocation());
   }
-  return payload_type_.gamestate_;
+  return payload_type_.game_state_;
 }
-inline ::rtype::GameState* Payload::mutable_gamestate() {
-  ::rtype::GameState* _msg = _internal_mutable_gamestate();
-  // @@protoc_insertion_point(field_mutable:rtype.Payload.gameState)
+inline ::rtype::GameState* Payload::mutable_game_state() {
+  ::rtype::GameState* _msg = _internal_mutable_game_state();
+  // @@protoc_insertion_point(field_mutable:rtype.Payload.game_state)
   return _msg;
 }
 

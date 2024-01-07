@@ -19,11 +19,12 @@ message PlayerState {
     uint32 player_id = 1;
     float pos_x = 2;
     float pos_y = 3;
-    bool is_shooting = 5;
+    float health = 5;
+    bool is_shooting = 6;
 }
 
 message EnemyState {
-    uint32 enemyId = 1;
+    uint32 enemy_id = 1;
     float pos_x = 2;
     float pos_y = 3;
     string type = 4;
@@ -43,7 +44,7 @@ message ScoreUpdate {
 }
 
 message BulletState {
-    uint32 bulletId = 1;
+    uint32 bullet_id = 1;
     float pos_x = 2;
     float pos_y = 3;
     float direction_x = 4;
@@ -73,7 +74,7 @@ message Payload {
         Connect connect = 1;
         ConnectResponse connect_response = 2;
         Event event = 3;
-        GameState gameState = 4;
+        GameState game_state = 4;
     }
     uint32 sequence_number = 5; // For handling ordered processing
 }

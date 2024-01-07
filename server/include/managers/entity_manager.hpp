@@ -13,6 +13,8 @@ public:
 
     ~EntityManager() { _registry.clear(); }
 
+    entt::registry& getRegistry() { return _registry; }
+
     // ! Factory methods
 
     entt::entity createPlayer(entt::entity hint);

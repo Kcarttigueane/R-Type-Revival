@@ -35,6 +35,7 @@ constexpr PlayerState::PlayerState(
   : player_id_(0u)
   , pos_x_(0)
   , pos_y_(0)
+  , health_(0)
   , is_shooting_(false){}
 struct PlayerStateDefaultTypeInternal {
   constexpr PlayerStateDefaultTypeInternal()
@@ -48,7 +49,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PlayerStateDefaultTypeInternal 
 constexpr EnemyState::EnemyState(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , enemyid_(0u)
+  , enemy_id_(0u)
   , pos_x_(0)
   , pos_y_(0)
   , health_(0){}
@@ -91,7 +92,7 @@ struct ScoreUpdateDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ScoreUpdateDefaultTypeInternal _ScoreUpdate_default_instance_;
 constexpr BulletState::BulletState(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : bulletid_(0u)
+  : bullet_id_(0u)
   , pos_x_(0)
   , pos_y_(0)
   , direction_x_(0)
@@ -183,6 +184,7 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::rtype::PlayerState, player_id_),
   PROTOBUF_FIELD_OFFSET(::rtype::PlayerState, pos_x_),
   PROTOBUF_FIELD_OFFSET(::rtype::PlayerState, pos_y_),
+  PROTOBUF_FIELD_OFFSET(::rtype::PlayerState, health_),
   PROTOBUF_FIELD_OFFSET(::rtype::PlayerState, is_shooting_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, _internal_metadata_),
@@ -190,7 +192,7 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, enemyid_),
+  PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, enemy_id_),
   PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, pos_x_),
   PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, pos_y_),
   PROTOBUF_FIELD_OFFSET(::rtype::EnemyState, type_),
@@ -219,7 +221,7 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::rtype::BulletState, bulletid_),
+  PROTOBUF_FIELD_OFFSET(::rtype::BulletState, bullet_id_),
   PROTOBUF_FIELD_OFFSET(::rtype::BulletState, pos_x_),
   PROTOBUF_FIELD_OFFSET(::rtype::BulletState, pos_y_),
   PROTOBUF_FIELD_OFFSET(::rtype::BulletState, direction_x_),
@@ -268,14 +270,14 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::rtype::Event)},
   { 7, -1, -1, sizeof(::rtype::PlayerState)},
-  { 17, -1, -1, sizeof(::rtype::EnemyState)},
-  { 28, -1, -1, sizeof(::rtype::PowerUpState)},
-  { 38, -1, -1, sizeof(::rtype::ScoreUpdate)},
-  { 46, -1, -1, sizeof(::rtype::BulletState)},
-  { 59, -1, -1, sizeof(::rtype::GameState)},
-  { 71, -1, -1, sizeof(::rtype::Connect)},
-  { 78, -1, -1, sizeof(::rtype::ConnectResponse)},
-  { 85, -1, -1, sizeof(::rtype::Payload)},
+  { 18, -1, -1, sizeof(::rtype::EnemyState)},
+  { 29, -1, -1, sizeof(::rtype::PowerUpState)},
+  { 39, -1, -1, sizeof(::rtype::ScoreUpdate)},
+  { 47, -1, -1, sizeof(::rtype::BulletState)},
+  { 60, -1, -1, sizeof(::rtype::GameState)},
+  { 72, -1, -1, sizeof(::rtype::Connect)},
+  { 79, -1, -1, sizeof(::rtype::ConnectResponse)},
+  { 86, -1, -1, sizeof(::rtype::Payload)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -293,37 +295,38 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_r_5ftype_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014r_type.proto\022\005rtype\"(\n\005Event\022\037\n\005event\030"
-  "\001 \001(\0162\020.rtype.EventType\"S\n\013PlayerState\022\021"
+  "\001 \001(\0162\020.rtype.EventType\"c\n\013PlayerState\022\021"
   "\n\tplayer_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_"
-  "y\030\003 \001(\002\022\023\n\013is_shooting\030\005 \001(\010\"Y\n\nEnemySta"
-  "te\022\017\n\007enemyId\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005po"
-  "s_y\030\003 \001(\002\022\014\n\004type\030\004 \001(\t\022\016\n\006health\030\005 \001(\002\""
-  "O\n\014PowerUpState\022\023\n\013power_up_id\030\001 \001(\r\022\r\n\005"
+  "y\030\003 \001(\002\022\016\n\006health\030\005 \001(\002\022\023\n\013is_shooting\030\006"
+  " \001(\010\"Z\n\nEnemyState\022\020\n\010enemy_id\030\001 \001(\r\022\r\n\005"
   "pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\014\n\004type\030\004 \001(\t"
-  "\"/\n\013ScoreUpdate\022\021\n\tplayer_id\030\001 \001(\r\022\r\n\005sc"
-  "ore\030\002 \001(\005\"\210\001\n\013BulletState\022\020\n\010bulletId\030\001 "
-  "\001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 \001(\002\022\023\n\013dir"
-  "ection_x\030\004 \001(\002\022\023\n\013direction_y\030\005 \001(\002\022\r\n\005s"
-  "peed\030\006 \001(\002\022\020\n\010owner_id\030\007 \001(\r\"\330\001\n\tGameSta"
-  "te\022#\n\007players\030\001 \003(\0132\022.rtype.PlayerState\022"
-  "\"\n\007enemies\030\002 \003(\0132\021.rtype.EnemyState\022&\n\tp"
-  "ower_ups\030\003 \003(\0132\023.rtype.PowerUpState\022\"\n\006s"
-  "cores\030\004 \003(\0132\022.rtype.ScoreUpdate\022#\n\007bulle"
-  "ts\030\006 \003(\0132\022.rtype.BulletState\022\021\n\ttimestam"
-  "p\030\005 \001(\004\"\036\n\007Connect\022\023\n\013player_name\030\001 \001(\t\""
-  "$\n\017ConnectResponse\022\021\n\tplayer_id\030\001 \001(\r\"\317\001"
-  "\n\007Payload\022!\n\007connect\030\001 \001(\0132\016.rtype.Conne"
-  "ctH\000\0222\n\020connect_response\030\002 \001(\0132\026.rtype.C"
-  "onnectResponseH\000\022\035\n\005event\030\003 \001(\0132\014.rtype."
-  "EventH\000\022%\n\tgameState\030\004 \001(\0132\020.rtype.GameS"
-  "tateH\000\022\027\n\017sequence_number\030\005 \001(\rB\016\n\014paylo"
-  "ad_type*[\n\tEventType\022\013\n\007MOVE_UP\020\000\022\r\n\tMOV"
-  "E_DOWN\020\001\022\r\n\tMOVE_LEFT\020\002\022\016\n\nMOVE_RIGHT\020\003\022"
-  "\t\n\005SHOOT\020\004\022\010\n\004QUIT\020\005b\006proto3"
+  "\022\016\n\006health\030\005 \001(\002\"O\n\014PowerUpState\022\023\n\013powe"
+  "r_up_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 "
+  "\001(\002\022\014\n\004type\030\004 \001(\t\"/\n\013ScoreUpdate\022\021\n\tplay"
+  "er_id\030\001 \001(\r\022\r\n\005score\030\002 \001(\005\"\211\001\n\013BulletSta"
+  "te\022\021\n\tbullet_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005"
+  "pos_y\030\003 \001(\002\022\023\n\013direction_x\030\004 \001(\002\022\023\n\013dire"
+  "ction_y\030\005 \001(\002\022\r\n\005speed\030\006 \001(\002\022\020\n\010owner_id"
+  "\030\007 \001(\r\"\330\001\n\tGameState\022#\n\007players\030\001 \003(\0132\022."
+  "rtype.PlayerState\022\"\n\007enemies\030\002 \003(\0132\021.rty"
+  "pe.EnemyState\022&\n\tpower_ups\030\003 \003(\0132\023.rtype"
+  ".PowerUpState\022\"\n\006scores\030\004 \003(\0132\022.rtype.Sc"
+  "oreUpdate\022#\n\007bullets\030\006 \003(\0132\022.rtype.Bulle"
+  "tState\022\021\n\ttimestamp\030\005 \001(\004\"\036\n\007Connect\022\023\n\013"
+  "player_name\030\001 \001(\t\"$\n\017ConnectResponse\022\021\n\t"
+  "player_id\030\001 \001(\r\"\320\001\n\007Payload\022!\n\007connect\030\001"
+  " \001(\0132\016.rtype.ConnectH\000\0222\n\020connect_respon"
+  "se\030\002 \001(\0132\026.rtype.ConnectResponseH\000\022\035\n\005ev"
+  "ent\030\003 \001(\0132\014.rtype.EventH\000\022&\n\ngame_state\030"
+  "\004 \001(\0132\020.rtype.GameStateH\000\022\027\n\017sequence_nu"
+  "mber\030\005 \001(\rB\016\n\014payload_type*[\n\tEventType\022"
+  "\013\n\007MOVE_UP\020\000\022\r\n\tMOVE_DOWN\020\001\022\r\n\tMOVE_LEFT"
+  "\020\002\022\016\n\nMOVE_RIGHT\020\003\022\t\n\005SHOOT\020\004\022\010\n\004QUIT\020\005b"
+  "\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_r_5ftype_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_r_5ftype_2eproto = {
-  false, false, 1108, descriptor_table_protodef_r_5ftype_2eproto, "r_type.proto", 
+  false, false, 1127, descriptor_table_protodef_r_5ftype_2eproto, "r_type.proto", 
   &descriptor_table_r_5ftype_2eproto_once, nullptr, 0, 10,
   schemas, file_default_instances, TableStruct_r_5ftype_2eproto::offsets,
   file_level_metadata_r_5ftype_2eproto, file_level_enum_descriptors_r_5ftype_2eproto, file_level_service_descriptors_r_5ftype_2eproto,
@@ -629,9 +632,17 @@ const char* PlayerState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
         } else
           goto handle_unusual;
         continue;
-      // bool is_shooting = 5;
+      // float health = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 40)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 45)) {
+          health_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+          ptr += sizeof(float);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool is_shooting = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 48)) {
           is_shooting_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else
@@ -692,10 +703,20 @@ uint8_t* PlayerState::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_pos_y(), target);
   }
 
-  // bool is_shooting = 5;
+  // float health = 5;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_health = this->_internal_health();
+  uint32_t raw_health;
+  memcpy(&raw_health, &tmp_health, sizeof(tmp_health));
+  if (raw_health != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(5, this->_internal_health(), target);
+  }
+
+  // bool is_shooting = 6;
   if (this->_internal_is_shooting() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(5, this->_internal_is_shooting(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(6, this->_internal_is_shooting(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -737,7 +758,16 @@ size_t PlayerState::ByteSizeLong() const {
     total_size += 1 + 4;
   }
 
-  // bool is_shooting = 5;
+  // float health = 5;
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_health = this->_internal_health();
+  uint32_t raw_health;
+  memcpy(&raw_health, &tmp_health, sizeof(tmp_health));
+  if (raw_health != 0) {
+    total_size += 1 + 4;
+  }
+
+  // bool is_shooting = 6;
   if (this->_internal_is_shooting() != 0) {
     total_size += 1 + 1;
   }
@@ -780,6 +810,13 @@ void PlayerState::MergeFrom(const PlayerState& from) {
   memcpy(&raw_pos_y, &tmp_pos_y, sizeof(tmp_pos_y));
   if (raw_pos_y != 0) {
     _internal_set_pos_y(from._internal_pos_y());
+  }
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_health = from._internal_health();
+  uint32_t raw_health;
+  memcpy(&raw_health, &tmp_health, sizeof(tmp_health));
+  if (raw_health != 0) {
+    _internal_set_health(from._internal_health());
   }
   if (from._internal_is_shooting() != 0) {
     _internal_set_is_shooting(from._internal_is_shooting());
@@ -841,9 +878,9 @@ EnemyState::EnemyState(const EnemyState& from)
     type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_type(), 
       GetArenaForAllocation());
   }
-  ::memcpy(&enemyid_, &from.enemyid_,
+  ::memcpy(&enemy_id_, &from.enemy_id_,
     static_cast<size_t>(reinterpret_cast<char*>(&health_) -
-    reinterpret_cast<char*>(&enemyid_)) + sizeof(health_));
+    reinterpret_cast<char*>(&enemy_id_)) + sizeof(health_));
   // @@protoc_insertion_point(copy_constructor:rtype.EnemyState)
 }
 
@@ -853,9 +890,9 @@ type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlready
   type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&enemyid_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&enemy_id_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&health_) -
-    reinterpret_cast<char*>(&enemyid_)) + sizeof(health_));
+    reinterpret_cast<char*>(&enemy_id_)) + sizeof(health_));
 }
 
 EnemyState::~EnemyState() {
@@ -887,9 +924,9 @@ void EnemyState::Clear() {
   (void) cached_has_bits;
 
   type_.ClearToEmpty();
-  ::memset(&enemyid_, 0, static_cast<size_t>(
+  ::memset(&enemy_id_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&health_) -
-      reinterpret_cast<char*>(&enemyid_)) + sizeof(health_));
+      reinterpret_cast<char*>(&enemy_id_)) + sizeof(health_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -899,10 +936,10 @@ const char* EnemyState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // uint32 enemyId = 1;
+      // uint32 enemy_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          enemyid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          enemy_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -970,10 +1007,10 @@ uint8_t* EnemyState::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint32 enemyId = 1;
-  if (this->_internal_enemyid() != 0) {
+  // uint32 enemy_id = 1;
+  if (this->_internal_enemy_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_enemyid(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_enemy_id(), target);
   }
 
   // float pos_x = 2;
@@ -1039,9 +1076,9 @@ size_t EnemyState::ByteSizeLong() const {
         this->_internal_type());
   }
 
-  // uint32 enemyId = 1;
-  if (this->_internal_enemyid() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_enemyid());
+  // uint32 enemy_id = 1;
+  if (this->_internal_enemy_id() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_enemy_id());
   }
 
   // float pos_x = 2;
@@ -1096,8 +1133,8 @@ void EnemyState::MergeFrom(const EnemyState& from) {
   if (!from._internal_type().empty()) {
     _internal_set_type(from._internal_type());
   }
-  if (from._internal_enemyid() != 0) {
-    _internal_set_enemyid(from._internal_enemyid());
+  if (from._internal_enemy_id() != 0) {
+    _internal_set_enemy_id(from._internal_enemy_id());
   }
   static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
   float tmp_pos_x = from._internal_pos_x();
@@ -1147,9 +1184,9 @@ void EnemyState::InternalSwap(EnemyState* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(EnemyState, health_)
       + sizeof(EnemyState::health_)
-      - PROTOBUF_FIELD_OFFSET(EnemyState, enemyid_)>(
-          reinterpret_cast<char*>(&enemyid_),
-          reinterpret_cast<char*>(&other->enemyid_));
+      - PROTOBUF_FIELD_OFFSET(EnemyState, enemy_id_)>(
+          reinterpret_cast<char*>(&enemy_id_),
+          reinterpret_cast<char*>(&other->enemy_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata EnemyState::GetMetadata() const {
@@ -1697,17 +1734,17 @@ BulletState::BulletState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 BulletState::BulletState(const BulletState& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&bulletid_, &from.bulletid_,
+  ::memcpy(&bullet_id_, &from.bullet_id_,
     static_cast<size_t>(reinterpret_cast<char*>(&owner_id_) -
-    reinterpret_cast<char*>(&bulletid_)) + sizeof(owner_id_));
+    reinterpret_cast<char*>(&bullet_id_)) + sizeof(owner_id_));
   // @@protoc_insertion_point(copy_constructor:rtype.BulletState)
 }
 
 inline void BulletState::SharedCtor() {
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&bulletid_) - reinterpret_cast<char*>(this)),
+    reinterpret_cast<char*>(&bullet_id_) - reinterpret_cast<char*>(this)),
     0, static_cast<size_t>(reinterpret_cast<char*>(&owner_id_) -
-    reinterpret_cast<char*>(&bulletid_)) + sizeof(owner_id_));
+    reinterpret_cast<char*>(&bullet_id_)) + sizeof(owner_id_));
 }
 
 BulletState::~BulletState() {
@@ -1737,9 +1774,9 @@ void BulletState::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&bulletid_, 0, static_cast<size_t>(
+  ::memset(&bullet_id_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&owner_id_) -
-      reinterpret_cast<char*>(&bulletid_)) + sizeof(owner_id_));
+      reinterpret_cast<char*>(&bullet_id_)) + sizeof(owner_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -1749,10 +1786,10 @@ const char* BulletState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // uint32 bulletId = 1;
+      // uint32 bullet_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          bulletid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          bullet_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -1834,10 +1871,10 @@ uint8_t* BulletState::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint32 bulletId = 1;
-  if (this->_internal_bulletid() != 0) {
+  // uint32 bullet_id = 1;
+  if (this->_internal_bullet_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_bulletid(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_bullet_id(), target);
   }
 
   // float pos_x = 2;
@@ -1912,9 +1949,9 @@ size_t BulletState::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // uint32 bulletId = 1;
-  if (this->_internal_bulletid() != 0) {
-    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_bulletid());
+  // uint32 bullet_id = 1;
+  if (this->_internal_bullet_id() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32SizePlusOne(this->_internal_bullet_id());
   }
 
   // float pos_x = 2;
@@ -1989,8 +2026,8 @@ void BulletState::MergeFrom(const BulletState& from) {
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_bulletid() != 0) {
-    _internal_set_bulletid(from._internal_bulletid());
+  if (from._internal_bullet_id() != 0) {
+    _internal_set_bullet_id(from._internal_bullet_id());
   }
   static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
   float tmp_pos_x = from._internal_pos_x();
@@ -2050,9 +2087,9 @@ void BulletState::InternalSwap(BulletState* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(BulletState, owner_id_)
       + sizeof(BulletState::owner_id_)
-      - PROTOBUF_FIELD_OFFSET(BulletState, bulletid_)>(
-          reinterpret_cast<char*>(&bulletid_),
-          reinterpret_cast<char*>(&other->bulletid_));
+      - PROTOBUF_FIELD_OFFSET(BulletState, bullet_id_)>(
+          reinterpret_cast<char*>(&bullet_id_),
+          reinterpret_cast<char*>(&other->bullet_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BulletState::GetMetadata() const {
@@ -2792,7 +2829,7 @@ class Payload::_Internal {
   static const ::rtype::Connect& connect(const Payload* msg);
   static const ::rtype::ConnectResponse& connect_response(const Payload* msg);
   static const ::rtype::Event& event(const Payload* msg);
-  static const ::rtype::GameState& gamestate(const Payload* msg);
+  static const ::rtype::GameState& game_state(const Payload* msg);
 };
 
 const ::rtype::Connect&
@@ -2808,8 +2845,8 @@ Payload::_Internal::event(const Payload* msg) {
   return *msg->payload_type_.event_;
 }
 const ::rtype::GameState&
-Payload::_Internal::gamestate(const Payload* msg) {
-  return *msg->payload_type_.gamestate_;
+Payload::_Internal::game_state(const Payload* msg) {
+  return *msg->payload_type_.game_state_;
 }
 void Payload::set_allocated_connect(::rtype::Connect* connect) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
@@ -2856,20 +2893,20 @@ void Payload::set_allocated_event(::rtype::Event* event) {
   }
   // @@protoc_insertion_point(field_set_allocated:rtype.Payload.event)
 }
-void Payload::set_allocated_gamestate(::rtype::GameState* gamestate) {
+void Payload::set_allocated_game_state(::rtype::GameState* game_state) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   clear_payload_type();
-  if (gamestate) {
+  if (game_state) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::rtype::GameState>::GetOwningArena(gamestate);
+      ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::rtype::GameState>::GetOwningArena(game_state);
     if (message_arena != submessage_arena) {
-      gamestate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, gamestate, submessage_arena);
+      game_state = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, game_state, submessage_arena);
     }
-    set_has_gamestate();
-    payload_type_.gamestate_ = gamestate;
+    set_has_game_state();
+    payload_type_.game_state_ = game_state;
   }
-  // @@protoc_insertion_point(field_set_allocated:rtype.Payload.gameState)
+  // @@protoc_insertion_point(field_set_allocated:rtype.Payload.game_state)
 }
 Payload::Payload(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
@@ -2899,7 +2936,7 @@ Payload::Payload(const Payload& from)
       break;
     }
     case kGameState: {
-      _internal_mutable_gamestate()->::rtype::GameState::MergeFrom(from._internal_gamestate());
+      _internal_mutable_game_state()->::rtype::GameState::MergeFrom(from._internal_game_state());
       break;
     }
     case PAYLOAD_TYPE_NOT_SET: {
@@ -2961,7 +2998,7 @@ void Payload::clear_payload_type() {
     }
     case kGameState: {
       if (GetArenaForAllocation() == nullptr) {
-        delete payload_type_.gamestate_;
+        delete payload_type_.game_state_;
       }
       break;
     }
@@ -3014,10 +3051,10 @@ const char* Payload::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
         } else
           goto handle_unusual;
         continue;
-      // .rtype.GameState gameState = 4;
+      // .rtype.GameState game_state = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          ptr = ctx->ParseMessage(_internal_mutable_gamestate(), ptr);
+          ptr = ctx->ParseMessage(_internal_mutable_game_state(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -3083,12 +3120,12 @@ uint8_t* Payload::_InternalSerialize(
         3, _Internal::event(this), target, stream);
   }
 
-  // .rtype.GameState gameState = 4;
-  if (_internal_has_gamestate()) {
+  // .rtype.GameState game_state = 4;
+  if (_internal_has_game_state()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        4, _Internal::gamestate(this), target, stream);
+        4, _Internal::game_state(this), target, stream);
   }
 
   // uint32 sequence_number = 5;
@@ -3140,11 +3177,11 @@ size_t Payload::ByteSizeLong() const {
           *payload_type_.event_);
       break;
     }
-    // .rtype.GameState gameState = 4;
+    // .rtype.GameState game_state = 4;
     case kGameState: {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *payload_type_.gamestate_);
+          *payload_type_.game_state_);
       break;
     }
     case PAYLOAD_TYPE_NOT_SET: {
@@ -3190,7 +3227,7 @@ void Payload::MergeFrom(const Payload& from) {
       break;
     }
     case kGameState: {
-      _internal_mutable_gamestate()->::rtype::GameState::MergeFrom(from._internal_gamestate());
+      _internal_mutable_game_state()->::rtype::GameState::MergeFrom(from._internal_game_state());
       break;
     }
     case PAYLOAD_TYPE_NOT_SET: {
