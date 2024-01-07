@@ -6,14 +6,15 @@
 
 class EntityManager {
 private:
-    entt::registry& _registry;
+    entt::registry _registry;
 
 public:
-    EntityManager(entt::registry& registry) : _registry(registry){};
+    EntityManager() = default;
 
-    ~EntityManager() = default;
+    ~EntityManager() { _registry.clear(); }
 
-    // Factory methods
+    // ! Factory methods
+
     entt::entity createPlayer(entt::entity hint);
 
     entt::entity createNormalEnemy(float spawnHeight, float speed);

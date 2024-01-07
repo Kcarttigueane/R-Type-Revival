@@ -9,7 +9,7 @@ find_package(
 
 find_package(Protobuf REQUIRED)
 
-file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.cc")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/proto/*.cc")
 
 add_executable(r-type_server ${SOURCE_FILES})
 
