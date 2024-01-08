@@ -4,7 +4,17 @@ entt::entity EntityManager::createPlayer(entt::entity hint)
 {
     auto player = _registry.create(hint);
 
-    _registry.emplace<TransformComponent>(player, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
+    TransformComponent transformComponent = {
+        .x = 12.0f,
+        .y = 0.0f,
+        .rotation = 0.0f,
+        .scaleX = 1.0f,
+        .scaleY = 1.0f,
+        .orientation = 0.0f,
+    };
+
+    _registry.emplace<TransformComponent>(player, transformComponent);
+
     _registry.emplace<VelocityComponent>(player, 0.0f, 0.0f, 10.0f);
     _registry.emplace<WeaponComponent>(
         player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false

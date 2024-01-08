@@ -155,83 +155,13 @@ public:
 
     ~NetworkManager() { _socket.close(); }
 
-    void broadcast_game_state()
-    {
-        rtype::GameState game_state;
-        entt::registry& registry = _entityManager.getRegistry();
-        // // Fill in game_state with current game data
+    void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
 
-        for (const auto& [endpoint, session] : _sessions) {
-            rtype::PlayerState player_state;
-            entt::entity playerEntity = session.get()->getPlayerEntity();
+    void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
 
-            TransformComponent& transformComponent =
-                _entityManager.getRegistry().get<TransformComponent>(playerEntity);
+    void sendGameStateToAllSessions(const rtype::GameState& game_state);
 
-            player_state.set_player_id(static_cast<uint32_t>(playerEntity));
-            player_state.set_pos_x(transformComponent.x);
-            player_state.set_pos_y(transformComponent.y);
-
-            HealthComponent& healthComponent =
-                _entityManager.getRegistry().get<HealthComponent>(playerEntity);
-
-            player_state.set_health(healthComponent.healthPoints);
-
-            // player_state.set_weapon(0);
-            // player_state.set_weapon_ammo(0);
-            // player_state.set_weapon_cooldown(0);
-            // player_state.set_weapon_type(0);
-
-            game_state.add_players()->CopyFrom(player_state);
-
-            rtype::ScoreUpdate score_update;
-
-            ScoreComponent& scoreComponent =
-                _entityManager.getRegistry().get<ScoreComponent>(playerEntity);
-
-            score_update.set_player_id(static_cast<uint32_t>(playerEntity));
-            score_update.set_score(scoreComponent.score);
-
-            game_state.add_scores()->CopyFrom(score_update);
-        }
-
-        // Check if there are any entities with the required components
-        if (registry.view<EnemyAIComponent, TransformComponent, HealthComponent>().size_hint()) {
-            std::cout << "There are enemies in the game." << std::endl;
-            registry.view<EnemyAIComponent, TransformComponent, HealthComponent>().each(
-                [&game_state](
-                    auto entity, auto& enemyAIComponent, auto& transformComponent,
-                    auto& healthComponent
-                ) {
-                    rtype::EnemyState enemy_state;
-                    enemy_state.set_enemy_id(static_cast<uint32_t>(entity));
-                    enemy_state.set_pos_x(transformComponent.x);
-                    enemy_state.set_pos_y(transformComponent.y);
-                    enemy_state.set_health(healthComponent.healthPoints);
-                    enemy_state.set_type("Normal");
-
-                    game_state.add_enemies()->CopyFrom(enemy_state);
-                }
-            );
-        }
-
-        rtype::Payload payload;
-
-        payload.mutable_game_state()->CopyFrom(game_state);
-
-        std::string serialized_state;
-        payload.SerializeToString(&serialized_state);
-
-        std::cout << "Sending game state: " << payload.DebugString() << std::endl;
-        // for (const auto& [endpoint, session] : _sessions) {
-        //     _socket.async_send_to(
-        //         boost::asio::buffer(serialized_state), session->endpoint(),
-        //         [this](const boost::system::error_code& error, std::size_t /*bytes_transferred*/) {
-        //             handle_send(error);
-        //         }
-        //     );
-        // }
-    }
+    void broadcast_game_state();
 };
 
 #endif  // UPD_SERVER_HPP
