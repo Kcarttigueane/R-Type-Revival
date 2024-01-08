@@ -143,10 +143,16 @@ void GameManager::game_loop(
             collisionProjectileAndEnemy();
             // collisionEnemyAndPlayer(); // TODO : to put in the server
             makeAllAnimations();
-            // checkWin(); // TODO : to put in the server
         }
-        // printf("Payload : %s\n", payload.
 
         _window.display();
     }
 };
+
+bool GameManager::isInputEvent(const sf::Event& event)
+{
+    // TODO: Add more input events if needed define scope with gars
+    return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
+           event.type == sf::Event::MouseButtonPressed ||
+           event.type == sf::Event::MouseButtonReleased;
+}

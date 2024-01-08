@@ -1,4 +1,4 @@
-#include "../include/command_line_arguments.hpp"
+#include "../../common/command_line_arguments/command_line_arguments.hpp"
 #include "../include/managers/game_manager.hpp"
 #include "../src/network/payload.pb.h"
 
@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    GameManager game_manager(args.ip_address, args.port);
+    GameManager game_manager(args._ip_address, args._port);
     game_manager.start_game();
 
     return 0;

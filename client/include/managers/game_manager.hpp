@@ -45,8 +45,6 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
 
-    int _score = 0;
-
     // ! Managers
     InputManager _inputManager;
     // NetworkManager _networkManager;
@@ -150,20 +148,9 @@ public:
             sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
             if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
                 deleteAIEnemies();
-                _score = 0;
-                _sceneManager.setCurrentScene(GameScenes::Lose);
             }
         }
     };
-
-    void checkWin()
-    {
-        if (_score >= 20) {
-            deleteAIEnemies();
-            _score = 0;
-            _sceneManager.setCurrentScene(GameScenes::Win);
-        }
-    }
 
     void deleteAIEnemies()
     {
@@ -217,13 +204,7 @@ public:
      * \param event The SFML event to check.
      * \return True if the event is an input event, false otherwise.
      */
-    bool isInputEvent(const sf::Event& event)
-    {
-        // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
-               event.type == sf::Event::MouseButtonPressed ||
-               event.type == sf::Event::MouseButtonReleased;
-    }
+    bool isInputEvent(const sf::Event& event);
 
     void drawHitBox(RenderableComponent& renderable);
 };
