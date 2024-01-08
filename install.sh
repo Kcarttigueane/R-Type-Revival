@@ -15,7 +15,6 @@ fi
 
 cd build
 
-# Run cmake
 cmake ..
 
 make
