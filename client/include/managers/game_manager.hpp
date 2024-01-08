@@ -59,6 +59,7 @@ private:
 
     float menuMoveCooldown = 0.0f;
     const float menuMoveDelay = 0.1f;
+    entt::entity selectedLabelEntity;
 
 public:
     /**
@@ -117,6 +118,8 @@ public:
             );
         }
 
+        selectedLabelEntity = _entityFactory.createSelectedLabel();
+
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
@@ -124,6 +127,7 @@ public:
 
     void parallaxSystem(float deltaTime);
 
+    void updateSelectedLabel();
     void changeGameState(const std::string& label);
     float calculateButtonXPosition(int index);
     void moveMenuItems(int direction);

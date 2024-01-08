@@ -50,20 +50,36 @@ void GameManager::moveMenuItems(int direction)
 void GameManager::changeGameState(const std::string& label)
 {
     if (label == "Play") {
-        std::cout << "Play" << std::endl;
         _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (label == "Settings") {
-        std::cout << "Settings" << std::endl;
         _sceneManager.setCurrentScene(GameScenes::Settings);
     } else if (label == "Tutorial") {
-        std::cout << "Tutorial" << std::endl;
         _sceneManager.setCurrentScene(GameScenes::Tutorial);
     } else if (label == "About") {
-        std::cout << "About" << std::endl;
         _sceneManager.setCurrentScene(GameScenes::About);
     } else if (label == "Quit") {
-        std::cout << "Quit" << std::endl;
         _sceneManager.setCurrentScene(GameScenes::Quit);
+    }
+}
+
+void GameManager::updateSelectedLabel()
+{
+    auto view = _registry.view<MenuItemComponent>();
+    for (auto entity : view) {
+        const auto& menuItem = view.get<MenuItemComponent>(entity);
+        if (menuItem.isSelected) {
+            auto& renderable =
+                _registry.get<RenderableComponent>(selectedLabelEntity);
+            renderable.text.setString(menuItem.label);
+            sf::FloatRect bounds = renderable.text.getLocalBounds();
+            renderable.text.setOrigin(
+                bounds.width / 2, bounds.height / 2
+            );
+            renderable.text.setPosition(
+                _window.getSize().x / 2, _window.getSize().y * 0.7
+            );
+            break;
+        }
     }
 }
 
@@ -96,4 +112,6 @@ void GameManager::menuSystem(float deltaTime)
             menuMoveCooldown = menuMoveDelay;
         }
     }
+
+    updateSelectedLabel();
 }

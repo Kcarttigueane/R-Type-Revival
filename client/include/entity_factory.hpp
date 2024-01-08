@@ -228,7 +228,31 @@ public:
         );
 
         return button;
-    }
+    };
+
+    entt::entity createSelectedLabel()
+    {
+        auto font =
+            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+        auto labelEntity = _registry.create();
+        RenderableComponent renderable;
+        renderable.text.setFont(*font);
+        renderable.text.setString("");
+        renderable.text.setCharacterSize(48);
+        renderable.text.setFillColor(sf::Color::White
+        );
+
+        renderable.text.setPosition(
+            _window.getSize().x / 2, _window.getSize().y * 0.7
+        );
+
+        _registry.emplace<RenderableComponent>(
+            labelEntity, std::move(renderable)
+        );
+        _registry.emplace<SceneComponent>(labelEntity, GameScenes::MainMenu);
+
+        return labelEntity;
+    };
 };
 
 #endif  // ENTITY_FACTORY_HPP
