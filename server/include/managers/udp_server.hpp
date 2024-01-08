@@ -125,6 +125,11 @@ private:
                     std::cout << "SHOOT" << std::endl;
                     // TODO : should create a bullet component
                     break;
+                case rtype::EventType::QUIT:
+                    std::cout << "QUIT" << std::endl;
+                    // TODO : should disconnect the player
+                    handle_player_quit(session, playerEntity);
+                    break;
                 default:
                     std::cerr << "Unknown event type." << std::endl;
                     break;
@@ -137,6 +142,15 @@ private:
         }
     }
 
+    void handle_player_quit(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity)
+    {
+        std::cout << "Player " << static_cast<uint32_t>(playerEntity) << " quit the game."
+                  << std::endl;
+
+        _entityManager.getRegistry().destroy(playerEntity);
+        _sessions.erase(session->endpoint());
+    }
+
     void handle_send(const boost::system::error_code& error)
     {
         if (error) {
@@ -146,8 +160,8 @@ private:
     }
 
 public:
-    NetworkManager(boost::asio::io_context& io_context, EntityManager& entityManager)
-        : _socket(io_context, udp::endpoint(udp::v4(), 5000)), _entityManager(entityManager)
+    NetworkManager(boost::asio::io_context& io_context, int port, EntityManager& entityManager)
+        : _socket(io_context, udp::endpoint(udp::v4(), port)), _entityManager(entityManager)
     {
         std::cout << "NetworkManager running at " << _socket.local_endpoint() << std::endl;
         start_receive();
@@ -155,12 +169,10 @@ public:
 
     ~NetworkManager() { _socket.close(); }
 
+    // ! Broadcast GameState Payload:
     void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
-
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
-
     void sendGameStateToAllSessions(const rtype::GameState& game_state);
-
     void broadcast_game_state();
 };
 
