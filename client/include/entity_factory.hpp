@@ -29,7 +29,11 @@ public:
 
     entt::entity createNormalEnemy(float spawnHeight, float speed);
 
+    entt::entity createFastEnemy(float spawnWidth, float speed);
+
     entt::entity createProjectile(float dx, float dy, float x, float y, float velocity);
+
+    entt::entity createEnemyProjectile(float dx, float dy, float x, float y, float velocity);
 
     entt::entity createExplosion(float x, float y);
 
@@ -37,11 +41,9 @@ public:
 
     entt::entity createMainMenu();
 
-    entt::entity createLoseScene();
+    entt::entity createWaveTransition(std::string title);
 
     entt::entity createPlanet(float x, float y, std::string randomFilepath);
-
-    entt::entity createWinScene();
 };
 
 #endif  // ENTITY_FACTORY_HPP

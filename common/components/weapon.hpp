@@ -18,4 +18,8 @@ struct WeaponComponent {
     bool alternateFire;
 };
 
+struct PlayerProjectileComponent {};
+
+struct EnemyProjectileComponent {};
+
 #endif  // ECS_WEAPON_COMPONENT_HPP
