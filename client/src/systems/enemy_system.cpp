@@ -17,13 +17,13 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
 
         if (health <= 0.0f) {
             explosionSound.play();
-            _score++;
             entitiesToDestroy.push_back(entity);
             _entityFactory.createExplosion(
                 enemy.sprite.getPosition().x - 200, enemy.sprite.getPosition().y - 60
             );
-        } if (enemyPosition.x < -128.0f) {
-           entitiesToDestroy.push_back(entity); 
+        }
+        if (enemyPosition.x < -128.0f) {
+            entitiesToDestroy.push_back(entity);
         } else {
             position.x = enemyPosition.x + velocity.dx * velocity.speed;
             position.y = enemyPosition.y + velocity.dy * velocity.speed;

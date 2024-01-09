@@ -4,6 +4,8 @@
 #    include "../../../common/components/component_includes.hpp"
 #    include "../../../libs/EnTT/entt.hpp"
 
+#    include "../config.hpp"
+
 class EntityManager {
 private:
     entt::registry _registry;

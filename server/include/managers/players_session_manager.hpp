@@ -3,150 +3,48 @@
 
 #    include <boost/array.hpp>
 #    include <boost/asio.hpp>
-#    include <boost/asio/io_context.hpp>
-#    include <iostream>
-#    include <memory>
-#    include <random>
-#    include <string>
-#    include <thread>
-#    include <vector>
-#    include "../../src/proto/payload.pb.h"
+#    include "../../../libs/EnTT/entt.hpp"
+#    include "../utils.hpp"
 
-class PlayerSessionManagerUDP {
+using boost::asio::ip::udp;
+
+/**
+ * @class PlayerSession
+ * @brief A class to manage a player's session in a networked game or application.
+ */
+class PlayerSession {
 private:
-    boost::asio::io_context& io_context_;
-    boost::asio::ip::udp::socket socket_;
-    boost::asio::ip::udp::endpoint remote_endpoint_;
-    rtype::PayloadHeader current_payload_header_;
-    std::string current_payload_data_;
-    std::thread session_thread_;
-    uint32_t posX_ = 200;
-    uint32_t posY_ = 200;
-    uint32_t width_ = 50;
-    uint32_t height_ = 50;
-    uint32_t player_id_ = 0;
-
-    void receive_payload()
-    {
-        socket_.async_receive_from(
-            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
-            remote_endpoint_,
-            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-                if (!error) {
-                    handle_receive_header(bytes_transferred);
-                } else {
-                    std::cerr << "Error in receive_payload header: " << error.message()
-                              << std::endl;
-                }
-            }
-        );
-    }
-
-    void handle_receive_header(std::size_t bytes_transferred)
-    {
-        current_payload_data_.resize(current_payload_header_.body_size());
-
-        socket_.async_receive_from(
-            boost::asio::buffer(current_payload_data_), remote_endpoint_,
-            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-                if (!error) {
-                    handle_receive_payload(bytes_transferred);
-                    receive_payload();  // Receive the next payload
-                } else {
-                    std::cerr << "Error in receive_payload data: " << error.message() << std::endl;
-                }
-            }
-        );
-    }
-
-    void handle_receive_payload(std::size_t bytes_transferred) { process_payload(); }
-
-    void process_payload()
-    {
-        rtype::Event event;
-        event.ParseFromString(current_payload_data_);
-        std::cout << "Event from client " << remote_endpoint_.address().to_string() << ":"
-                  << remote_endpoint_.port() << ": " << event.ShortDebugString() << std::endl;
-
-        switch (event.event()) {
-            case rtype::EventType::MOVEUP:
-                printf("Move up\n");
-                posY_ -= 10;
-                break;
-            case rtype::EventType::MOVEDOWN:
-                printf("Move down\n");
-                posY_ += 10;
-                break;
-            case rtype::EventType::MOVELEFT:
-                printf("Move left\n");
-                posX_ -= 10;
-                break;
-            case rtype::EventType::MOVERIGHT:
-                printf("Move right\n");
-                posX_ += 10;
-                break;
-            default:
-                break;
-        }
-
-        // Handle the received payload as needed for your game logic
-
-        if (event.event() == rtype::EventType::QUIT) {
-            std::cout << "Client " << remote_endpoint_.address().to_string() << ":"
-                      << remote_endpoint_.port() << " disconnected" << std::endl;
-        }
-    }
+    udp::endpoint endpoint_;
+    entt::entity _playerEntity;
 
 public:
-    PlayerSessionManagerUDP(
-        boost::asio::io_context& io_context, boost::asio::ip::udp::socket socket
-    )
-        : socket_(std::move(socket)), io_context_(io_context)
+    /**
+     * @brief Construct a new Player Session object.
+     *
+     * @param endpoint The endpoint representing the IP address and port number of the player's session.
+     * @param playerEntity The entity representing the player in the game.
+     */
+    PlayerSession(udp::endpoint endpoint, entt::entity playerEntity)
+        : endpoint_(endpoint), _playerEntity(playerEntity)
     {
-        std::cout << "Access" << std::endl;
-        receive_payload();
+        std::cout << MAGENTA << "PlayerSession created for endpoint: " << endpoint_
+                  << " with Player entity: " << static_cast<uint32_t>(_playerEntity) << RESET
+                  << std::endl;
     }
 
-    ~PlayerSessionManagerUDP()
-    {
-        // Join or detach the thread before destroying the object
-        if (session_thread_.joinable()) {
-            session_thread_.join();
-        }
-        // Alternatively, you can detach the thread:
-        // session_thread_.detach();
-    }
+    /**
+     * @brief Get the endpoint object.
+     *
+     * @return udp::endpoint The endpoint representing the IP address and port number of the player's session.
+     */
+    udp::endpoint endpoint() const;
 
-    void send_payload(const rtype::Payload& payload)
-    {
-        std::string serialized_payload = payload.SerializeAsString();
-        rtype::PayloadHeader header;
-        header.set_body_size(serialized_payload.size());
-        socket_.send_to(boost::asio::buffer(&header, sizeof(header)), remote_endpoint_);
-        socket_.send_to(boost::asio::buffer(serialized_payload), remote_endpoint_);
-    }
-
-    void start()
-    {
-        // Run the thread for this session
-        session_thread_ = std::thread([this]() { io_context_.run(); });
-    }
-
-    uint32_t get_player_id() const { return player_id_; }
-
-    void setId(uint32_t id) { player_id_ = id; }
-
-    boost::asio::ip::udp::endpoint get_endpoint() const { return remote_endpoint_; }
-
-    void setEndpoint(boost::asio::ip::udp::endpoint endpoint) { remote_endpoint_ = endpoint; }
-
-    uint32_t getPosX() const { return posX_; }
-
-    uint32_t getPosY() const { return posY_; }
-
-    void setPosX(uint32_t posX) { posX_ = posX; }
-
-    void setPosY(uint32_t posY) { posY_ = posY; }
+    /**
+     * @brief Get the Player Entity object.
+     *
+     * @return entt::entity The entity representing the player in the game.
+     */
+    entt::entity getPlayerEntity() const;
 };
 
 #endif  // PLAYER_SESSION_MANAGER_HPP

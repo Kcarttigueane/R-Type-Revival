@@ -19,14 +19,14 @@
 class CommandLineArgs {
 public:
     std::string _ip_address;  ///< The IP address to connect to.
-    int _port;                ///< The port number to connect to.
+    std::string _port;        ///< The port number to connect to.
 
     /**
      * @brief Default constructor.
      *
      * Initializes the IP address to "127.0.0.1" and the port number to 5000.
      */
-    CommandLineArgs() : _ip_address("127.0.0.1"), _port(5000) {}
+    CommandLineArgs() : _ip_address("127.0.0.1"), _port("5000") {}
 
     /**
      * @brief Parses command line arguments.
@@ -53,7 +53,7 @@ public:
         if (argc == 3) {
             try {
                 _ip_address = argv[1];
-                _port = std::stoi(argv[2]);
+                _port = argv[2];
             } catch (const std::invalid_argument& e) {
                 std::cerr << "Invalid port number: " << argv[2] << std::endl;
                 show_usage(argv[0]);

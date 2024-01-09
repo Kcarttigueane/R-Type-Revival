@@ -24,7 +24,7 @@
 #    include <queue>
 
 #    include "../../../common/components/component_includes.hpp"
-#    include "../../src/network/payload.pb.h"
+#    include "../../src/proto/r_type.pb.h"
 
 struct Actions {
     bool Spacebar;
@@ -45,9 +45,7 @@ public:
     InputManager() = delete;
 
     InputManager(entt::registry& _registry, sf::RenderWindow& window)
-        : _currentScene(GameScenes::InGame),
-          _registry(_registry),
-          _window(window)
+        : _currentScene(GameScenes::InGame), _registry(_registry), _window(window)
     {}
 
     ~InputManager() = default;
