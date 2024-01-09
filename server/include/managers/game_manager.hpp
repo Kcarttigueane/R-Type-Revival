@@ -1,36 +1,15 @@
 #if !defined(GAME_MANGER_HPP)
 #    define GAME_MANGER_HPP
 
+#    include "../game_metadata.hpp"
 #    include "./entity_manager.hpp"
 #    include "./network_manager.hpp"
 #    include "./players_session_manager.hpp"
 
-struct GameMetadata {
-    int currentLevel;
-    int highestScore;
-
-    GameMetadata() : currentLevel(1), highestScore(0) {}
-
-    void reset()
-    {
-        currentLevel = 1;
-        highestScore = 0;
-    }
-
-    void updateLevel(int level) { currentLevel = level; }
-
-    void updateScore(int score)
-    {
-        if (score > highestScore) {
-            highestScore = score;
-        }
-    }
-};
-
 class GameManager {
 private:
-    entt::registry _registry;
     boost::asio::io_context _io_context;
+    std::thread _network_thread;
 
     // ! Game metadata
     GameMetadata _game_metadata;
@@ -38,19 +17,34 @@ private:
     // ! Managers
     EntityManager _entity_manager;
     NetworkManager _network_manager;
-    // PlayerSessionManagerUDP _players_manager;
 
 public:
-    GameManager(const std::string& server_address, unsigned short port)
-        : _entity_manager(_registry), _network_manager(_io_context, port)
+    GameManager(const std::string& server_address, std::string port)
+        : _network_manager(_io_context, port, _entity_manager)
     {}
 
     ~GameManager() = default;
 
     void run()
     {
-        std::thread send_payload_thread([&]() { _network_manager.send_payload_thread(); });
-        _io_context.run();
+        _network_thread = std::thread([this]() { _io_context.run(); });
+        game_loop();
+    }
+
+    void game_loop()
+    {
+        while (_game_metadata.isRunning) {
+            // TODO : Deal with game updates
+
+            static auto last_update = std::chrono::steady_clock::now();
+            auto now = std::chrono::steady_clock::now();
+            if (now - last_update >= std::chrono::milliseconds(1000)) {
+                _network_manager.broadcast_game_state();
+                last_update = now;
+            }
+
+            // TODO : Deal with game process -> enemies creations
+        }
     }
 };
 

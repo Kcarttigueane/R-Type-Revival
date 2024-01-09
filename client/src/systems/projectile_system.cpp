@@ -5,6 +5,7 @@ void GameManager::projectileSystem()
     auto projectiles =
         _registry.view<RenderableComponent, DamageComponent, VelocityComponent, TransformComponent>(
         );
+
     std::vector<entt::entity> entitiesToDestroy;
 
     for (auto& entity : projectiles) {

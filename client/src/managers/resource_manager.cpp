@@ -21,6 +21,7 @@ std::shared_ptr<ResourceType> ResourceManager::loadResource(
 )
 {
     auto iter = resourceMap.find(filename);
+
     if (iter != resourceMap.end()) {
         return iter->second;
     } else {
