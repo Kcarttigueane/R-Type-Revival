@@ -77,31 +77,6 @@ public:
 
     ~GameManager() { _registry.clear(); }
 
-    // rtype::Event handle_key(sf::Keyboard::Key key)
-    // {
-    //     rtype::Event event;
-    //     switch (key) {
-    //         case sf::Keyboard::Up:
-    //             event.set_event(rtype::EventType::MOVEUP);
-    //             break;
-    //         case sf::Keyboard::Down:
-    //             event.set_event(rtype::EventType::MOVEDOWN);
-    //             break;
-    //         case sf::Keyboard::Left:
-    //             event.set_event(rtype::EventType::MOVELEFT);
-    //             break;
-    //         case sf::Keyboard::Right:
-    //             event.set_event(rtype::EventType::MOVERIGHT);
-    //             break;
-    //         case sf::Keyboard::Space:
-    //             event.set_event(rtype::EventType::SHOOT);
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    //     return event;
-    // }
-
     void start_game();
     void game_loop();
 
@@ -117,21 +92,50 @@ public:
 
     void processPlayerActions(float deltaTime)
     {
-        // auto& actions = _inputManager.getKeyboardActions();
-        // rtype::Event protoEvent;
+        auto& actions = _inputManager.getKeyboardActions();
+        rtype::Event event;
 
-        // if (actions.Up == true) {
-        //     protoEvent.set_event(rtype::EventType::MOVEUP);
-        // }
-        // if (actions.Down == true) {
-        //     protoEvent.set_event(rtype::EventType::MOVEDOWN);
-        // }
-        // if (actions.Right == true) {
-        //     protoEvent.set_event(rtype::EventType::MOVERIGHT);
-        // }
-        // if (actions.Left == true) {
-        //     protoEvent.set_event(rtype::EventType::MOVELEFT);
-        // }
+        if (actions.Up == true) {
+            rtype::Event event;
+            event.set_event(rtype::EventType::MOVE_UP);
+
+            rtype::Payload payload;
+            payload.set_allocated_event(&event);
+
+            _networkManager.send(payload);
+        }
+        if (actions.Down == true) {
+            event.set_event(rtype::EventType::MOVE_DOWN);
+
+            rtype::Payload payload;
+            payload.set_allocated_event(&event);
+
+            _networkManager.send(payload);
+        }
+        if (actions.Right == true) {
+            event.set_event(rtype::EventType::MOVE_RIGHT);
+
+            rtype::Payload payload;
+            payload.set_allocated_event(&event);
+
+            _networkManager.send(payload);
+        }
+        if (actions.Left == true) {
+            event.set_event(rtype::EventType::MOVE_LEFT);
+
+            rtype::Payload payload;
+            payload.set_allocated_event(&event);
+
+            _networkManager.send(payload);
+        }
+        if (actions.Shoot == true) {
+            event.set_event(rtype::EventType::SHOOT);
+            rtype::Payload payload;
+            payload.set_allocated_event(&event);
+
+            _networkManager.send(payload);
+        }
+        // event.set_event(rtype::EventType::QUIT);
     }
 
     // ! Server Response Processing:

@@ -32,6 +32,9 @@ void InputManager::processKeyPress(sf::Event& event)
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = true;
         }
+        if (event.key.code == sf::Keyboard::Space) {
+            keyboardActions.Shoot = true;
+        }
     }
 }
 
@@ -49,6 +52,9 @@ void InputManager::processKeyRelease(sf::Event& event)
         }
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = false;
+        }
+        if (event.key.code == sf::Keyboard::Space) {
+            keyboardActions.Shoot = false;
         }
     }
 }

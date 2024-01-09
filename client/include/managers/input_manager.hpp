@@ -27,7 +27,7 @@
 #    include "../../src/proto/r_type.pb.h"
 
 struct Actions {
-    bool Spacebar;
+    bool Shoot;
     bool Up;
     bool Down;
     bool Right;

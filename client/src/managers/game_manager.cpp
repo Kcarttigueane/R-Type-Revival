@@ -61,9 +61,6 @@ void GameManager::game_loop()
                 _window.close();
             }
             if (isInputEvent(event)) {
-                // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
-                // std::lock_guard<std::mutex> lock(messages_mutex);
-                // messages.push(handle_key(event.key.code));
                 _inputManager.processKeyPress(event);
                 _inputManager.processKeyRelease(event);
             }
@@ -90,23 +87,23 @@ void GameManager::game_loop()
 
             processServerResponse();
 
-            //     if (!_playerPresent.empty()) {
-            //         processPlayerActions(deltaTime.asSeconds());
-            //         // Update player position
-            //         entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
+            if (!_connectedPlayerIds.empty()) {
+                processPlayerActions(deltaTime.asSeconds());
+                //         // Update player position
+                //         entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
 
-            //         auto& transform = _registry.get<TransformComponent>(playerEntity);
-            //         transform.x = payload.posx();
-            //         transform.y = payload.posy();
+                //         auto& transform = _registry.get<TransformComponent>(playerEntity);
+                //         transform.x = payload.posx();
+                //         transform.y = payload.posy();
 
-            //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-            //             enemyClock.restart();
-            //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
-            //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-            //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
-            //         }
-            //     }
-            // }
+                //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+                //             enemyClock.restart();
+                //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
+                //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+                //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
+                //         }
+                //     }
+            }
 
             _window.clear();
 
