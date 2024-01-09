@@ -215,8 +215,8 @@ public:
 
     void update_game_wave(const rtype::GameState& game_state)
     {
-        if (game_state.has_wave_info()) {
-            const rtype::WaveInfo& gameWave = game_state.wave_info();
+        if (game_state.has_wave_state()) {
+            const rtype::WaveState& gameWave = game_state.wave_state();
 
             _currentWaveLevel = gameWave.current_wave();
             _numberOfWaveEnemies = gameWave.total_enemies();

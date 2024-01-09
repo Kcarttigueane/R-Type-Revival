@@ -155,6 +155,7 @@ public:
     // ! Broadcast GameState Payload:
     void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
+    void addWaveStateToGameState(rtype::GameState& game_state);
     void sendGameStateToAllSessions(const rtype::GameState& game_state);
     void broadcast_game_state();
 };

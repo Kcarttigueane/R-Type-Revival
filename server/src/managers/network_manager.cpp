@@ -133,6 +133,24 @@ void NetworkManager::sendGameStateToAllSessions(const rtype::GameState& game_sta
     }
 }
 
+void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
+{
+    rtype::WaveState wave_state;
+    wave_state.set_current_wave(1);  // TODO : see with other how we deal with wave
+    wave_state.set_total_enemies(1);
+    wave_state.set_wave_in_progress(true);
+
+    game_state.mutable_wave_state()->CopyFrom(wave_state);
+
+    rtype::Payload payload;
+
+    payload.mutable_game_state()->CopyFrom(game_state);
+
+    std::string serialized_state;
+
+    payload.SerializeToString(&serialized_state);
+}
+
 void NetworkManager::broadcast_game_state()
 {
     rtype::GameState game_state;
@@ -141,6 +159,8 @@ void NetworkManager::broadcast_game_state()
     addPlayerStateToGameState(game_state, registry);
 
     addEnemyStatesToGameState(game_state, registry);
+
+    addWaveStateToGameState(game_state);
 
     sendGameStateToAllSessions(game_state);
 }
