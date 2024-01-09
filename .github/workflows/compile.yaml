@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Install cmake and dependencies
-        run: sudo apt-get update && sudo apt-get install -y libboost-all-dev cmake libsfml-dev
+        run: sudo apt-get update && sudo apt-get install -y libboost-all-dev cmake libsfml-dev protobuf-devel
       - name: Build
         run: |
           mkdir build
