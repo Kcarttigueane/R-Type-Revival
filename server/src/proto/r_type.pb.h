@@ -85,9 +85,9 @@ extern PowerUpStateDefaultTypeInternal _PowerUpState_default_instance_;
 class ScoreUpdate;
 struct ScoreUpdateDefaultTypeInternal;
 extern ScoreUpdateDefaultTypeInternal _ScoreUpdate_default_instance_;
-class WaveInfo;
-struct WaveInfoDefaultTypeInternal;
-extern WaveInfoDefaultTypeInternal _WaveInfo_default_instance_;
+class WaveState;
+struct WaveStateDefaultTypeInternal;
+extern WaveStateDefaultTypeInternal _WaveState_default_instance_;
 }  // namespace rtype
 PROTOBUF_NAMESPACE_OPEN
 template<> ::rtype::BulletState* Arena::CreateMaybeMessage<::rtype::BulletState>(Arena*);
@@ -100,7 +100,7 @@ template<> ::rtype::Payload* Arena::CreateMaybeMessage<::rtype::Payload>(Arena*)
 template<> ::rtype::PlayerState* Arena::CreateMaybeMessage<::rtype::PlayerState>(Arena*);
 template<> ::rtype::PowerUpState* Arena::CreateMaybeMessage<::rtype::PowerUpState>(Arena*);
 template<> ::rtype::ScoreUpdate* Arena::CreateMaybeMessage<::rtype::ScoreUpdate>(Arena*);
-template<> ::rtype::WaveInfo* Arena::CreateMaybeMessage<::rtype::WaveInfo>(Arena*);
+template<> ::rtype::WaveState* Arena::CreateMaybeMessage<::rtype::WaveState>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace rtype {
 
@@ -1032,24 +1032,24 @@ class ScoreUpdate final :
 };
 // -------------------------------------------------------------------
 
-class WaveInfo final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:rtype.WaveInfo) */ {
+class WaveState final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:rtype.WaveState) */ {
  public:
-  inline WaveInfo() : WaveInfo(nullptr) {}
-  ~WaveInfo() override;
-  explicit constexpr WaveInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline WaveState() : WaveState(nullptr) {}
+  ~WaveState() override;
+  explicit constexpr WaveState(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  WaveInfo(const WaveInfo& from);
-  WaveInfo(WaveInfo&& from) noexcept
-    : WaveInfo() {
+  WaveState(const WaveState& from);
+  WaveState(WaveState&& from) noexcept
+    : WaveState() {
     *this = ::std::move(from);
   }
 
-  inline WaveInfo& operator=(const WaveInfo& from) {
+  inline WaveState& operator=(const WaveState& from) {
     CopyFrom(from);
     return *this;
   }
-  inline WaveInfo& operator=(WaveInfo&& from) noexcept {
+  inline WaveState& operator=(WaveState&& from) noexcept {
     if (this == &from) return *this;
     if (GetOwningArena() == from.GetOwningArena()
   #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
@@ -1072,20 +1072,20 @@ class WaveInfo final :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const WaveInfo& default_instance() {
+  static const WaveState& default_instance() {
     return *internal_default_instance();
   }
-  static inline const WaveInfo* internal_default_instance() {
-    return reinterpret_cast<const WaveInfo*>(
-               &_WaveInfo_default_instance_);
+  static inline const WaveState* internal_default_instance() {
+    return reinterpret_cast<const WaveState*>(
+               &_WaveState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     5;
 
-  friend void swap(WaveInfo& a, WaveInfo& b) {
+  friend void swap(WaveState& a, WaveState& b) {
     a.Swap(&b);
   }
-  inline void Swap(WaveInfo* other) {
+  inline void Swap(WaveState* other) {
     if (other == this) return;
   #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
     if (GetOwningArena() != nullptr &&
@@ -1098,7 +1098,7 @@ class WaveInfo final :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(WaveInfo* other) {
+  void UnsafeArenaSwap(WaveState* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
@@ -1106,13 +1106,13 @@ class WaveInfo final :
 
   // implements Message ----------------------------------------------
 
-  WaveInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
-    return CreateMaybeMessage<WaveInfo>(arena);
+  WaveState* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<WaveState>(arena);
   }
   using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
-  void CopyFrom(const WaveInfo& from);
+  void CopyFrom(const WaveState& from);
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
-  void MergeFrom(const WaveInfo& from);
+  void MergeFrom(const WaveState& from);
   private:
   static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
   public:
@@ -1129,15 +1129,15 @@ class WaveInfo final :
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(WaveInfo* other);
+  void InternalSwap(WaveState* other);
 
   private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "rtype.WaveInfo";
+    return "rtype.WaveState";
   }
   protected:
-  explicit WaveInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+  explicit WaveState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   private:
   static void ArenaDtor(void* object);
@@ -1185,7 +1185,7 @@ class WaveInfo final :
   void _internal_set_wave_in_progress(bool value);
   public:
 
-  // @@protoc_insertion_point(class_scope:rtype.WaveInfo)
+  // @@protoc_insertion_point(class_scope:rtype.WaveState)
  private:
   class _Internal;
 
@@ -1539,7 +1539,7 @@ class GameState final :
     kPowerUpsFieldNumber = 3,
     kScoresFieldNumber = 4,
     kBulletsFieldNumber = 6,
-    kWaveInfoFieldNumber = 7,
+    kWaveStateFieldNumber = 7,
     kTimestampFieldNumber = 5,
   };
   // repeated .rtype.PlayerState players = 1;
@@ -1632,23 +1632,23 @@ class GameState final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::BulletState >&
       bullets() const;
 
-  // .rtype.WaveInfo wave_info = 7;
-  bool has_wave_info() const;
+  // .rtype.WaveState wave_state = 7;
+  bool has_wave_state() const;
   private:
-  bool _internal_has_wave_info() const;
+  bool _internal_has_wave_state() const;
   public:
-  void clear_wave_info();
-  const ::rtype::WaveInfo& wave_info() const;
-  PROTOBUF_NODISCARD ::rtype::WaveInfo* release_wave_info();
-  ::rtype::WaveInfo* mutable_wave_info();
-  void set_allocated_wave_info(::rtype::WaveInfo* wave_info);
+  void clear_wave_state();
+  const ::rtype::WaveState& wave_state() const;
+  PROTOBUF_NODISCARD ::rtype::WaveState* release_wave_state();
+  ::rtype::WaveState* mutable_wave_state();
+  void set_allocated_wave_state(::rtype::WaveState* wave_state);
   private:
-  const ::rtype::WaveInfo& _internal_wave_info() const;
-  ::rtype::WaveInfo* _internal_mutable_wave_info();
+  const ::rtype::WaveState& _internal_wave_state() const;
+  ::rtype::WaveState* _internal_mutable_wave_state();
   public:
-  void unsafe_arena_set_allocated_wave_info(
-      ::rtype::WaveInfo* wave_info);
-  ::rtype::WaveInfo* unsafe_arena_release_wave_info();
+  void unsafe_arena_set_allocated_wave_state(
+      ::rtype::WaveState* wave_state);
+  ::rtype::WaveState* unsafe_arena_release_wave_state();
 
   // uint64 timestamp = 5;
   void clear_timestamp();
@@ -1671,7 +1671,7 @@ class GameState final :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::PowerUpState > power_ups_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::ScoreUpdate > scores_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::BulletState > bullets_;
-  ::rtype::WaveInfo* wave_info_;
+  ::rtype::WaveState* wave_state_;
   uint64_t timestamp_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_r_5ftype_2eproto;
@@ -2664,66 +2664,66 @@ inline void ScoreUpdate::set_score(int32_t value) {
 
 // -------------------------------------------------------------------
 
-// WaveInfo
+// WaveState
 
 // int32 current_wave = 1;
-inline void WaveInfo::clear_current_wave() {
+inline void WaveState::clear_current_wave() {
   current_wave_ = 0;
 }
-inline int32_t WaveInfo::_internal_current_wave() const {
+inline int32_t WaveState::_internal_current_wave() const {
   return current_wave_;
 }
-inline int32_t WaveInfo::current_wave() const {
-  // @@protoc_insertion_point(field_get:rtype.WaveInfo.current_wave)
+inline int32_t WaveState::current_wave() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveState.current_wave)
   return _internal_current_wave();
 }
-inline void WaveInfo::_internal_set_current_wave(int32_t value) {
+inline void WaveState::_internal_set_current_wave(int32_t value) {
   
   current_wave_ = value;
 }
-inline void WaveInfo::set_current_wave(int32_t value) {
+inline void WaveState::set_current_wave(int32_t value) {
   _internal_set_current_wave(value);
-  // @@protoc_insertion_point(field_set:rtype.WaveInfo.current_wave)
+  // @@protoc_insertion_point(field_set:rtype.WaveState.current_wave)
 }
 
 // int32 total_enemies = 2;
-inline void WaveInfo::clear_total_enemies() {
+inline void WaveState::clear_total_enemies() {
   total_enemies_ = 0;
 }
-inline int32_t WaveInfo::_internal_total_enemies() const {
+inline int32_t WaveState::_internal_total_enemies() const {
   return total_enemies_;
 }
-inline int32_t WaveInfo::total_enemies() const {
-  // @@protoc_insertion_point(field_get:rtype.WaveInfo.total_enemies)
+inline int32_t WaveState::total_enemies() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveState.total_enemies)
   return _internal_total_enemies();
 }
-inline void WaveInfo::_internal_set_total_enemies(int32_t value) {
+inline void WaveState::_internal_set_total_enemies(int32_t value) {
   
   total_enemies_ = value;
 }
-inline void WaveInfo::set_total_enemies(int32_t value) {
+inline void WaveState::set_total_enemies(int32_t value) {
   _internal_set_total_enemies(value);
-  // @@protoc_insertion_point(field_set:rtype.WaveInfo.total_enemies)
+  // @@protoc_insertion_point(field_set:rtype.WaveState.total_enemies)
 }
 
 // bool wave_in_progress = 3;
-inline void WaveInfo::clear_wave_in_progress() {
+inline void WaveState::clear_wave_in_progress() {
   wave_in_progress_ = false;
 }
-inline bool WaveInfo::_internal_wave_in_progress() const {
+inline bool WaveState::_internal_wave_in_progress() const {
   return wave_in_progress_;
 }
-inline bool WaveInfo::wave_in_progress() const {
-  // @@protoc_insertion_point(field_get:rtype.WaveInfo.wave_in_progress)
+inline bool WaveState::wave_in_progress() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveState.wave_in_progress)
   return _internal_wave_in_progress();
 }
-inline void WaveInfo::_internal_set_wave_in_progress(bool value) {
+inline void WaveState::_internal_set_wave_in_progress(bool value) {
   
   wave_in_progress_ = value;
 }
-inline void WaveInfo::set_wave_in_progress(bool value) {
+inline void WaveState::set_wave_in_progress(bool value) {
   _internal_set_wave_in_progress(value);
-  // @@protoc_insertion_point(field_set:rtype.WaveInfo.wave_in_progress)
+  // @@protoc_insertion_point(field_set:rtype.WaveState.wave_in_progress)
 }
 
 // -------------------------------------------------------------------
@@ -3074,45 +3074,45 @@ GameState::bullets() const {
   return bullets_;
 }
 
-// .rtype.WaveInfo wave_info = 7;
-inline bool GameState::_internal_has_wave_info() const {
-  return this != internal_default_instance() && wave_info_ != nullptr;
+// .rtype.WaveState wave_state = 7;
+inline bool GameState::_internal_has_wave_state() const {
+  return this != internal_default_instance() && wave_state_ != nullptr;
 }
-inline bool GameState::has_wave_info() const {
-  return _internal_has_wave_info();
+inline bool GameState::has_wave_state() const {
+  return _internal_has_wave_state();
 }
-inline void GameState::clear_wave_info() {
-  if (GetArenaForAllocation() == nullptr && wave_info_ != nullptr) {
-    delete wave_info_;
+inline void GameState::clear_wave_state() {
+  if (GetArenaForAllocation() == nullptr && wave_state_ != nullptr) {
+    delete wave_state_;
   }
-  wave_info_ = nullptr;
+  wave_state_ = nullptr;
 }
-inline const ::rtype::WaveInfo& GameState::_internal_wave_info() const {
-  const ::rtype::WaveInfo* p = wave_info_;
-  return p != nullptr ? *p : reinterpret_cast<const ::rtype::WaveInfo&>(
-      ::rtype::_WaveInfo_default_instance_);
+inline const ::rtype::WaveState& GameState::_internal_wave_state() const {
+  const ::rtype::WaveState* p = wave_state_;
+  return p != nullptr ? *p : reinterpret_cast<const ::rtype::WaveState&>(
+      ::rtype::_WaveState_default_instance_);
 }
-inline const ::rtype::WaveInfo& GameState::wave_info() const {
-  // @@protoc_insertion_point(field_get:rtype.GameState.wave_info)
-  return _internal_wave_info();
+inline const ::rtype::WaveState& GameState::wave_state() const {
+  // @@protoc_insertion_point(field_get:rtype.GameState.wave_state)
+  return _internal_wave_state();
 }
-inline void GameState::unsafe_arena_set_allocated_wave_info(
-    ::rtype::WaveInfo* wave_info) {
+inline void GameState::unsafe_arena_set_allocated_wave_state(
+    ::rtype::WaveState* wave_state) {
   if (GetArenaForAllocation() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(wave_info_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(wave_state_);
   }
-  wave_info_ = wave_info;
-  if (wave_info) {
+  wave_state_ = wave_state;
+  if (wave_state) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rtype.GameState.wave_info)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rtype.GameState.wave_state)
 }
-inline ::rtype::WaveInfo* GameState::release_wave_info() {
+inline ::rtype::WaveState* GameState::release_wave_state() {
   
-  ::rtype::WaveInfo* temp = wave_info_;
-  wave_info_ = nullptr;
+  ::rtype::WaveState* temp = wave_state_;
+  wave_state_ = nullptr;
 #ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
   auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
   temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
@@ -3124,44 +3124,44 @@ inline ::rtype::WaveInfo* GameState::release_wave_info() {
 #endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
-inline ::rtype::WaveInfo* GameState::unsafe_arena_release_wave_info() {
-  // @@protoc_insertion_point(field_release:rtype.GameState.wave_info)
+inline ::rtype::WaveState* GameState::unsafe_arena_release_wave_state() {
+  // @@protoc_insertion_point(field_release:rtype.GameState.wave_state)
   
-  ::rtype::WaveInfo* temp = wave_info_;
-  wave_info_ = nullptr;
+  ::rtype::WaveState* temp = wave_state_;
+  wave_state_ = nullptr;
   return temp;
 }
-inline ::rtype::WaveInfo* GameState::_internal_mutable_wave_info() {
+inline ::rtype::WaveState* GameState::_internal_mutable_wave_state() {
   
-  if (wave_info_ == nullptr) {
-    auto* p = CreateMaybeMessage<::rtype::WaveInfo>(GetArenaForAllocation());
-    wave_info_ = p;
+  if (wave_state_ == nullptr) {
+    auto* p = CreateMaybeMessage<::rtype::WaveState>(GetArenaForAllocation());
+    wave_state_ = p;
   }
-  return wave_info_;
+  return wave_state_;
 }
-inline ::rtype::WaveInfo* GameState::mutable_wave_info() {
-  ::rtype::WaveInfo* _msg = _internal_mutable_wave_info();
-  // @@protoc_insertion_point(field_mutable:rtype.GameState.wave_info)
+inline ::rtype::WaveState* GameState::mutable_wave_state() {
+  ::rtype::WaveState* _msg = _internal_mutable_wave_state();
+  // @@protoc_insertion_point(field_mutable:rtype.GameState.wave_state)
   return _msg;
 }
-inline void GameState::set_allocated_wave_info(::rtype::WaveInfo* wave_info) {
+inline void GameState::set_allocated_wave_state(::rtype::WaveState* wave_state) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
-    delete wave_info_;
+    delete wave_state_;
   }
-  if (wave_info) {
+  if (wave_state) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::rtype::WaveInfo>::GetOwningArena(wave_info);
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::rtype::WaveState>::GetOwningArena(wave_state);
     if (message_arena != submessage_arena) {
-      wave_info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, wave_info, submessage_arena);
+      wave_state = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, wave_state, submessage_arena);
     }
     
   } else {
     
   }
-  wave_info_ = wave_info;
-  // @@protoc_insertion_point(field_set_allocated:rtype.GameState.wave_info)
+  wave_state_ = wave_state;
+  // @@protoc_insertion_point(field_set_allocated:rtype.GameState.wave_state)
 }
 
 // uint64 timestamp = 5;

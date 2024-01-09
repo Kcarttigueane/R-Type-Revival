@@ -43,7 +43,7 @@ message ScoreUpdate {
     int32 score = 2;
 }
 
-message WaveInfo {
+message WaveState {
     int32 current_wave = 1;
     int32 total_enemies = 2;
     bool wave_in_progress = 3;
@@ -65,7 +65,7 @@ message GameState {
     repeated PowerUpState power_ups = 3;
     repeated ScoreUpdate scores = 4;
     repeated BulletState bullets = 6;
-    WaveInfo wave_info = 7;
+    WaveState wave_state = 7;
     uint64 timestamp = 5; // Unix timestamp in milliseconds
 }
 
