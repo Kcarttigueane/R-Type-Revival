@@ -271,12 +271,35 @@ public:
         }
     }
 
+    void update_player_score(const rtype::GameState& game_state)
+    {
+        for (const auto& playerScore : game_state.scores()) {
+            uint32_t playerID = playerScore.player_id();
+            uint32_t score = playerScore.score();
+
+            std::cout << "Player " << playerID << ": Score: " << score << std::endl;
+
+            entt::entity playerEntity = static_cast<entt::entity>(playerID);
+
+            if (_registry.all_of<ScoreComponent>(playerEntity)) {
+                auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
+
+                scoreComponent.score = score;
+
+            } else {
+                std::cerr << "Entity with ID " << playerID << " does not have required components."
+                          << std::endl;
+            }
+        }
+    }
+
     void handleGameState(const rtype::Payload& payload)
     {
         if (payload.has_game_state()) {
             const rtype::GameState& gameState = payload.game_state();
 
             update_player_state(gameState);
+            update_player_score(gameState);
             // update_enemies_state(gameState);
             update_game_wave(gameState);
             // TODO : Continue for powerUps, scores, bullets, etc.
