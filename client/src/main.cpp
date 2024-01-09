@@ -1,6 +1,6 @@
 #include "../include/command_line_arguments.hpp"
 #include "../include/managers/game_manager.hpp"
-#include "../src/network/payload.pb.h"
+#include "../../../build/common/proto/payload.pb.h"
 
 int main(int argc, char* argv[])
 {

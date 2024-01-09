@@ -24,7 +24,7 @@
 #    include <queue>
 
 #    include "../../../common/components/component_includes.hpp"
-#    include "../../src/network/payload.pb.h"
+#    include "../../../build/common/proto/payload.pb.h"
 
 struct Actions {
     bool Spacebar;

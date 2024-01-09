@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "payload.pb.h"
+#include "../../build/common/proto/payload.pb.h"
 
 class UDPSession {
 public:
