@@ -50,14 +50,34 @@ entt::entity EntityFactory::createNormalEnemy(float spawnHeight, float speed)
     _registry.emplace<HealthComponent>(enemy, 100.0f);
     _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
 
-    auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav");
-    if (!soundBuffer)
-        std::cerr << "Error loading sound buffer." << std::endl;
-    SoundComponent sound(*soundBuffer);
-    sound.setVolumeLevel(10.0f);
+    return enemy;
+}
 
-    _registry.emplace<SoundComponent>(enemy, std::move(sound));
-
+entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
+{
+    auto enemy = _registry.create();
+    auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
+    sf::IntRect initialFrameRect(150, 48, 82, 32);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(spawnWidth, -128.0f));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
+    renderable.sprite.setRotation(90.0f);
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<EnemyAIComponent>(enemy);
+    _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
+    _registry.emplace<TransformComponent>(
+        enemy, spawnWidth, -128.0f, 0.0f, 1.0f, 1.0f, 0.0f
+    );
+    _registry.emplace<VelocityComponent>(enemy, 0.0f, 1.0f, speed);
+    _registry.emplace<WeaponComponent>(
+        enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
+    );
+    _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
+    _registry.emplace<HealthComponent>(enemy, 100.0f);
+    _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
     return enemy;
 }
 
@@ -78,7 +98,30 @@ entt::entity EntityFactory::createProjectile(float dx, float dy, float x, float 
     _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
     _registry.emplace<DamageComponent>(projectile, 100.0f);
     _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
-    _registry.emplace<HoldAnimationComponent>(projectile, 6, 0.5f, true);
+    _registry.emplace<HoldAnimationComponent>(projectile, 6, 0.2f, true);
+    _registry.emplace<PlayerProjectileComponent>(projectile);
+    return projectile;
+}
+
+entt::entity EntityFactory::createEnemyProjectile(float dx, float dy, float x, float y, float velocity)
+{
+    auto projectile = _registry.create();
+    auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/enemy_shot.png");
+    sf::IntRect initialFrameRect(0, 0, 7, 6);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(x, y));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(5.0f, 5.0f));
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
+    _registry.emplace<TransformComponent>(projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
+    _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
+    _registry.emplace<DamageComponent>(projectile, 100.0f);
+    _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
+    _registry.emplace<InfiniteAnimationComponent>(projectile, 4, 0.25f);
+    _registry.emplace<EnemyProjectileComponent>(projectile);
     return projectile;
 }
 
@@ -133,37 +176,24 @@ entt::entity EntityFactory::createMainMenu()
     return mainMenuTitle;
 };
 
-entt::entity EntityFactory::createLoseScene()
+entt::entity EntityFactory::createWaveTransition(std::string title)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto loseTitle = _registry.create();
+    auto transitionTitle = _registry.create();
     RenderableComponent renderable;
     renderable.text.setFont(*font);
-    renderable.text.setString("You lose!");
+    renderable.text.setString(title);
     renderable.text.setCharacterSize(96);
     sf::FloatRect titleBounds = renderable.text.getLocalBounds();
     renderable.text.setOrigin(titleBounds.width / 2, titleBounds.height / 2);
-    renderable.text.setPosition(_window.getSize().x / 2, _window.getSize().y * 0.20);
-    _registry.emplace<RenderableComponent>(loseTitle, std::move(renderable));
-    _registry.emplace<SceneComponent>(loseTitle, GameScenes::Lose);
-    return loseTitle;
+    renderable.text.setPosition(_window.getSize().x + titleBounds.width / 2, _window.getSize().y / 2);
+    _registry.emplace<TransformComponent>(transitionTitle, _window.getSize().x + titleBounds.width / 2.0f, _window.getSize().y / 2.0f, 0.0f, 1.0f, 1.0f, 0.0f);
+    _registry.emplace<VelocityComponent>(transitionTitle, -1.0f, 0.0f, 5.0f);
+    _registry.emplace<RenderableComponent>(transitionTitle, std::move(renderable));
+    _registry.emplace<SceneComponent>(transitionTitle, GameScenes::InGame);
+    return transitionTitle;
 }
 
-entt::entity EntityFactory::createWinScene()
-{
-    auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto winTitle = _registry.create();
-    RenderableComponent renderable;
-    renderable.text.setFont(*font);
-    renderable.text.setString("You win!");
-    renderable.text.setCharacterSize(96);
-    sf::FloatRect titleBounds = renderable.text.getLocalBounds();
-    renderable.text.setOrigin(titleBounds.width / 2, titleBounds.height / 2);
-    renderable.text.setPosition(_window.getSize().x / 2, _window.getSize().y * 0.20);
-    _registry.emplace<RenderableComponent>(winTitle, std::move(renderable));
-    _registry.emplace<SceneComponent>(winTitle, GameScenes::Win);
-    return winTitle;
-}
 
 entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFilepath)
 {

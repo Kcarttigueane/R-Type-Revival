@@ -5,8 +5,6 @@
 void GameManager::start_game()
 {
     _entityFactory.createMainMenu();
-    _entityFactory.createWinScene();
-    _entityFactory.createLoseScene();
     _entityFactory.createPlanet(
         WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
     );
@@ -67,6 +65,7 @@ void GameManager::game_loop(
     musicSound.setVolumeLevel(2.0f);
     musicSound.sound.play();
 
+    int wave = 0;
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
         sf::Event event;
@@ -85,7 +84,7 @@ void GameManager::game_loop(
                 const sf::Vector2f& playerPosition =
                     _registry.get<RenderableComponent>(player).sprite.getPosition();
                 _entityFactory.createProjectile(
-                    1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 5.0f
+                    1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 25.0f
                 );
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
@@ -126,26 +125,28 @@ void GameManager::game_loop(
                     enemyClock.restart();
                     float randomSpeed = getRandomFloat(2.0f, 5.0f);
                     float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+                    float randomX = getRandomFloat(0.0f, WINDOW_WIDTH - 64);
                     _entityFactory.createNormalEnemy(randomY, randomSpeed);
+                    _entityFactory.createFastEnemy(randomX, 10.0f);
                 }
             }
         }
-
+        if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
+            transitionClock.restart();
+            //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
+            makeEnemyShoot();
+            wave++;
+        }
         _window.clear();
         parallaxSystem(deltaTime.asSeconds());
         planetSystem(deltaTime.asSeconds());
-
         if (!_playerPresent.empty()) {
-            enemySystem(explosionSound.sound);
             renderSystem();
-            projectileSystem();
+            enemySystem(explosionSound.sound);
+            velocitySystem();
             collisionProjectileAndEnemy();
-            // collisionEnemyAndPlayer(); // TODO : to put in the server
             makeAllAnimations();
-            // checkWin(); // TODO : to put in the server
         }
-        // printf("Payload : %s\n", payload.
-
         _window.display();
     }
 };

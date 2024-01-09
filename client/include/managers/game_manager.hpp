@@ -44,6 +44,7 @@ private:
     entt::registry _registry;
     sf::Clock clock;
     sf::Clock enemyClock;
+    sf::Clock transitionClock;
 
     int _score = 0;
 
@@ -98,7 +99,7 @@ public:
     void collisionProjectileAndEnemy()
     {
         auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
+        auto projectiles = _registry.view<RenderableComponent, DamageComponent, PlayerProjectileComponent>();
 
         for (auto& enemy : enemies) {
             sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
@@ -172,9 +173,10 @@ public:
     }
 
     // ! Systems:
-    void projectileSystem();
 
     void enemySystem(sf::Sound& explosionSound);
+
+    void makeEnemyShoot();
 
     void renderSystem();
 
@@ -189,6 +191,8 @@ public:
     void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
 
     void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void velocitySystem();
 
     // ! Utility methods
     /**
