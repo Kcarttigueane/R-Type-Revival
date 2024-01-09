@@ -71,6 +71,12 @@ void GameManager::game_loop()
                 sound.playSound();
 
                 // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
+                // entt::entity player = _playerProfileManager.getPlayerEntity();
+                // const sf::Vector2f& playerPosition =
+                //     _registry.get<RenderableComponent>(player).sprite.getPosition();
+                // _entityFactory.createProjectile(
+                //     1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 5.0f
+                // );
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
                 rtype::Connect connect_message;
