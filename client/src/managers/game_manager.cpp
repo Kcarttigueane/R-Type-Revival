@@ -33,20 +33,23 @@ void GameManager::start_game()
     );
     _entityFactory.createBackground();
 
-    std::thread io_thread([&]() { _io_service.run(); });
+    // std::thread io_thread([&]() { _io_service.run(); });
+    _network_thread = std::jthread([&]() { _io_service.run(); });
 
     game_loop();
 }
 
 void GameManager::handle_closing_game()
 {
-    rtype::Event event;
-    event.set_event(rtype::EventType::QUIT);
-
     rtype::Payload payload;
-    payload.set_allocated_event(&event);
+    rtype::Event* event = payload.mutable_event();
+    event->set_event(rtype::EventType::MOVE_UP);
 
     _networkManager.send(payload);
+
+    if (_network_thread.joinable()) {
+        _io_service.stop();
+    }
 
     _registry.clear();
     _window.close();
@@ -108,7 +111,7 @@ void GameManager::game_loop()
             // processServerResponse();
         }
         if (!_connectedPlayerIds.empty()) {
-            processPlayerActions(deltaTime.asSeconds());
+            // processPlayerActions(deltaTime.asSeconds());
 
             //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
             //             enemyClock.restart();
@@ -199,6 +202,30 @@ void GameManager::processPlayerActions(float deltaTime)
     }
 }
 
+void GameManager::processServerResponse()
+{
+    std::queue<rtype::Payload> messages = _networkManager.getReceivedMessages();
+
+    while (!messages.empty()) {
+        rtype::Payload payload = messages.front();
+        processPayload(payload);
+        messages.pop();
+    }
+}
+
+void GameManager::processPayload(const rtype::Payload& payload)
+{
+    std::cout << "Processing payload" << payload.DebugString() << std::endl;
+
+    if (payload.has_connect_response()) {
+        handleConnectResponse(payload);
+    } else if (payload.has_game_state()) {
+        handleGameState(payload);
+    } else {
+        std::cerr << "Unknown payload type received." << std::endl;
+    }
+}
+
 void GameManager::handleConnectResponse(const rtype::Payload& payload)
 {
     std::cout << "Connect response -> player Id: " << payload.connect_response().player_id()
@@ -213,6 +240,8 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
         entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
         auto playerEntity = _entityFactory.createPlayer(player);
         _connectedPlayerIds.insert(payload.connect_response().player_id());
+
+        _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
         std::cout << "Connect response  -> KO" << std::endl;
         // TODO: Need to check how we handle this -> user experience

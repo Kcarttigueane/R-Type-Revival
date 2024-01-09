@@ -64,6 +64,8 @@ private:
     int _numberOfWaveEnemies = 0;
     bool _isWaveInProgress = false;
 
+    std::jthread _network_thread;
+
 public:
     /**
      * \brief Constructor for GameManager.
@@ -88,29 +90,9 @@ public:
 
     // ! Server Response Processing:
 
-    void processServerResponse()
-    {
-        std::queue<rtype::Payload> messages = _networkManager.getReceivedMessages();
+    void processServerResponse();
 
-        while (!messages.empty()) {
-            rtype::Payload payload = messages.front();
-            processPayload(payload);
-            messages.pop();
-        }
-    }
-
-    void processPayload(const rtype::Payload& payload)
-    {
-        std::cout << "Processing payload" << payload.DebugString() << std::endl;
-
-        if (payload.has_connect_response()) {
-            handleConnectResponse(payload);
-        } else if (payload.has_game_state()) {
-            handleGameState(payload);
-        } else {
-            std::cerr << "Unknown payload type received." << std::endl;
-        }
-    }
+    void processPayload(const rtype::Payload& payload);
 
     void handleConnectResponse(const rtype::Payload& payload);
 

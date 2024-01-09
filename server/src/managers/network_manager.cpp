@@ -127,7 +127,7 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
         }
 
         // Optionally, update other players about this move
-        // broadcast_player_state(session);
+        // broadcast_player_state();
     } else {
         std::cerr << "Session not found for endpoint: " << sender_endpoint << std::endl;
     }
