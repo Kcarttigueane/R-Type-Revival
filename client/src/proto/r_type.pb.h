@@ -47,7 +47,7 @@ struct TableStruct_r_5ftype_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[10]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[11]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -85,6 +85,9 @@ extern PowerUpStateDefaultTypeInternal _PowerUpState_default_instance_;
 class ScoreUpdate;
 struct ScoreUpdateDefaultTypeInternal;
 extern ScoreUpdateDefaultTypeInternal _ScoreUpdate_default_instance_;
+class WaveInfo;
+struct WaveInfoDefaultTypeInternal;
+extern WaveInfoDefaultTypeInternal _WaveInfo_default_instance_;
 }  // namespace rtype
 PROTOBUF_NAMESPACE_OPEN
 template<> ::rtype::BulletState* Arena::CreateMaybeMessage<::rtype::BulletState>(Arena*);
@@ -97,6 +100,7 @@ template<> ::rtype::Payload* Arena::CreateMaybeMessage<::rtype::Payload>(Arena*)
 template<> ::rtype::PlayerState* Arena::CreateMaybeMessage<::rtype::PlayerState>(Arena*);
 template<> ::rtype::PowerUpState* Arena::CreateMaybeMessage<::rtype::PowerUpState>(Arena*);
 template<> ::rtype::ScoreUpdate* Arena::CreateMaybeMessage<::rtype::ScoreUpdate>(Arena*);
+template<> ::rtype::WaveInfo* Arena::CreateMaybeMessage<::rtype::WaveInfo>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace rtype {
 
@@ -1028,6 +1032,174 @@ class ScoreUpdate final :
 };
 // -------------------------------------------------------------------
 
+class WaveInfo final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:rtype.WaveInfo) */ {
+ public:
+  inline WaveInfo() : WaveInfo(nullptr) {}
+  ~WaveInfo() override;
+  explicit constexpr WaveInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  WaveInfo(const WaveInfo& from);
+  WaveInfo(WaveInfo&& from) noexcept
+    : WaveInfo() {
+    *this = ::std::move(from);
+  }
+
+  inline WaveInfo& operator=(const WaveInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WaveInfo& operator=(WaveInfo&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WaveInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WaveInfo* internal_default_instance() {
+    return reinterpret_cast<const WaveInfo*>(
+               &_WaveInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(WaveInfo& a, WaveInfo& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(WaveInfo* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WaveInfo* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WaveInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<WaveInfo>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const WaveInfo& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const WaveInfo& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(WaveInfo* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "rtype.WaveInfo";
+  }
+  protected:
+  explicit WaveInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCurrentWaveFieldNumber = 1,
+    kTotalEnemiesFieldNumber = 2,
+    kWaveInProgressFieldNumber = 3,
+  };
+  // int32 current_wave = 1;
+  void clear_current_wave();
+  int32_t current_wave() const;
+  void set_current_wave(int32_t value);
+  private:
+  int32_t _internal_current_wave() const;
+  void _internal_set_current_wave(int32_t value);
+  public:
+
+  // int32 total_enemies = 2;
+  void clear_total_enemies();
+  int32_t total_enemies() const;
+  void set_total_enemies(int32_t value);
+  private:
+  int32_t _internal_total_enemies() const;
+  void _internal_set_total_enemies(int32_t value);
+  public:
+
+  // bool wave_in_progress = 3;
+  void clear_wave_in_progress();
+  bool wave_in_progress() const;
+  void set_wave_in_progress(bool value);
+  private:
+  bool _internal_wave_in_progress() const;
+  void _internal_set_wave_in_progress(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:rtype.WaveInfo)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  int32_t current_wave_;
+  int32_t total_enemies_;
+  bool wave_in_progress_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_r_5ftype_2eproto;
+};
+// -------------------------------------------------------------------
+
 class BulletState final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:rtype.BulletState) */ {
  public:
@@ -1076,7 +1248,7 @@ class BulletState final :
                &_BulletState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(BulletState& a, BulletState& b) {
     a.Swap(&b);
@@ -1288,7 +1460,7 @@ class GameState final :
                &_GameState_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(GameState& a, GameState& b) {
     a.Swap(&b);
@@ -1367,6 +1539,7 @@ class GameState final :
     kPowerUpsFieldNumber = 3,
     kScoresFieldNumber = 4,
     kBulletsFieldNumber = 6,
+    kWaveInfoFieldNumber = 7,
     kTimestampFieldNumber = 5,
   };
   // repeated .rtype.PlayerState players = 1;
@@ -1459,6 +1632,24 @@ class GameState final :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::BulletState >&
       bullets() const;
 
+  // .rtype.WaveInfo wave_info = 7;
+  bool has_wave_info() const;
+  private:
+  bool _internal_has_wave_info() const;
+  public:
+  void clear_wave_info();
+  const ::rtype::WaveInfo& wave_info() const;
+  PROTOBUF_NODISCARD ::rtype::WaveInfo* release_wave_info();
+  ::rtype::WaveInfo* mutable_wave_info();
+  void set_allocated_wave_info(::rtype::WaveInfo* wave_info);
+  private:
+  const ::rtype::WaveInfo& _internal_wave_info() const;
+  ::rtype::WaveInfo* _internal_mutable_wave_info();
+  public:
+  void unsafe_arena_set_allocated_wave_info(
+      ::rtype::WaveInfo* wave_info);
+  ::rtype::WaveInfo* unsafe_arena_release_wave_info();
+
   // uint64 timestamp = 5;
   void clear_timestamp();
   uint64_t timestamp() const;
@@ -1480,6 +1671,7 @@ class GameState final :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::PowerUpState > power_ups_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::ScoreUpdate > scores_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::BulletState > bullets_;
+  ::rtype::WaveInfo* wave_info_;
   uint64_t timestamp_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_r_5ftype_2eproto;
@@ -1534,7 +1726,7 @@ class Connect final :
                &_Connect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(Connect& a, Connect& b) {
     a.Swap(&b);
@@ -1685,7 +1877,7 @@ class ConnectResponse final :
                &_ConnectResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(ConnectResponse& a, ConnectResponse& b) {
     a.Swap(&b);
@@ -1850,7 +2042,7 @@ class Payload final :
                &_Payload_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(Payload& a, Payload& b) {
     a.Swap(&b);
@@ -2472,6 +2664,70 @@ inline void ScoreUpdate::set_score(int32_t value) {
 
 // -------------------------------------------------------------------
 
+// WaveInfo
+
+// int32 current_wave = 1;
+inline void WaveInfo::clear_current_wave() {
+  current_wave_ = 0;
+}
+inline int32_t WaveInfo::_internal_current_wave() const {
+  return current_wave_;
+}
+inline int32_t WaveInfo::current_wave() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveInfo.current_wave)
+  return _internal_current_wave();
+}
+inline void WaveInfo::_internal_set_current_wave(int32_t value) {
+  
+  current_wave_ = value;
+}
+inline void WaveInfo::set_current_wave(int32_t value) {
+  _internal_set_current_wave(value);
+  // @@protoc_insertion_point(field_set:rtype.WaveInfo.current_wave)
+}
+
+// int32 total_enemies = 2;
+inline void WaveInfo::clear_total_enemies() {
+  total_enemies_ = 0;
+}
+inline int32_t WaveInfo::_internal_total_enemies() const {
+  return total_enemies_;
+}
+inline int32_t WaveInfo::total_enemies() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveInfo.total_enemies)
+  return _internal_total_enemies();
+}
+inline void WaveInfo::_internal_set_total_enemies(int32_t value) {
+  
+  total_enemies_ = value;
+}
+inline void WaveInfo::set_total_enemies(int32_t value) {
+  _internal_set_total_enemies(value);
+  // @@protoc_insertion_point(field_set:rtype.WaveInfo.total_enemies)
+}
+
+// bool wave_in_progress = 3;
+inline void WaveInfo::clear_wave_in_progress() {
+  wave_in_progress_ = false;
+}
+inline bool WaveInfo::_internal_wave_in_progress() const {
+  return wave_in_progress_;
+}
+inline bool WaveInfo::wave_in_progress() const {
+  // @@protoc_insertion_point(field_get:rtype.WaveInfo.wave_in_progress)
+  return _internal_wave_in_progress();
+}
+inline void WaveInfo::_internal_set_wave_in_progress(bool value) {
+  
+  wave_in_progress_ = value;
+}
+inline void WaveInfo::set_wave_in_progress(bool value) {
+  _internal_set_wave_in_progress(value);
+  // @@protoc_insertion_point(field_set:rtype.WaveInfo.wave_in_progress)
+}
+
+// -------------------------------------------------------------------
+
 // BulletState
 
 // uint32 bullet_id = 1;
@@ -2816,6 +3072,96 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::rtype::BulletState >&
 GameState::bullets() const {
   // @@protoc_insertion_point(field_list:rtype.GameState.bullets)
   return bullets_;
+}
+
+// .rtype.WaveInfo wave_info = 7;
+inline bool GameState::_internal_has_wave_info() const {
+  return this != internal_default_instance() && wave_info_ != nullptr;
+}
+inline bool GameState::has_wave_info() const {
+  return _internal_has_wave_info();
+}
+inline void GameState::clear_wave_info() {
+  if (GetArenaForAllocation() == nullptr && wave_info_ != nullptr) {
+    delete wave_info_;
+  }
+  wave_info_ = nullptr;
+}
+inline const ::rtype::WaveInfo& GameState::_internal_wave_info() const {
+  const ::rtype::WaveInfo* p = wave_info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::rtype::WaveInfo&>(
+      ::rtype::_WaveInfo_default_instance_);
+}
+inline const ::rtype::WaveInfo& GameState::wave_info() const {
+  // @@protoc_insertion_point(field_get:rtype.GameState.wave_info)
+  return _internal_wave_info();
+}
+inline void GameState::unsafe_arena_set_allocated_wave_info(
+    ::rtype::WaveInfo* wave_info) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(wave_info_);
+  }
+  wave_info_ = wave_info;
+  if (wave_info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:rtype.GameState.wave_info)
+}
+inline ::rtype::WaveInfo* GameState::release_wave_info() {
+  
+  ::rtype::WaveInfo* temp = wave_info_;
+  wave_info_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::rtype::WaveInfo* GameState::unsafe_arena_release_wave_info() {
+  // @@protoc_insertion_point(field_release:rtype.GameState.wave_info)
+  
+  ::rtype::WaveInfo* temp = wave_info_;
+  wave_info_ = nullptr;
+  return temp;
+}
+inline ::rtype::WaveInfo* GameState::_internal_mutable_wave_info() {
+  
+  if (wave_info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::rtype::WaveInfo>(GetArenaForAllocation());
+    wave_info_ = p;
+  }
+  return wave_info_;
+}
+inline ::rtype::WaveInfo* GameState::mutable_wave_info() {
+  ::rtype::WaveInfo* _msg = _internal_mutable_wave_info();
+  // @@protoc_insertion_point(field_mutable:rtype.GameState.wave_info)
+  return _msg;
+}
+inline void GameState::set_allocated_wave_info(::rtype::WaveInfo* wave_info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete wave_info_;
+  }
+  if (wave_info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::rtype::WaveInfo>::GetOwningArena(wave_info);
+    if (message_arena != submessage_arena) {
+      wave_info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, wave_info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  wave_info_ = wave_info;
+  // @@protoc_insertion_point(field_set_allocated:rtype.GameState.wave_info)
 }
 
 // uint64 timestamp = 5;
@@ -3269,6 +3615,8 @@ inline Payload::PayloadTypeCase Payload::payload_type_case() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

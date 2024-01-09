@@ -90,6 +90,20 @@ struct ScoreUpdateDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ScoreUpdateDefaultTypeInternal _ScoreUpdate_default_instance_;
+constexpr WaveInfo::WaveInfo(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : current_wave_(0)
+  , total_enemies_(0)
+  , wave_in_progress_(false){}
+struct WaveInfoDefaultTypeInternal {
+  constexpr WaveInfoDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~WaveInfoDefaultTypeInternal() {}
+  union {
+    WaveInfo _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT WaveInfoDefaultTypeInternal _WaveInfo_default_instance_;
 constexpr BulletState::BulletState(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : bullet_id_(0u)
@@ -115,6 +129,7 @@ constexpr GameState::GameState(
   , power_ups_()
   , scores_()
   , bullets_()
+  , wave_info_(nullptr)
   , timestamp_(uint64_t{0u}){}
 struct GameStateDefaultTypeInternal {
   constexpr GameStateDefaultTypeInternal()
@@ -165,7 +180,7 @@ struct PayloadDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PayloadDefaultTypeInternal _Payload_default_instance_;
 }  // namespace rtype
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_r_5ftype_2eproto[10];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_r_5ftype_2eproto[11];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_r_5ftype_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_r_5ftype_2eproto = nullptr;
 
@@ -218,6 +233,15 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::rtype::ScoreUpdate, player_id_),
   PROTOBUF_FIELD_OFFSET(::rtype::ScoreUpdate, score_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::rtype::WaveInfo, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::rtype::WaveInfo, current_wave_),
+  PROTOBUF_FIELD_OFFSET(::rtype::WaveInfo, total_enemies_),
+  PROTOBUF_FIELD_OFFSET(::rtype::WaveInfo, wave_in_progress_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::rtype::BulletState, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -241,6 +265,7 @@ const uint32_t TableStruct_r_5ftype_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE
   PROTOBUF_FIELD_OFFSET(::rtype::GameState, power_ups_),
   PROTOBUF_FIELD_OFFSET(::rtype::GameState, scores_),
   PROTOBUF_FIELD_OFFSET(::rtype::GameState, bullets_),
+  PROTOBUF_FIELD_OFFSET(::rtype::GameState, wave_info_),
   PROTOBUF_FIELD_OFFSET(::rtype::GameState, timestamp_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::rtype::Connect, _internal_metadata_),
@@ -276,11 +301,12 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 18, -1, -1, sizeof(::rtype::EnemyState)},
   { 29, -1, -1, sizeof(::rtype::PowerUpState)},
   { 39, -1, -1, sizeof(::rtype::ScoreUpdate)},
-  { 47, -1, -1, sizeof(::rtype::BulletState)},
-  { 60, -1, -1, sizeof(::rtype::GameState)},
-  { 72, -1, -1, sizeof(::rtype::Connect)},
-  { 79, -1, -1, sizeof(::rtype::ConnectResponse)},
-  { 87, -1, -1, sizeof(::rtype::Payload)},
+  { 47, -1, -1, sizeof(::rtype::WaveInfo)},
+  { 56, -1, -1, sizeof(::rtype::BulletState)},
+  { 69, -1, -1, sizeof(::rtype::GameState)},
+  { 82, -1, -1, sizeof(::rtype::Connect)},
+  { 89, -1, -1, sizeof(::rtype::ConnectResponse)},
+  { 97, -1, -1, sizeof(::rtype::Payload)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -289,6 +315,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_EnemyState_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_PowerUpState_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_ScoreUpdate_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_WaveInfo_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_BulletState_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_GameState_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::rtype::_Connect_default_instance_),
@@ -306,33 +333,36 @@ const char descriptor_table_protodef_r_5ftype_2eproto[] PROTOBUF_SECTION_VARIABL
   "\022\016\n\006health\030\005 \001(\002\"O\n\014PowerUpState\022\023\n\013powe"
   "r_up_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005pos_y\030\003 "
   "\001(\002\022\014\n\004type\030\004 \001(\t\"/\n\013ScoreUpdate\022\021\n\tplay"
-  "er_id\030\001 \001(\r\022\r\n\005score\030\002 \001(\005\"\211\001\n\013BulletSta"
-  "te\022\021\n\tbullet_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022\r\n\005"
-  "pos_y\030\003 \001(\002\022\023\n\013direction_x\030\004 \001(\002\022\023\n\013dire"
-  "ction_y\030\005 \001(\002\022\r\n\005speed\030\006 \001(\002\022\020\n\010owner_id"
-  "\030\007 \001(\r\"\330\001\n\tGameState\022#\n\007players\030\001 \003(\0132\022."
-  "rtype.PlayerState\022\"\n\007enemies\030\002 \003(\0132\021.rty"
-  "pe.EnemyState\022&\n\tpower_ups\030\003 \003(\0132\023.rtype"
-  ".PowerUpState\022\"\n\006scores\030\004 \003(\0132\022.rtype.Sc"
-  "oreUpdate\022#\n\007bullets\030\006 \003(\0132\022.rtype.Bulle"
-  "tState\022\021\n\ttimestamp\030\005 \001(\004\"\036\n\007Connect\022\023\n\013"
-  "player_name\030\001 \001(\t\"R\n\017ConnectResponse\022\021\n\t"
-  "player_id\030\001 \001(\r\022,\n\006status\030\002 \001(\0162\034.rtype."
-  "ConnectResponseStatus\"\320\001\n\007Payload\022!\n\007con"
-  "nect\030\001 \001(\0132\016.rtype.ConnectH\000\0222\n\020connect_"
-  "response\030\002 \001(\0132\026.rtype.ConnectResponseH\000"
-  "\022\035\n\005event\030\003 \001(\0132\014.rtype.EventH\000\022&\n\ngame_"
-  "state\030\004 \001(\0132\020.rtype.GameStateH\000\022\027\n\017seque"
-  "nce_number\030\005 \001(\rB\016\n\014payload_type*[\n\tEven"
-  "tType\022\013\n\007MOVE_UP\020\000\022\r\n\tMOVE_DOWN\020\001\022\r\n\tMOV"
-  "E_LEFT\020\002\022\016\n\nMOVE_RIGHT\020\003\022\t\n\005SHOOT\020\004\022\010\n\004Q"
-  "UIT\020\005*5\n\025ConnectResponseStatus\022\013\n\007SUCCES"
-  "S\020\000\022\017\n\013SERVER_FULL\020\001b\006proto3"
+  "er_id\030\001 \001(\r\022\r\n\005score\030\002 \001(\005\"Q\n\010WaveInfo\022\024"
+  "\n\014current_wave\030\001 \001(\005\022\025\n\rtotal_enemies\030\002 "
+  "\001(\005\022\030\n\020wave_in_progress\030\003 \001(\010\"\211\001\n\013Bullet"
+  "State\022\021\n\tbullet_id\030\001 \001(\r\022\r\n\005pos_x\030\002 \001(\002\022"
+  "\r\n\005pos_y\030\003 \001(\002\022\023\n\013direction_x\030\004 \001(\002\022\023\n\013d"
+  "irection_y\030\005 \001(\002\022\r\n\005speed\030\006 \001(\002\022\020\n\010owner"
+  "_id\030\007 \001(\r\"\374\001\n\tGameState\022#\n\007players\030\001 \003(\013"
+  "2\022.rtype.PlayerState\022\"\n\007enemies\030\002 \003(\0132\021."
+  "rtype.EnemyState\022&\n\tpower_ups\030\003 \003(\0132\023.rt"
+  "ype.PowerUpState\022\"\n\006scores\030\004 \003(\0132\022.rtype"
+  ".ScoreUpdate\022#\n\007bullets\030\006 \003(\0132\022.rtype.Bu"
+  "lletState\022\"\n\twave_info\030\007 \001(\0132\017.rtype.Wav"
+  "eInfo\022\021\n\ttimestamp\030\005 \001(\004\"\036\n\007Connect\022\023\n\013p"
+  "layer_name\030\001 \001(\t\"R\n\017ConnectResponse\022\021\n\tp"
+  "layer_id\030\001 \001(\r\022,\n\006status\030\002 \001(\0162\034.rtype.C"
+  "onnectResponseStatus\"\320\001\n\007Payload\022!\n\007conn"
+  "ect\030\001 \001(\0132\016.rtype.ConnectH\000\0222\n\020connect_r"
+  "esponse\030\002 \001(\0132\026.rtype.ConnectResponseH\000\022"
+  "\035\n\005event\030\003 \001(\0132\014.rtype.EventH\000\022&\n\ngame_s"
+  "tate\030\004 \001(\0132\020.rtype.GameStateH\000\022\027\n\017sequen"
+  "ce_number\030\005 \001(\rB\016\n\014payload_type*[\n\tEvent"
+  "Type\022\013\n\007MOVE_UP\020\000\022\r\n\tMOVE_DOWN\020\001\022\r\n\tMOVE"
+  "_LEFT\020\002\022\016\n\nMOVE_RIGHT\020\003\022\t\n\005SHOOT\020\004\022\010\n\004QU"
+  "IT\020\005*5\n\025ConnectResponseStatus\022\013\n\007SUCCESS"
+  "\020\000\022\017\n\013SERVER_FULL\020\001b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_r_5ftype_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_r_5ftype_2eproto = {
-  false, false, 1228, descriptor_table_protodef_r_5ftype_2eproto, "r_type.proto", 
-  &descriptor_table_r_5ftype_2eproto_once, nullptr, 0, 10,
+  false, false, 1347, descriptor_table_protodef_r_5ftype_2eproto, "r_type.proto", 
+  &descriptor_table_r_5ftype_2eproto_once, nullptr, 0, 11,
   schemas, file_default_instances, TableStruct_r_5ftype_2eproto::offsets,
   file_level_metadata_r_5ftype_2eproto, file_level_enum_descriptors_r_5ftype_2eproto, file_level_service_descriptors_r_5ftype_2eproto,
 };
@@ -1737,6 +1767,240 @@ void ScoreUpdate::InternalSwap(ScoreUpdate* other) {
 
 // ===================================================================
 
+class WaveInfo::_Internal {
+ public:
+};
+
+WaveInfo::WaveInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:rtype.WaveInfo)
+}
+WaveInfo::WaveInfo(const WaveInfo& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&current_wave_, &from.current_wave_,
+    static_cast<size_t>(reinterpret_cast<char*>(&wave_in_progress_) -
+    reinterpret_cast<char*>(&current_wave_)) + sizeof(wave_in_progress_));
+  // @@protoc_insertion_point(copy_constructor:rtype.WaveInfo)
+}
+
+inline void WaveInfo::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&current_wave_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&wave_in_progress_) -
+    reinterpret_cast<char*>(&current_wave_)) + sizeof(wave_in_progress_));
+}
+
+WaveInfo::~WaveInfo() {
+  // @@protoc_insertion_point(destructor:rtype.WaveInfo)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void WaveInfo::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void WaveInfo::ArenaDtor(void* object) {
+  WaveInfo* _this = reinterpret_cast< WaveInfo* >(object);
+  (void)_this;
+}
+void WaveInfo::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void WaveInfo::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void WaveInfo::Clear() {
+// @@protoc_insertion_point(message_clear_start:rtype.WaveInfo)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&current_wave_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&wave_in_progress_) -
+      reinterpret_cast<char*>(&current_wave_)) + sizeof(wave_in_progress_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* WaveInfo::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // int32 current_wave = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          current_wave_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // int32 total_enemies = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          total_enemies_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // bool wave_in_progress = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          wave_in_progress_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* WaveInfo::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:rtype.WaveInfo)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // int32 current_wave = 1;
+  if (this->_internal_current_wave() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_current_wave(), target);
+  }
+
+  // int32 total_enemies = 2;
+  if (this->_internal_total_enemies() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_total_enemies(), target);
+  }
+
+  // bool wave_in_progress = 3;
+  if (this->_internal_wave_in_progress() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_wave_in_progress(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:rtype.WaveInfo)
+  return target;
+}
+
+size_t WaveInfo::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:rtype.WaveInfo)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // int32 current_wave = 1;
+  if (this->_internal_current_wave() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_current_wave());
+  }
+
+  // int32 total_enemies = 2;
+  if (this->_internal_total_enemies() != 0) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32SizePlusOne(this->_internal_total_enemies());
+  }
+
+  // bool wave_in_progress = 3;
+  if (this->_internal_wave_in_progress() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData WaveInfo::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    WaveInfo::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*WaveInfo::GetClassData() const { return &_class_data_; }
+
+void WaveInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<WaveInfo *>(to)->MergeFrom(
+      static_cast<const WaveInfo &>(from));
+}
+
+
+void WaveInfo::MergeFrom(const WaveInfo& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:rtype.WaveInfo)
+  GOOGLE_DCHECK_NE(&from, this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_current_wave() != 0) {
+    _internal_set_current_wave(from._internal_current_wave());
+  }
+  if (from._internal_total_enemies() != 0) {
+    _internal_set_total_enemies(from._internal_total_enemies());
+  }
+  if (from._internal_wave_in_progress() != 0) {
+    _internal_set_wave_in_progress(from._internal_wave_in_progress());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void WaveInfo::CopyFrom(const WaveInfo& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:rtype.WaveInfo)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool WaveInfo::IsInitialized() const {
+  return true;
+}
+
+void WaveInfo::InternalSwap(WaveInfo* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(WaveInfo, wave_in_progress_)
+      + sizeof(WaveInfo::wave_in_progress_)
+      - PROTOBUF_FIELD_OFFSET(WaveInfo, current_wave_)>(
+          reinterpret_cast<char*>(&current_wave_),
+          reinterpret_cast<char*>(&other->current_wave_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata WaveInfo::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
+      file_level_metadata_r_5ftype_2eproto[5]);
+}
+
+// ===================================================================
+
 class BulletState::_Internal {
  public:
 };
@@ -2114,15 +2378,20 @@ void BulletState::InternalSwap(BulletState* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata BulletState::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
-      file_level_metadata_r_5ftype_2eproto[5]);
+      file_level_metadata_r_5ftype_2eproto[6]);
 }
 
 // ===================================================================
 
 class GameState::_Internal {
  public:
+  static const ::rtype::WaveInfo& wave_info(const GameState* msg);
 };
 
+const ::rtype::WaveInfo&
+GameState::_Internal::wave_info(const GameState* msg) {
+  return *msg->wave_info_;
+}
 GameState::GameState(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
@@ -2145,12 +2414,20 @@ GameState::GameState(const GameState& from)
       scores_(from.scores_),
       bullets_(from.bullets_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_wave_info()) {
+    wave_info_ = new ::rtype::WaveInfo(*from.wave_info_);
+  } else {
+    wave_info_ = nullptr;
+  }
   timestamp_ = from.timestamp_;
   // @@protoc_insertion_point(copy_constructor:rtype.GameState)
 }
 
 inline void GameState::SharedCtor() {
-timestamp_ = uint64_t{0u};
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&wave_info_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&timestamp_) -
+    reinterpret_cast<char*>(&wave_info_)) + sizeof(timestamp_));
 }
 
 GameState::~GameState() {
@@ -2162,6 +2439,7 @@ GameState::~GameState() {
 
 inline void GameState::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete wave_info_;
 }
 
 void GameState::ArenaDtor(void* object) {
@@ -2185,6 +2463,10 @@ void GameState::Clear() {
   power_ups_.Clear();
   scores_.Clear();
   bullets_.Clear();
+  if (GetArenaForAllocation() == nullptr && wave_info_ != nullptr) {
+    delete wave_info_;
+  }
+  wave_info_ = nullptr;
   timestamp_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -2268,6 +2550,14 @@ const char* GameState::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
         } else
           goto handle_unusual;
         continue;
+      // .rtype.WaveInfo wave_info = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
+          ptr = ctx->ParseMessage(_internal_mutable_wave_info(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
       default:
         goto handle_unusual;
     }  // switch
@@ -2343,6 +2633,14 @@ uint8_t* GameState::_InternalSerialize(
       InternalWriteMessage(6, this->_internal_bullets(i), target, stream);
   }
 
+  // .rtype.WaveInfo wave_info = 7;
+  if (this->_internal_has_wave_info()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        7, _Internal::wave_info(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -2394,6 +2692,13 @@ size_t GameState::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
+  // .rtype.WaveInfo wave_info = 7;
+  if (this->_internal_has_wave_info()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *wave_info_);
+  }
+
   // uint64 timestamp = 5;
   if (this->_internal_timestamp() != 0) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64SizePlusOne(this->_internal_timestamp());
@@ -2426,6 +2731,9 @@ void GameState::MergeFrom(const GameState& from) {
   power_ups_.MergeFrom(from.power_ups_);
   scores_.MergeFrom(from.scores_);
   bullets_.MergeFrom(from.bullets_);
+  if (from._internal_has_wave_info()) {
+    _internal_mutable_wave_info()->::rtype::WaveInfo::MergeFrom(from._internal_wave_info());
+  }
   if (from._internal_timestamp() != 0) {
     _internal_set_timestamp(from._internal_timestamp());
   }
@@ -2451,13 +2759,18 @@ void GameState::InternalSwap(GameState* other) {
   power_ups_.InternalSwap(&other->power_ups_);
   scores_.InternalSwap(&other->scores_);
   bullets_.InternalSwap(&other->bullets_);
-  swap(timestamp_, other->timestamp_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GameState, timestamp_)
+      + sizeof(GameState::timestamp_)
+      - PROTOBUF_FIELD_OFFSET(GameState, wave_info_)>(
+          reinterpret_cast<char*>(&wave_info_),
+          reinterpret_cast<char*>(&other->wave_info_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GameState::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
-      file_level_metadata_r_5ftype_2eproto[6]);
+      file_level_metadata_r_5ftype_2eproto[7]);
 }
 
 // ===================================================================
@@ -2660,7 +2973,7 @@ void Connect::InternalSwap(Connect* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Connect::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
-      file_level_metadata_r_5ftype_2eproto[7]);
+      file_level_metadata_r_5ftype_2eproto[8]);
 }
 
 // ===================================================================
@@ -2875,7 +3188,7 @@ void ConnectResponse::InternalSwap(ConnectResponse* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ConnectResponse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
-      file_level_metadata_r_5ftype_2eproto[8]);
+      file_level_metadata_r_5ftype_2eproto[9]);
 }
 
 // ===================================================================
@@ -3315,7 +3628,7 @@ void Payload::InternalSwap(Payload* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Payload::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_r_5ftype_2eproto_getter, &descriptor_table_r_5ftype_2eproto_once,
-      file_level_metadata_r_5ftype_2eproto[9]);
+      file_level_metadata_r_5ftype_2eproto[10]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -3335,6 +3648,9 @@ template<> PROTOBUF_NOINLINE ::rtype::PowerUpState* Arena::CreateMaybeMessage< :
 }
 template<> PROTOBUF_NOINLINE ::rtype::ScoreUpdate* Arena::CreateMaybeMessage< ::rtype::ScoreUpdate >(Arena* arena) {
   return Arena::CreateMessageInternal< ::rtype::ScoreUpdate >(arena);
+}
+template<> PROTOBUF_NOINLINE ::rtype::WaveInfo* Arena::CreateMaybeMessage< ::rtype::WaveInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::rtype::WaveInfo >(arena);
 }
 template<> PROTOBUF_NOINLINE ::rtype::BulletState* Arena::CreateMaybeMessage< ::rtype::BulletState >(Arena* arena) {
   return Arena::CreateMessageInternal< ::rtype::BulletState >(arena);
