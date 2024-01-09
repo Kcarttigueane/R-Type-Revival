@@ -24,6 +24,7 @@ void GameManager::start_game()
     _entityFactory.createMainMenu();
     _entityFactory.createWinScene();
     _entityFactory.createLoseScene();
+
     _entityFactory.createPlanet(
         WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
     );
@@ -35,6 +36,20 @@ void GameManager::start_game()
     std::thread io_thread([&]() { _io_service.run(); });
 
     game_loop();
+}
+
+void GameManager::handle_closing_game()
+{
+    rtype::Event event;
+    event.set_event(rtype::EventType::QUIT);
+
+    rtype::Payload payload;
+    payload.set_allocated_event(&event);
+
+    _networkManager.send(payload);
+
+    _registry.clear();
+    _window.close();
 }
 
 void GameManager::game_loop()
@@ -58,7 +73,12 @@ void GameManager::game_loop()
         sf::Event event;
         while (_window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                _window.close();
+                handle_closing_game();
+            }
+            if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                    handle_closing_game();
+                }
             }
             if (isInputEvent(event)) {
                 _inputManager.processKeyPress(event);

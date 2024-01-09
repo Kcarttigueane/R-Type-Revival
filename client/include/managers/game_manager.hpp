@@ -79,6 +79,7 @@ public:
 
     void start_game();
     void game_loop();
+    void handle_closing_game();
 
     // ! Collision and Event Handling methods
 
