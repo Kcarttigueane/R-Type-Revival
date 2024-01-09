@@ -1,155 +1,162 @@
-#if !defined(NETWORK_MANAGER_HPP)
-#    define NETWORK_MANAGER_HPP
-
-#    include <iostream>
+#if !defined(UPD_SERVER_HPP)
+#    define UPD_SERVER_HPP
 
 #    include <boost/array.hpp>
 #    include <boost/asio.hpp>
-#    include <boost/asio/io_context.hpp>
+#    include <boost/bind/bind.hpp>
+#    include <ctime>
 #    include <iostream>
-#    include <memory>
-#    include <random>
+#    include <map>
 #    include <string>
-#    include <thread>
-#    include <vector>
-#    include "../../src/proto/payload.pb.h"
 
-#    include "players_session_manager.hpp"
+#    include "../../../libs/EnTT/entt.hpp"
+
+#    include "../../src/proto/r_type.pb.h"
+
+// Managers
+
+#    include "../config.hpp"
+#    include "../utils.hpp"
+
+#    include "./entity_manager.hpp"
+#    include "./players_session_manager.hpp"
+
+#    define BUFFER_SIZE 3000
+
+#    define MAX_NUMBER_OF_PLAYERS 4
+
+using boost::asio::ip::udp;
 
 class NetworkManager {
 private:
-    boost::asio::io_context& io_context_;
-    boost::asio::ip::udp::socket socket_;
-    boost::asio::ip::udp::endpoint remote_endpoint_;
-    rtype::PayloadHeader current_payload_header_;
-    std::string current_payload_data_;
-    std::vector<std::unique_ptr<PlayerSessionManagerUDP>> clients;
+    // Networking Data
+    udp::socket _socket;
+    udp::endpoint _remote_endpoint;
+    boost::array<char, BUFFER_SIZE> _recv_buffer;
+    std::map<udp::endpoint, std::shared_ptr<PlayerSession>> _sessions;
 
-    void receive_payload_connect()
+    // Game Data
+    std::uint32_t _next_player_id = 1;
+    EntityManager& _entityManager;
+
+    void start_receive()
     {
-        socket_.async_receive_from(
-            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
-            remote_endpoint_,
+        _socket.async_receive_from(
+            boost::asio::buffer(_recv_buffer), _remote_endpoint,
             [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-                if (!error) {
-                    current_payload_data_.resize(current_payload_header_.body_size());
-
-                    socket_.async_receive_from(
-                        boost::asio::buffer(current_payload_data_), remote_endpoint_,
-                        [this](
-                            const boost::system::error_code& error, std::size_t bytes_transferred
-                        ) {
-                            if (!error) {
-                                handle_connect_payload(bytes_transferred);
-                            } else {
-                                std::cerr << "Error in receive_payload data: " << error.message()
-                                          << std::endl;
-                            }
-                        }
-                    );
-                } else {
-                    std::cerr << "Error in receive_payload header: " << error.message()
-                              << std::endl;
-                }
+                handle_receive(error, bytes_transferred);
             }
         );
     }
 
-    void handle_connect_payload(std::size_t bytes_transferred)
+    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
     {
-        rtype::Connect connect;
-        connect.ParseFromString(current_payload_data_);
-        std::cout << "Recept Connect : " << connect.ShortDebugString() << std::endl;
+        if (error) {
+            std::cerr << "Receive error: " << error.message() << std::endl;
+            return;
+        }
 
-        // Créer un nouveau socket pour cette session
-        boost::asio::ip::udp::socket session_socket(io_context_);
-        session_socket.open(boost::asio::ip::udp::v4());
+        std::cout << "udp::endpoint" << _remote_endpoint << std::endl;
+        std::cout << "Remote endpoint: " << _remote_endpoint.address() << ":"
+                  << _remote_endpoint.port() << std::endl;
 
-        // Envoyer un ID au client
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<int32_t> dis(
-            std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()
-        );
-        uint32_t id = dis(gen);
-        rtype::ID connect_send;
-        connect_send.set_id(id);
-        std::string serialized_payload = connect_send.SerializeAsString();
-        rtype::PayloadHeader header;
-        header.set_body_size(serialized_payload.size());
-        session_socket.send_to(boost::asio::buffer(&header, sizeof(header)), remote_endpoint_);
-        session_socket.send_to(boost::asio::buffer(serialized_payload), remote_endpoint_);
+        std::string received_data(_recv_buffer.data(), bytes_transferred);
+        rtype::Payload payload;
 
-        std::cout << "Send id : " << connect_send.ShortDebugString() << std::endl;
-        // Créer une nouvelle session avec le nouveau socket
-        auto session =
-            std::make_unique<PlayerSessionManagerUDP>(io_context_, std::move(session_socket));
-        session->setEndpoint(remote_endpoint_);
-        session->setId(id);
-        session->start();
-        std::cout << "Terminate to create" << std::endl;
-
-        // Ajouter la nouvelle session au vecteur
-        clients.push_back(std::move(session));
-
-        receive_payload_connect();
+        if (payload.ParseFromString(received_data)) {
+            std::cout << "Received payload: " << payload.DebugString() << std::endl;
+            if (payload.has_connect()) {
+                handle_connection_request(payload.connect());
+            } else if (payload.has_event()) {
+                handle_event(payload.event(), _remote_endpoint);
+            } else if (payload.has_game_state()) {  // TODO : to remove from the sever
+                std::cerr << "Received game state from client." << std::endl;
+            } else {
+                std::cerr << "Unknown payload type received." << std::endl;
+            }
+        } else {
+            std::cerr << "Failed to parse received data as protobuf Payload message." << std::endl;
+        }
+        start_receive();
     }
 
-    void send_payload(const rtype::Payload& payload, const boost::asio::ip::udp::endpoint& endpoint)
+    // ! PLAYER CONNECTION
+    void send_connection_response(bool is_accepted, std::uint32_t player_id);
+    void handle_connection_request(const rtype::Connect& connect_message);
+
+    void handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint)
     {
-        std::string serialized_payload = payload.SerializeAsString();
-        rtype::PayloadHeader header;
-        header.set_body_size(serialized_payload.size());
-        socket_.send_to(boost::asio::buffer(&header, sizeof(header)), endpoint);
-        socket_.send_to(boost::asio::buffer(serialized_payload), endpoint);
+        auto session_it = _sessions.find(sender_endpoint);
+        if (session_it != _sessions.end()) {
+            auto& session = session_it->second;
+            entt::entity playerEntity = session.get()->getPlayerEntity();
+
+            TransformComponent& transformComponent =
+                _entityManager.getRegistry().get<TransformComponent>(playerEntity);
+
+            switch (event.event()) {
+                case rtype::EventType::MOVE_UP:
+                    std::cout << "MOVE_UP" << std::endl;
+                    transformComponent.y -= 10;
+                    break;
+                case rtype::EventType::MOVE_DOWN:
+                    transformComponent.y += 10;
+                    break;
+                case rtype::EventType::MOVE_LEFT:
+                    transformComponent.x -= 10;
+                    break;
+                case rtype::EventType::MOVE_RIGHT:
+                    transformComponent.x += 10;
+                    break;
+                case rtype::EventType::SHOOT:
+                    std::cout << "SHOOT" << std::endl;
+                    // TODO : should create a bullet component
+                    break;
+                case rtype::EventType::QUIT:
+                    std::cout << "QUIT" << std::endl;
+                    // TODO : should disconnect the player
+                    handle_player_quit(session, playerEntity);
+                    break;
+                default:
+                    std::cerr << "Unknown event type." << std::endl;
+                    break;
+            }
+
+            // Optionally, update other players about this move
+            // broadcast_player_state(session);
+        } else {
+            std::cerr << "Session not found for endpoint: " << sender_endpoint << std::endl;
+        }
+    }
+
+    void handle_player_quit(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
+
+    void handle_send(const boost::system::error_code& error)
+    {
+        if (error) {
+            std::cerr << "Send error: " << error.message() << std::endl;
+        }
+        // Additional code for successful send, if needed
     }
 
 public:
-    NetworkManager(boost::asio::io_context& io_context, unsigned short port)
-        : socket_(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port)),
-          io_context_(io_context)
+    NetworkManager(
+        boost::asio::io_context& io_context, std::string port, EntityManager& entityManager
+    )
+        : _socket(io_context, udp::endpoint(udp::v4(), std::stoi(port))),
+          _entityManager(entityManager)
     {
-        std::cout << "Server started on port " << port << std::endl;
-        receive_payload_connect();
+        std::cout << "NetworkManager running at " << _socket.local_endpoint() << std::endl;
+        start_receive();
     }
 
-    void send_to_all(const rtype::Payload& payload)
-    {
-        for (auto& client : clients) {
-            client->send_payload(payload);
-        }
-    }
+    ~NetworkManager() { _socket.close(); }
 
-    void remove_client(PlayerSessionManagerUDP* client)
-    {
-        for (auto it = clients.begin(); it != clients.end(); ++it) {
-            if (it->get() == client) {
-                clients.erase(it);
-                break;
-            }
-        }
-    }
-
-    void send_payload_thread()
-    {
-        while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
-            std::vector<rtype::Payload> payloads;
-            for (auto& client : clients) {
-                rtype::Payload payload;
-                payload.set_identity(client->get_player_id());
-                payload.set_posx(client->getPosX());
-                payload.set_posy(client->getPosY());
-                payload.set_width(50);
-                payload.set_height(50);
-                payloads.push_back(payload);
-            }
-            for (auto& payload : payloads) {
-                send_to_all(payload);
-                // std::cout << "Send payload : " << payload.ShortDebugString() << std::endl;
-            }
-        }
-    }
+    // ! Broadcast GameState Payload:
+    void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
+    void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
+    void sendGameStateToAllSessions(const rtype::GameState& game_state);
+    void broadcast_game_state();
 };
 
-#endif  // NETWORK_MANAGER_HPP
+#endif  // UPD_SERVER_HPP

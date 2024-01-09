@@ -2,6 +2,23 @@
 
 #include "../../include/utils.hpp"
 
+GameManager::GameManager(
+    std::string server_ip, std::string server_port, boost::asio::io_service& io_service
+)
+    : _io_service(io_service),
+      _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
+      _inputManager(_registry, _window),
+      _networkManager(io_service, server_ip, server_port),
+      _playerProfileManager(),
+      _resourceManager(),
+      _sceneManager(_inputManager),
+      _settingsManager(_resourceManager),
+      _entityFactory(_registry, _resourceManager, _window)
+{
+    _window.setFramerateLimit(60);
+    std::cout << "GameManager created!" << std::endl;
+}
+
 void GameManager::start_game()
 {
     _entityFactory.createMainMenu();
@@ -15,44 +32,12 @@ void GameManager::start_game()
     );
     _entityFactory.createBackground();
 
-    std::queue<rtype::Event> messages;
-    std::mutex messages_mutex;
+    std::thread io_thread([&]() { _io_service.run(); });
 
-    boost::asio::io_context io_context;
-    ClientUDP client(io_context, _server_ip, _server_port);
-
-    std::thread client_thread([&io_context, &client, &messages, &messages_mutex]() {
-        while (true) {
-            io_context.poll();  // Handle asynchronous operations
-
-            // Check for stop request
-            if (client.stop_requested_) {
-                std::cout << "Stopping client thread..." << std::endl;
-                rtype::Event event;
-                event.set_event(rtype::EventType::QUIT);
-                client.send_payload(event);
-                break;
-            }
-
-            // Send messages to the server
-            {
-                std::lock_guard<std::mutex> lock(messages_mutex);
-                while (!messages.empty()) {
-                    client.send_payload(messages.front());
-                    messages.pop();
-                }
-            }
-        }
-    });
-
-    game_loop(messages, messages_mutex, client);
-    client.stop();
-    client_thread.join();
+    game_loop();
 }
 
-void GameManager::game_loop(
-    std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
-)
+void GameManager::game_loop()
 {
     auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav");
     auto explosionSoundBuffer =
@@ -65,6 +50,7 @@ void GameManager::game_loop(
     explosionSound.setVolumeLevel(7.5f);
     SoundComponent musicSound(*musicSoundBuffer);
     musicSound.setVolumeLevel(2.0f);
+    musicSound.sound.setLoop(true);
     musicSound.sound.play();
 
     while (_window.isOpen()) {
@@ -75,79 +61,64 @@ void GameManager::game_loop(
                 _window.close();
             }
             if (isInputEvent(event)) {
-                std::lock_guard<std::mutex> lock(messages_mutex);
-                messages.push(handle_key(event.key.code));
-                // _inputManager.processKeyPress(event);
-                // _inputManager.processKeyRelease(event);
+                // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
+                // std::lock_guard<std::mutex> lock(messages_mutex);
+                // messages.push(handle_key(event.key.code));
+                _inputManager.processKeyPress(event);
+                _inputManager.processKeyRelease(event);
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
                 sound.playSound();
 
-                entt::entity player = _playerProfileManager.getPlayerEntity();
-                const sf::Vector2f& playerPosition =
-                    _registry.get<RenderableComponent>(player).sprite.getPosition();
-                _entityFactory.createProjectile(
-                    1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 5.0f
-                );
+                // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
             }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                _sceneManager.setCurrentScene(GameScenes::InGame);
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
+                rtype::Connect connect_message;
+                connect_message.set_player_name("Player Kevin");
+
+                rtype::Payload payload;
+                payload.mutable_connect()->CopyFrom(connect_message);
+
+                _networkManager.send(payload);
             }
-        }
-        if (musicSound.sound.getStatus() == sf::Music::Stopped) {
-            musicSound.sound.play();
-        }
-        auto payloads = client.get_payloads();
-        for (auto payload : payloads) {
 
-            // std::cout << "Payload : " << payload.ShortDebugString() << std::endl;
-            if (_playerPresent.find(payload.identity()) == _playerPresent.end()) {
-                printf(
-                    "Player %u joined the game\n", static_cast<unsigned int>(payload.identity())
-                );
-                _playerPresent.insert(payload.identity());
+            processServerResponse();
 
-                entt::entity player = static_cast<entt::entity>(payload.identity());
-                auto playerEntity = _entityFactory.createPlayer(player);
-                if (_isFirstPlayer) {
-                    _playerProfileManager.setPlayerEntity(playerEntity);
-                    _isFirstPlayer = false;
-                }
+            //     if (!_playerPresent.empty()) {
+            //         processPlayerActions(deltaTime.asSeconds());
+            //         // Update player position
+            //         entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
+
+            //         auto& transform = _registry.get<TransformComponent>(playerEntity);
+            //         transform.x = payload.posx();
+            //         transform.y = payload.posy();
+
+            //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+            //             enemyClock.restart();
+            //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
+            //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+            //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
+            //         }
+            //     }
+            // }
+
+            _window.clear();
+
+            if (_connectedPlayerIds.empty()) {
+                parallaxSystem(deltaTime.asSeconds());
+                planetSystem(deltaTime.asSeconds());
+                // enemySystem(explosionSound.sound);
+                // renderSystem();
+                // projectileSystem();
+                // collisionProjectileAndEnemy(); // TODO : to put in the server
+                // collisionEnemyAndPlayer(); // TODO : to put in the server
+                // makeAllAnimations();
             }
-            if (!_playerPresent.empty()) {
-                processPlayerActions(deltaTime.asSeconds());
-                // Update player position
-                entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
 
-                auto& transform = _registry.get<TransformComponent>(playerEntity);
-                transform.x = payload.posx();
-                transform.y = payload.posy();
-
-                if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                    enemyClock.restart();
-                    float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                    float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                    _entityFactory.createNormalEnemy(randomY, randomSpeed);
-                }
-            }
+            _window.display();
         }
-
-        _window.clear();
-        parallaxSystem(deltaTime.asSeconds());
-        planetSystem(deltaTime.asSeconds());
-
-        if (!_playerPresent.empty()) {
-            enemySystem(explosionSound.sound);
-            renderSystem();
-            projectileSystem();
-            collisionProjectileAndEnemy();
-            // collisionEnemyAndPlayer(); // TODO : to put in the server
-            makeAllAnimations();
-        }
-
-        _window.display();
     }
-};
+}
 
 bool GameManager::isInputEvent(const sf::Event& event)
 {
