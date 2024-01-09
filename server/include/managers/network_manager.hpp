@@ -49,94 +49,31 @@ private:
         );
     }
 
-    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred)
-    {
-        if (error) {
-            std::cerr << "Receive error: " << error.message() << std::endl;
-            return;
-        }
-
-        std::cout << "udp::endpoint" << _remote_endpoint << std::endl;
-        std::cout << "Remote endpoint: " << _remote_endpoint.address() << ":"
-                  << _remote_endpoint.port() << std::endl;
-
-        std::string received_data(_recv_buffer.data(), bytes_transferred);
-        rtype::Payload payload;
-
-        if (payload.ParseFromString(received_data)) {
-            std::cout << "Received payload: " << payload.DebugString() << std::endl;
-            if (payload.has_connect()) {
-                handle_connection_request(payload.connect());
-            } else if (payload.has_event()) {
-                handle_event(payload.event(), _remote_endpoint);
-            } else if (payload.has_game_state()) {  // TODO : to remove from the sever
-                std::cerr << "Received game state from client." << std::endl;
-            } else {
-                std::cerr << "Unknown payload type received." << std::endl;
-            }
-        } else {
-            std::cerr << "Failed to parse received data as protobuf Payload message." << std::endl;
-        }
-        start_receive();
-    }
+    void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
 
     // ! PLAYER CONNECTION
     void send_connection_response(bool is_accepted, std::uint32_t player_id);
     void handle_connection_request(const rtype::Connect& connect_message);
 
-    void handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint)
-    {
-        auto session_it = _sessions.find(sender_endpoint);
-        if (session_it != _sessions.end()) {
-            auto& session = session_it->second;
-            entt::entity playerEntity = session.get()->getPlayerEntity();
-
-            TransformComponent& transformComponent =
-                _entityManager.getRegistry().get<TransformComponent>(playerEntity);
-
-            switch (event.event()) {
-                case rtype::EventType::MOVE_UP:
-                    std::cout << "MOVE_UP" << std::endl;
-                    transformComponent.y -= 10;
-                    break;
-                case rtype::EventType::MOVE_DOWN:
-                    transformComponent.y += 10;
-                    break;
-                case rtype::EventType::MOVE_LEFT:
-                    transformComponent.x -= 10;
-                    break;
-                case rtype::EventType::MOVE_RIGHT:
-                    transformComponent.x += 10;
-                    break;
-                case rtype::EventType::SHOOT:
-                    std::cout << "SHOOT" << std::endl;
-                    // TODO : should create a bullet component
-                    break;
-                case rtype::EventType::QUIT:
-                    std::cout << "QUIT" << std::endl;
-                    // TODO : should disconnect the player
-                    handle_player_quit(session, playerEntity);
-                    break;
-                default:
-                    std::cerr << "Unknown event type." << std::endl;
-                    break;
-            }
-
-            // Optionally, update other players about this move
-            // broadcast_player_state(session);
-        } else {
-            std::cerr << "Session not found for endpoint: " << sender_endpoint << std::endl;
-        }
-    }
+    void handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint);
 
     void handle_player_quit(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
+
+    void send_message(const std::string& serialized_message, const udp::endpoint& target_endpoint)
+    {
+        _socket.async_send_to(
+            boost::asio::buffer(serialized_message), target_endpoint,
+            [this](const boost::system::error_code& error, std::size_t /*bytes_transferred*/) {
+                handle_send(error);
+            }
+        );
+    }
 
     void handle_send(const boost::system::error_code& error)
     {
         if (error) {
             std::cerr << "Send error: " << error.message() << std::endl;
         }
-        // Additional code for successful send, if needed
     }
 
 public:
