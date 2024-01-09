@@ -74,7 +74,7 @@ public:
         std::string server_ip, std::string server_port, boost::asio::io_service& io_service
     );
 
-    ~GameManager() { _registry.clear(); }
+    ~GameManager() = default;
 
     void start_game();
     void game_loop();
@@ -84,52 +84,7 @@ public:
 
     void deleteAIEnemies();
 
-    void processPlayerActions(float deltaTime)
-    {
-        auto& actions = _inputManager.getKeyboardActions();
-        rtype::Event event;
-
-        if (actions.Up == true) {
-            rtype::Event event;
-            event.set_event(rtype::EventType::MOVE_UP);
-
-            rtype::Payload payload;
-            payload.set_allocated_event(&event);
-
-            _networkManager.send(payload);
-        }
-        if (actions.Down == true) {
-            event.set_event(rtype::EventType::MOVE_DOWN);
-
-            rtype::Payload payload;
-            payload.set_allocated_event(&event);
-
-            _networkManager.send(payload);
-        }
-        if (actions.Right == true) {
-            event.set_event(rtype::EventType::MOVE_RIGHT);
-
-            rtype::Payload payload;
-            payload.set_allocated_event(&event);
-
-            _networkManager.send(payload);
-        }
-        if (actions.Left == true) {
-            event.set_event(rtype::EventType::MOVE_LEFT);
-
-            rtype::Payload payload;
-            payload.set_allocated_event(&event);
-
-            _networkManager.send(payload);
-        }
-        if (actions.Shoot == true) {
-            event.set_event(rtype::EventType::SHOOT);
-            rtype::Payload payload;
-            payload.set_allocated_event(&event);
-
-            _networkManager.send(payload);
-        }
-    }
+    void processPlayerActions(float deltaTime);
 
     // ! Server Response Processing:
 
@@ -157,28 +112,7 @@ public:
         }
     }
 
-    void handleConnectResponse(const rtype::Payload& payload)
-    {
-        std::cout << "Connect response -> player Id: " << payload.connect_response().player_id()
-                  << std::endl;
-        std::cout << "Connect response -> Status " << payload.connect_response().status()
-                  << std::endl;
-
-        rtype::ConnectResponseStatus responseStatus = payload.connect_response().status();
-
-        if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
-            std::cout << "Connect response -> OK" << std::endl;
-            // TODO : should I check if the set can container max 4 players
-            entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
-            auto playerEntity = _entityFactory.createPlayer(player);
-            _connectedPlayerIds.insert(payload.connect_response().player_id());
-        } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
-            std::cout << "Connect response  -> KO" << std::endl;
-            return;
-        } else {
-            std::cout << "Connect response -> Unknown" << std::endl;
-        }
-    }
+    void handleConnectResponse(const rtype::Payload& payload);
 
     void update_player_state(const rtype::GameState& game_state)
     {

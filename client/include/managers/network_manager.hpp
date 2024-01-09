@@ -64,6 +64,11 @@ public:
     }
 
     /**
+     * @brief Destroys the NetworkManagerAsyncUDPClient.
+     */
+    ~NetworkManagerAsyncUDPClient() { socket_.close(); }
+
+    /**
      * @brief Sends a payload to the server.
      *
      * @param payload The payload to send.

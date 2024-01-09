@@ -85,7 +85,7 @@ void GameManager::game_loop()
                 _inputManager.processKeyRelease(event);
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                sound.playSound();
+                // sound.playSound(); // TODO : play song only when GameScenes::InGame
 
                 // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
                 // entt::entity player = _playerProfileManager.getPlayerEntity();
@@ -105,33 +105,34 @@ void GameManager::game_loop()
                 _networkManager.send(payload);
             }
 
-            processServerResponse();
-
-            if (!_connectedPlayerIds.empty()) {
-                processPlayerActions(deltaTime.asSeconds());
-
-                //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                //             enemyClock.restart();
-                //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
-                //         }
-                //     }
-            }
-
-            _window.clear();
-
-            if (_connectedPlayerIds.empty()) {
-                parallaxSystem(deltaTime.asSeconds());
-                planetSystem(deltaTime.asSeconds());
-                // enemySystem(explosionSound.sound);
-                // renderSystem();
-                // projectileSystem();
-                // makeAllAnimations();
-            }
-
-            _window.display();
+            // processServerResponse();
         }
+        if (!_connectedPlayerIds.empty()) {
+            processPlayerActions(deltaTime.asSeconds());
+
+            //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
+            //             enemyClock.restart();
+            //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
+            //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
+            //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
+            //         }
+            //     }
+        }
+
+        _window.clear();
+
+        planetSystem(deltaTime.asSeconds());
+        parallaxSystem(deltaTime.asSeconds());
+        renderSystem();
+        makeAllAnimations();
+
+        // if (!_connectedPlayerIds.empty()) {
+        //     std::cout << MAGENTA << "PLAYERS IN THE GAME" << RESET << std::endl;
+        //     // enemySystem(explosionSound.sound);
+        //     // projectileSystem();
+        // }
+
+        _window.display();
     }
 }
 
@@ -148,5 +149,75 @@ void GameManager::deleteAIEnemies()
     auto enemies = _registry.view<EnemyAIComponent>();
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
+    }
+}
+
+void GameManager::processPlayerActions(float deltaTime)
+{
+    auto& actions = _inputManager.getKeyboardActions();
+    rtype::Event event;
+
+    if (actions.Up == true) {
+        rtype::Event event;
+        event.set_event(rtype::EventType::MOVE_UP);
+
+        rtype::Payload payload;
+        payload.set_allocated_event(&event);
+
+        _networkManager.send(payload);
+    }
+    if (actions.Down == true) {
+        event.set_event(rtype::EventType::MOVE_DOWN);
+
+        rtype::Payload payload;
+        payload.set_allocated_event(&event);
+
+        _networkManager.send(payload);
+    }
+    if (actions.Right == true) {
+        event.set_event(rtype::EventType::MOVE_RIGHT);
+
+        rtype::Payload payload;
+        payload.set_allocated_event(&event);
+
+        _networkManager.send(payload);
+    }
+    if (actions.Left == true) {
+        event.set_event(rtype::EventType::MOVE_LEFT);
+
+        rtype::Payload payload;
+        payload.set_allocated_event(&event);
+
+        _networkManager.send(payload);
+    }
+    if (actions.Shoot == true) {
+        event.set_event(rtype::EventType::SHOOT);
+        rtype::Payload payload;
+        payload.set_allocated_event(&event);
+
+        _networkManager.send(payload);
+    }
+}
+
+void GameManager::handleConnectResponse(const rtype::Payload& payload)
+{
+    std::cout << "Connect response -> player Id: " << payload.connect_response().player_id()
+              << std::endl;
+    std::cout << "Connect response -> Status " << payload.connect_response().status() << std::endl;
+
+    rtype::ConnectResponseStatus responseStatus = payload.connect_response().status();
+
+    if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
+        std::cout << "Connect response -> OK" << std::endl;
+        // TODO : should I check if the set can container max 4 players
+        entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
+        auto playerEntity = _entityFactory.createPlayer(player);
+        _connectedPlayerIds.insert(payload.connect_response().player_id());
+    } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
+        std::cout << "Connect response  -> KO" << std::endl;
+        // TODO: Need to check how we handle this -> user experience
+        return;
+    } else {
+        std::cout << "Connect response -> Unknown" << std::endl;
     }
 }

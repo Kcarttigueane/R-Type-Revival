@@ -45,7 +45,7 @@ public:
     InputManager() = delete;
 
     InputManager(entt::registry& _registry, sf::RenderWindow& window)
-        : _currentScene(GameScenes::InGame), _registry(_registry), _window(window)
+        : _currentScene(GameScenes::MainMenu), _registry(_registry), _window(window)
     {}
 
     ~InputManager() = default;
