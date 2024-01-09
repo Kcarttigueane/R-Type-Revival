@@ -42,12 +42,13 @@ private:
     string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
+
     sf::Clock clock;
     sf::Clock enemyClock;
 
     // ! Managers
     InputManager _inputManager;
-    // NetworkManager _networkManager;
+    NetworkManagerAsyncUDPClient _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
@@ -55,11 +56,14 @@ private:
 
     EntityFactory _entityFactory;
 
-    std::set<uint32_t> _playerPresent;
-    bool _isFirstPlayer = true;
+    boost::asio::io_service& _io_service;
 
-    std::string _server_ip;
-    unsigned short _server_port;
+    std::set<uint32_t> _connectedPlayerIds;
+
+    int _currentWaveLevel = 0;
+    std::set<uint32_t> _enemiesIds;
+    int _numberOfWaveEnemies = 0;
+    bool _isWaveInProgress = false;
 
 public:
     /**
@@ -67,90 +71,41 @@ public:
      * \param server_ip IP address for the server.
      * \param server_port Port number for the server.
      */
-    GameManager(std::string server_ip, unsigned short server_port)
-        : _server_ip(server_ip),
-          _server_port(server_port),
-          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(_registry, _window),
-          //   _networkManager(_io_context, server_ip, server_port),
-          _playerProfileManager(),
-          _resourceManager(),
-          _sceneManager(_inputManager),
-          _settingsManager(_resourceManager),
-          _entityFactory(_registry, _resourceManager, _window)
-    {
-        _window.setFramerateLimit(60);
-        std::cout << "GameManager created!" << std::endl;
-    }
+    GameManager(
+        std::string server_ip, std::string server_port, boost::asio::io_service& io_service
+    );
 
     ~GameManager() { _registry.clear(); }
 
-    rtype::Event handle_key(sf::Keyboard::Key key)
-    {
-        rtype::Event event;
-        switch (key) {
-            case sf::Keyboard::Up:
-                event.set_event(rtype::EventType::MOVEUP);
-                break;
-            case sf::Keyboard::Down:
-                event.set_event(rtype::EventType::MOVEDOWN);
-                break;
-            case sf::Keyboard::Left:
-                event.set_event(rtype::EventType::MOVELEFT);
-                break;
-            case sf::Keyboard::Right:
-                event.set_event(rtype::EventType::MOVERIGHT);
-                break;
-            case sf::Keyboard::Space:
-                event.set_event(rtype::EventType::SHOOT);
-                break;
-            default:
-                break;
-        }
-        return event;
-    }
+    // rtype::Event handle_key(sf::Keyboard::Key key)
+    // {
+    //     rtype::Event event;
+    //     switch (key) {
+    //         case sf::Keyboard::Up:
+    //             event.set_event(rtype::EventType::MOVEUP);
+    //             break;
+    //         case sf::Keyboard::Down:
+    //             event.set_event(rtype::EventType::MOVEDOWN);
+    //             break;
+    //         case sf::Keyboard::Left:
+    //             event.set_event(rtype::EventType::MOVELEFT);
+    //             break;
+    //         case sf::Keyboard::Right:
+    //             event.set_event(rtype::EventType::MOVERIGHT);
+    //             break;
+    //         case sf::Keyboard::Space:
+    //             event.set_event(rtype::EventType::SHOOT);
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    //     return event;
+    // }
 
     void start_game();
-
-    void game_loop(
-        std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
-    );
+    void game_loop();
 
     // ! Collision and Event Handling methods
-
-    void collisionProjectileAndEnemy()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
-
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
-            for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite =
-                    projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
-                    enemyHealth -= projectileDamage;
-                    _registry.destroy(projectile);
-                }
-            }
-        }
-    }
-
-    void collisionEnemyAndPlayer()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
-        auto player = _playerProfileManager.getPlayerEntity();
-
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
-                deleteAIEnemies();
-            }
-        }
-    };
 
     void deleteAIEnemies()
     {
@@ -162,20 +117,174 @@ public:
 
     void processPlayerActions(float deltaTime)
     {
-        auto& actions = _inputManager.getKeyboardActions();
-        rtype::Event protoEvent;
+        // auto& actions = _inputManager.getKeyboardActions();
+        // rtype::Event protoEvent;
 
-        if (actions.Up == true) {
-            protoEvent.set_event(rtype::EventType::MOVEUP);
+        // if (actions.Up == true) {
+        //     protoEvent.set_event(rtype::EventType::MOVEUP);
+        // }
+        // if (actions.Down == true) {
+        //     protoEvent.set_event(rtype::EventType::MOVEDOWN);
+        // }
+        // if (actions.Right == true) {
+        //     protoEvent.set_event(rtype::EventType::MOVERIGHT);
+        // }
+        // if (actions.Left == true) {
+        //     protoEvent.set_event(rtype::EventType::MOVELEFT);
+        // }
+    }
+
+    // ! Server Response Processing:
+
+    void processServerResponse()
+    {
+        std::queue<rtype::Payload> messages = _networkManager.getReceivedMessages();
+
+        while (!messages.empty()) {
+            rtype::Payload payload = messages.front();
+            processPayload(payload);
+            messages.pop();
         }
-        if (actions.Down == true) {
-            protoEvent.set_event(rtype::EventType::MOVEDOWN);
+    }
+
+    void processPayload(const rtype::Payload& payload)
+    {
+        std::cout << "Processing payload" << payload.DebugString() << std::endl;
+
+        if (payload.has_connect_response()) {
+            handleConnectResponse(payload);
+        } else if (payload.has_game_state()) {
+            handleGameState(payload);
+        } else {
+            std::cerr << "Unknown payload type received." << std::endl;
         }
-        if (actions.Right == true) {
-            protoEvent.set_event(rtype::EventType::MOVERIGHT);
+    }
+
+    void handleConnectResponse(const rtype::Payload& payload)
+    {
+        std::cout << "Connect response -> player Id: " << payload.connect_response().player_id()
+                  << std::endl;
+        std::cout << "Connect response -> Status " << payload.connect_response().status()
+                  << std::endl;
+
+        rtype::ConnectResponseStatus responseStatus = payload.connect_response().status();
+
+        if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
+            std::cout << "Connect response -> OK" << std::endl;
+            // TODO : should I check if the set can container max 4 players
+            entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
+            auto playerEntity = _entityFactory.createPlayer(player);
+            _connectedPlayerIds.insert(payload.connect_response().player_id());
+        } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
+            std::cout << "Connect response  -> KO" << std::endl;
+            return;
+        } else {
+            std::cout << "Connect response -> Unknown" << std::endl;
         }
-        if (actions.Left == true) {
-            protoEvent.set_event(rtype::EventType::MOVELEFT);
+    }
+
+    void update_player_state(const rtype::GameState& game_state)
+    {
+        for (const auto& playerState : game_state.players()) {
+            // TODO : should maybe check with my set of uint32_t if the player is already connected
+            uint32_t playerID = playerState.player_id();
+            float posX = playerState.pos_x();
+            float posY = playerState.pos_y();
+            float health = playerState.health();
+            bool isShooting = playerState.is_shooting();
+
+            std::cout << "Player " << playerID << ": Position(" << posX << ", " << posY
+                      << "), Health: " << health << ", IsShooting: " << (isShooting ? "Yes" : "No")
+                      << std::endl;
+
+            entt::entity playerEntity = static_cast<entt::entity>(playerID);
+
+            if (_registry.all_of<TransformComponent, HealthComponent, ScoreComponent>(playerEntity
+                )) {
+                auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
+                auto& healthComponent = _registry.get<HealthComponent>(playerEntity);
+                auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
+
+                transformComponent.x = posX;
+                transformComponent.y = posY;
+
+                healthComponent.healthPoints = health;
+            } else {
+                std::cerr << "Entity with ID " << playerID << " does not have required components."
+                          << std::endl;
+            }
+        }
+    }
+
+    void update_game_wave(const rtype::GameState& game_state)
+    {
+        if (game_state.has_wave_info()) {
+            const rtype::WaveInfo& gameWave = game_state.wave_info();
+
+            _currentWaveLevel = gameWave.current_wave();
+            _numberOfWaveEnemies = gameWave.total_enemies();
+            _isWaveInProgress = gameWave.wave_in_progress();
+
+            std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
+                      << ", Total Enemies: " << _numberOfWaveEnemies
+                      << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
+
+            if (_isWaveInProgress) {
+                if (_enemiesIds.size() < _numberOfWaveEnemies) {
+                    for (const auto& enemyState : game_state.enemies()) {
+                        const bool isIdAlreadyPresent =
+                            _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
+                        std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
+                        if (!isIdAlreadyPresent) {
+                            uint32_t enemyID = enemyState.enemy_id();
+                            float posX = enemyState.pos_x();
+                            float posY = enemyState.pos_y();
+                            std::string type = enemyState.type();
+                            float health = enemyState.health();
+
+                            std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position("
+                                      << posX << ", " << posY << "), Health: " << health
+                                      << std::endl;
+
+                            entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+
+                            if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity
+                                )) {
+                                auto& transformComponent =
+                                    _registry.get<TransformComponent>(enemyEntity);
+                                auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
+
+                                transformComponent.x = posX;
+                                transformComponent.y = posY;
+
+                                healthComponent.healthPoints = health;
+
+                            } else {
+                                std::cerr << "Enemy entity with ID " << enemyID
+                                          << " does not have required components." << std::endl;
+                            }
+                        }
+                    }
+                } else {
+                    std::cout << "No enemies to create" << std::endl;
+                }
+            }
+        } else {
+            std::cerr << "Wave not in progress or no wave info." << std::endl;
+        }
+    }
+
+    void handleGameState(const rtype::Payload& payload)
+    {
+        if (payload.has_game_state()) {
+            const rtype::GameState& gameState = payload.game_state();
+
+            update_player_state(gameState);
+            // update_enemies_state(gameState);
+            update_game_wave(gameState);
+            // TODO : Continue for powerUps, scores, bullets, etc.
+        } else {
+            std::cerr << "Payload does not contain a GameState." << std::endl;
         }
     }
 
