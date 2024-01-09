@@ -38,7 +38,6 @@
  */
 class GameManager {
 private:
-    // Game
     string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
@@ -83,13 +82,7 @@ public:
 
     // ! Collision and Event Handling methods
 
-    void deleteAIEnemies()
-    {
-        auto enemies = _registry.view<EnemyAIComponent>();
-        for (auto enemy : enemies) {
-            _registry.destroy(enemy);
-        }
-    }
+    void deleteAIEnemies();
 
     void processPlayerActions(float deltaTime)
     {
@@ -136,7 +129,6 @@ public:
 
             _networkManager.send(payload);
         }
-        // event.set_event(rtype::EventType::QUIT);
     }
 
     // ! Server Response Processing:

@@ -109,12 +109,6 @@ void GameManager::game_loop()
 
             if (!_connectedPlayerIds.empty()) {
                 processPlayerActions(deltaTime.asSeconds());
-                //         // Update player position
-                //         entt::entity playerEntity = static_cast<entt::entity>(payload.identity());
-
-                //         auto& transform = _registry.get<TransformComponent>(playerEntity);
-                //         transform.x = payload.posx();
-                //         transform.y = payload.posy();
 
                 //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
                 //             enemyClock.restart();
@@ -133,8 +127,6 @@ void GameManager::game_loop()
                 // enemySystem(explosionSound.sound);
                 // renderSystem();
                 // projectileSystem();
-                // collisionProjectileAndEnemy(); // TODO : to put in the server
-                // collisionEnemyAndPlayer(); // TODO : to put in the server
                 // makeAllAnimations();
             }
 
@@ -149,4 +141,12 @@ bool GameManager::isInputEvent(const sf::Event& event)
     return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
            event.type == sf::Event::MouseButtonPressed ||
            event.type == sf::Event::MouseButtonReleased;
+}
+
+void GameManager::deleteAIEnemies()
+{
+    auto enemies = _registry.view<EnemyAIComponent>();
+    for (auto enemy : enemies) {
+        _registry.destroy(enemy);
+    }
 }
