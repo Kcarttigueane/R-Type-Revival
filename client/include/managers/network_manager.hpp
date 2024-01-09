@@ -6,7 +6,7 @@
 #    include <iostream>
 #    include <thread>
 
-#    include "../../src/network/payload.pb.h"
+#    include "../../../build/common/proto/payload.pb.h"
 
 class ClientUDP {
 public:

@@ -9,7 +9,7 @@
 #include <vector>
 #include <mutex>
 #include <queue>
-#include "payload.pb.h" // Inclure les fichiers générés par protobuf
+#include "../build/common/proto/payload.pb.h"
 
 class ClientUDP {
 public:
