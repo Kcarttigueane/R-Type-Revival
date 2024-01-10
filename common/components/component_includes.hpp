@@ -16,5 +16,6 @@
 #    include "./velocity.hpp"
 #    include "./weapon.hpp"
 #    include "./menu_items.hpp"
+#    include "./settings_items.hpp"
 
 #endif  // COMPONENTS_INCLUDE

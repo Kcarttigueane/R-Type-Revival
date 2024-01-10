@@ -57,8 +57,8 @@ private:
 
     EntityFactory _entityFactory;
 
-    float menuMoveCooldown = 0.0f;
-    const float menuMoveDelay = 0.1f;
+    float menuMoveCooldown = 0.2f;
+    const float menuMoveDelay = 0.2f;
     entt::entity selectedLabelEntity;
 
 public:
@@ -120,6 +120,19 @@ public:
 
         selectedLabelEntity = _entityFactory.createSelectedLabel();
 
+        std::vector<std::pair<std::string, std::vector<std::string>>>
+            settingsInfo = {
+                {"Sound Volume", {"Low", "Medium", "High"}},
+                {"Music", {"On", "Off"}},
+                {"Resolution", {"1920x1080", "1280x720", "800x600"}},
+                {"Fullscreen", {"On", "Off"}},
+            };
+
+        for (int i = 0; i < settingsInfo.size(); ++i) {
+            _entityFactory.createSettingsItem(
+                settingsInfo[i].first, settingsInfo[i].second, 0, i );
+        }
+
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
@@ -132,6 +145,11 @@ public:
     float calculateButtonXPosition(int index);
     void moveMenuItems(int direction);
     void menuSystem(float deltaTime);
+
+    void settingsSystem(float deltaTime);
+    void moveSettingLine(int direction);
+    void updateSettingHighlight();
+
     void makeAllAnimations();
 
     void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
@@ -201,6 +219,7 @@ public:
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
             menuSystem(deltaTime.asSeconds());
+            settingsSystem(deltaTime.asSeconds());
             enemySystem(explosionSound.sound);
             renderSystem();
             projectileSystem();

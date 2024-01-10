@@ -253,6 +253,42 @@ public:
 
         return labelEntity;
     };
+
+    entt::entity createSettingsItem(
+        const std::string& settingName,
+        const std::vector<std::string>& settingValues, int currentValueIndex,
+        int index
+    )
+    {
+        auto font =
+            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+        auto settingsItem = _registry.create();
+
+        float startingY = _window.getSize().y * 0.3f;
+        float spacing = 50.0f;
+        float menuItemY = startingY + index * spacing;
+
+        RenderableComponent renderable;
+
+        renderable.text.setFont(*font);
+        renderable.text.setString(
+            settingName + ": " + settingValues[currentValueIndex]
+        );
+        renderable.text.setCharacterSize(48);
+        renderable.text.setFillColor(sf::Color::White);
+        renderable.text.setPosition(
+            _window.getSize().x / 4, menuItemY
+        );
+        _registry.emplace<RenderableComponent>(settingsItem, renderable);
+
+        _registry.emplace<SceneComponent>(settingsItem, GameScenes::Settings);
+        _registry.emplace<SettingItemComponent>(
+            settingsItem, settingName, settingValues, currentValueIndex,
+            index == 0
+        );
+
+        return settingsItem;
+    };
 };
 
 #endif  // ENTITY_FACTORY_HPP
