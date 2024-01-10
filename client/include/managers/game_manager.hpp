@@ -82,7 +82,9 @@ public:
     ~GameManager() = default;
 
     void start_game();
+
     void game_loop();
+
     void handle_closing_game();
 
     // ! Collision and Event Handling methods
@@ -103,101 +105,11 @@ public:
 
     void update_player_state(const rtype::GameState& game_state);
 
-    void update_game_wave(const rtype::GameState& game_state)
-    {
-        if (game_state.has_wave_state()) {
-            const rtype::WaveState& gameWave = game_state.wave_state();
+    void update_game_wave(const rtype::GameState& game_state);
 
-            _currentWaveLevel = gameWave.current_wave();
-            _numberOfWaveEnemies = gameWave.total_enemies();
-            _isWaveInProgress = gameWave.wave_in_progress();
+    void update_player_score(const rtype::GameState& game_state);
 
-            std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
-                      << ", Total Enemies: " << _numberOfWaveEnemies
-                      << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
-
-            if (_isWaveInProgress) {
-                if (_enemiesIds.size() < _numberOfWaveEnemies) {
-                    for (const auto& enemyState : game_state.enemies()) {
-                        const bool isIdAlreadyPresent =
-                            _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
-
-                        std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
-                        if (!isIdAlreadyPresent) {
-                            uint32_t enemyID = enemyState.enemy_id();
-                            float posX = enemyState.pos_x();
-                            float posY = enemyState.pos_y();
-                            std::string type = enemyState.type();
-                            float health = enemyState.health();
-
-                            std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position("
-                                      << posX << ", " << posY << "), Health: " << health
-                                      << std::endl;
-
-                            entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
-
-                            if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity
-                                )) {
-                                auto& transformComponent =
-                                    _registry.get<TransformComponent>(enemyEntity);
-                                auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
-
-                                transformComponent.x = posX;
-                                transformComponent.y = posY;
-
-                                healthComponent.healthPoints = health;
-
-                            } else {
-                                std::cerr << "Enemy entity with ID " << enemyID
-                                          << " does not have required components." << std::endl;
-                            }
-                        }
-                    }
-                } else {
-                    std::cout << "No enemies to create" << std::endl;
-                }
-            }
-        } else {
-            std::cerr << "Wave not in progress or no wave info." << std::endl;
-        }
-    }
-
-    void update_player_score(const rtype::GameState& game_state)
-    {
-        for (const auto& playerScore : game_state.scores()) {
-            uint32_t playerID = playerScore.player_id();
-            uint32_t score = playerScore.score();
-
-            std::cout << "Player " << playerID << ": Score: " << score << std::endl;
-
-            entt::entity playerEntity = static_cast<entt::entity>(playerID);
-
-            if (_registry.all_of<ScoreComponent>(playerEntity)) {
-                auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
-
-                scoreComponent.score = score;
-
-            } else {
-                std::cerr << "Entity with ID " << playerID << " does not have required components."
-                          << std::endl;
-            }
-        }
-    }
-
-    void handleGameState(const rtype::Payload& payload)
-    {
-        if (payload.has_game_state()) {
-            const rtype::GameState& gameState = payload.game_state();
-
-            update_player_state(gameState);
-            // update_player_score(gameState);
-            // update_enemies_state(gameState);
-            // update_game_wave(gameState);
-            // TODO : Continue for powerUps, scores, bullets, etc.
-        } else {
-            std::cerr << "Payload does not contain a GameState." << std::endl;
-        }
-    }
+    void handleGameState(const rtype::Payload& payload);
 
     // ! Systems:
     void projectileSystem();

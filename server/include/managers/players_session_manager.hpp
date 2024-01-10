@@ -24,13 +24,13 @@ public:
      * @param endpoint The endpoint representing the IP address and port number of the player's session.
      * @param playerEntity The entity representing the player in the game.
      */
-    PlayerSession(udp::endpoint endpoint, entt::entity playerEntity)
-        : endpoint_(endpoint), _playerEntity(playerEntity)
-    {
-        std::cout << MAGENTA << "PlayerSession created for endpoint: " << endpoint_
-                  << " with Player entity: " << static_cast<uint32_t>(_playerEntity) << RESET
-                  << std::endl;
-    }
+    PlayerSession(udp::endpoint endpoint, entt::entity playerEntity);
+
+    /**
+     * @brief Destroy the Player Session object.
+     *
+     */
+    ~PlayerSession() = default;
 
     /**
      * @brief Get the endpoint object.
