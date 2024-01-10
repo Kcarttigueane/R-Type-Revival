@@ -22,8 +22,6 @@ GameManager::GameManager(
 void GameManager::start_game()
 {
     _entityFactory.createMainMenu();
-    _entityFactory.createWinScene();
-    _entityFactory.createLoseScene();
 
     _entityFactory.createPlanet(
         WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
@@ -70,6 +68,7 @@ void GameManager::game_loop()
     musicSound.sound.setLoop(true);
     musicSound.sound.play();
 
+    int wave = 0;
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
         sf::Event event;
@@ -107,7 +106,12 @@ void GameManager::game_loop()
                 _networkManager.send(payload);
             }
         }
-
+        if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
+            transitionClock.restart();
+            //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
+            makeEnemyShoot();
+            wave++;
+        }
         _window.clear();
 
         processServerResponse();

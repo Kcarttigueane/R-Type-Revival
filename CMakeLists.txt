@@ -7,10 +7,10 @@ project(r-type-revival VERSION 0.1)
 
 add_subdirectory(client)
 add_subdirectory(server)
+add_subdirectory(common/proto)
 
 install(TARGETS r-type_client DESTINATION bin)
 install(TARGETS r-type_server DESTINATION bin)
-
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

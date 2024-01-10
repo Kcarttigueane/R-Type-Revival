@@ -1,5 +1,9 @@
 #include "../../include/managers/input_manager.hpp"
 
+InputManager::InputManager(entt::registry& _registry, sf::RenderWindow& window)
+    : _currentScene(GameScenes::MainMenu), _registry(_registry), _window(window)
+{}
+
 [[nodiscard]] GameScenes InputManager::getContext() const
 {
     return _currentScene;
@@ -19,11 +23,9 @@ void InputManager::processKeyPress(sf::Event& event)
 {
     if (event.type == event.KeyPressed) {
         if (event.key.code == sf::Keyboard::Left) {
-
             keyboardActions.Left = true;
         }
         if (event.key.code == sf::Keyboard::Right) {
-
             keyboardActions.Right = true;
         }
         if (event.key.code == sf::Keyboard::Up) {

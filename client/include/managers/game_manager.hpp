@@ -45,6 +45,7 @@ private:
 
     sf::Clock clock;
     sf::Clock enemyClock;
+    sf::Clock transitionClock;
 
     // ! Managers
     InputManager _inputManager;
@@ -112,9 +113,10 @@ public:
     void handleGameState(const rtype::Payload& payload);
 
     // ! Systems:
-    void projectileSystem();
 
     void enemySystem(sf::Sound& explosionSound);
+
+    void makeEnemyShoot();
 
     void renderSystem();
 
@@ -129,6 +131,8 @@ public:
     void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
 
     void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    void velocitySystem();
 
     // ! Utility methods
     /**

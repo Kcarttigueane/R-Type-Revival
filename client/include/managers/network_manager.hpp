@@ -8,8 +8,8 @@
 #    include <queue>
 #    include <thread>
 
+#    include "../../../build/common/proto/r_type.pb.h"
 #    include "../../../common/utils/id_generator.hpp"
-#    include "../../src/proto/r_type.pb.h"
 
 #    include "../config.hpp"
 

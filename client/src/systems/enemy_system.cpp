@@ -1,36 +1,38 @@
 #include "../../include/managers/game_manager.hpp"
+#include "../../include/utils.hpp"
 
 void GameManager::enemySystem(sf::Sound& explosionSound)
 {
-    auto enemies = _registry.view<
-        EnemyAIComponent, RenderableComponent, VelocityComponent, HealthComponent,
-        TransformComponent, SoundComponent>();
-    std::vector<entt::entity> entitiesToDestroy;
+    entt::basic_view enemies =
+        _registry.view<EnemyAIComponent, TransformComponent, HealthComponent>();
 
     for (auto& entity : enemies) {
-        auto& enemy = enemies.get<RenderableComponent>(entity);
-        auto& velocity = enemies.get<VelocityComponent>(entity);
-        auto& position = enemies.get<TransformComponent>(entity);
         float& health = enemies.get<HealthComponent>(entity).healthPoints;
-
-        sf::Vector2f enemyPosition = enemy.sprite.getPosition();
-
+        TransformComponent& transformable = enemies.get<TransformComponent>(entity);
         if (health <= 0.0f) {
             explosionSound.play();
-            entitiesToDestroy.push_back(entity);
-            _entityFactory.createExplosion(
-                enemy.sprite.getPosition().x - 200, enemy.sprite.getPosition().y - 60
-            );
-        }
-        if (enemyPosition.x < -128.0f) {
-            entitiesToDestroy.push_back(entity);
-        } else {
-            position.x = enemyPosition.x + velocity.dx * velocity.speed;
-            position.y = enemyPosition.y + velocity.dy * velocity.speed;
+            _entityFactory.createExplosion(transformable.x - 200, transformable.y - 60);
+            _registry.destroy(entity);
+            printf("Enemy killed\n");
         }
     }
+}
 
-    for (auto entity : entitiesToDestroy) {
-        _registry.destroy(entity);
+void GameManager::makeEnemyShoot()
+{
+    entt::basic_view shootingEnemies =
+        _registry.view<EnemyAIComponent, WeaponComponent, TransformComponent>();
+
+    for (auto& enemy : shootingEnemies) {
+        float enemyX = shootingEnemies.get<TransformComponent>(enemy).x;
+        float enemyY = shootingEnemies.get<TransformComponent>(enemy).y;
+        float playerX =
+            _registry.get<TransformComponent>(_playerProfileManager.getPlayerEntity()).x;
+        float playerY =
+            _registry.get<TransformComponent>(_playerProfileManager.getPlayerEntity()).y;
+        std::pair<float, float> direction = get_direction(enemyX, enemyY, playerX, playerY);
+        _entityFactory.createEnemyProjectile(
+            direction.first, direction.second, enemyX, enemyY, 5.0f
+        );
     }
 }
