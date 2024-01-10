@@ -11,7 +11,7 @@
 
 #    include "../../../libs/EnTT/entt.hpp"
 
-#    include "../../src/proto/r_type.pb.h"
+#    include "../../../build/common/proto/r_type.pb.h"
 
 // Managers
 
@@ -99,8 +99,8 @@ public:
     void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addWaveStateToGameState(rtype::GameState& game_state);
-    void sendGameStateToAllSessions(const rtype::GameState& game_state);
-    void broadcast_game_state();
+    void sendGameStateToAllSessions(rtype::GameState& game_state);
+    void broadcast_game_state(rtype::GameState& gameState);
 };
 
 #endif  // UPD_SERVER_HPP

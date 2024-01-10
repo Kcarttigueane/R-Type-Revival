@@ -57,7 +57,7 @@ public:
      * @param speed The speed of the enemy.
      * @return The created enemy entity.
      */
-    entt::entity createNormalEnemy(float spawnHeight, float speed);
+    entt::entity createNormalEnemy(entt::entity hint, float spawnHeight, float speed);
 
     /**
      * @brief Creates a new projectile entity.
@@ -69,7 +69,11 @@ public:
      * @param velocity The velocity of the projectile.
      * @return The created projectile entity.
      */
-    entt::entity createProjectile(float dx, float dy, float x, float y, float velocity);
+    entt::entity createProjectile(
+        entt::entity hint, float dx, float dy, float x, float y, float velocity
+    );
+
+    entt::entity createFastEnemy(entt::entity hint, float spawnWidth, float speed);
 };
 
 #endif  // ENTITY_MANAGER_HPP

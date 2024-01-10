@@ -203,13 +203,14 @@ void NetworkManager::addEnemyStatesToGameState(
         enemy_state.set_pos_x(transformComponent.x);
         enemy_state.set_pos_y(transformComponent.y);
         enemy_state.set_health(healthComponent.healthPoints);
-        enemy_state.set_type("Normal");  // TODO : see with other how we deal with type of weapons
+        enemy_state.set_type(rtype::NORMAL);
+        // TODO : see with other how we deal with type of weapons
 
         game_state.add_enemies()->CopyFrom(enemy_state);
     }
 }
 
-void NetworkManager::sendGameStateToAllSessions(const rtype::GameState& game_state)
+void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
 {
     rtype::Payload payload;
     payload.mutable_game_state()->CopyFrom(game_state);
@@ -248,9 +249,8 @@ void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
     payload.SerializeToString(&serialized_state);
 }
 
-void NetworkManager::broadcast_game_state()
+void NetworkManager::broadcast_game_state(rtype::GameState& game_state)
 {
-    rtype::GameState game_state;
     entt::registry& registry = _entityManager.getRegistry();
 
     addPlayerStateToGameState(game_state, registry);
