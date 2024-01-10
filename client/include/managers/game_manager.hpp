@@ -133,6 +133,8 @@ public:
                 settingsInfo[i].first, settingsInfo[i].second, 0, i );
         }
 
+        _entityFactory.createAboutMenu();
+
         auto playerEntity = _entityFactory.createPlayer();
         _playerProfileManager.setPlayerEntity(playerEntity);
         _entityFactory.createBackground();
@@ -149,6 +151,7 @@ public:
     void settingsSystem(float deltaTime);
     void moveSettingLine(int direction);
     void updateSettingHighlight();
+
 
     void makeAllAnimations();
 

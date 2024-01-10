@@ -289,6 +289,57 @@ public:
 
         return settingsItem;
     };
+
+    entt::entity createAboutMenu()
+    {
+        auto font =
+            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+        auto aboutMenuEntity = _registry.create();
+        RenderableComponent renderable;
+
+        std::string aboutText =
+            "About R-Type 2\n\n"
+            "Developed by a team of passionate game enthusiasts, R-Type 2 \n"
+            "brings together a blend of engaging gameplay and creative \n"
+            "design. Our team is committed to delivering an immersive and \n"
+            "enjoyable experience for all players.\n\n"
+
+            "Development Team\n"
+            "Kevin\n"
+            "Jules\n"
+            "Lucas\n"
+            "Tom\n"
+            "Dylan\n\n"
+
+            "Copyright © 2024 Leaving tek after this. All rights "
+            "reserved.\n\n"
+
+            "Special Thanks\n"
+            "We would like to extend our heartfelt thanks to our families, \n"
+            "friends, and the gaming community for their unwavering support \n"
+            "and valuable feedback throughout the development process. Your \n"
+            "encouragement has been instrumental in bringing this project to \n"
+            "life.\n\n"
+
+            "Stay Connected";
+
+        renderable.text.setFont(*font);
+        renderable.text.setString(aboutText);
+        renderable.text.setCharacterSize(32);
+        renderable.text.setFillColor(sf::Color::White);
+        sf::FloatRect textBounds = renderable.text.getLocalBounds();
+        renderable.text.setOrigin(textBounds.width / 2, textBounds.height / 2);
+        renderable.text.setPosition(
+            _window.getSize().x / 2, _window.getSize().y * 0.50
+        );
+
+        _registry.emplace<RenderableComponent>(
+            aboutMenuEntity, std::move(renderable)
+        );
+        _registry.emplace<SceneComponent>(aboutMenuEntity, GameScenes::About);
+
+        return aboutMenuEntity;
+    }
 };
 
 #endif  // ENTITY_FACTORY_HPP
