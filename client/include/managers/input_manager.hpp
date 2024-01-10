@@ -32,6 +32,7 @@ struct Actions {
     bool Right;
     bool Left;
     bool Enter;
+    bool Backspace;
 };
 
 class InputManager {
@@ -76,6 +77,9 @@ public:
             if (event.key.code == sf::Keyboard::Enter) {
                 keyboardActions.Enter = true;
             }
+            if (event.key.code == sf::Keyboard::Backspace) {
+                keyboardActions.Backspace = true;
+            }
         }
     }
 
@@ -96,6 +100,9 @@ public:
             }
             if (event.key.code == sf::Keyboard::Enter) {
                 keyboardActions.Enter = false;
+            }
+            if (event.key.code == sf::Keyboard::Backspace) {
+                keyboardActions.Backspace = false;
             }
         }
     }

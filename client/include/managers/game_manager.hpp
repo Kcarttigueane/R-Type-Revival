@@ -176,7 +176,7 @@ public:
         SoundComponent musicSound(*musicSoundBuffer);
         musicSound.setVolumeLevel(10.0f);
         musicSound.sound.play();
-        while (_window.isOpen()) {
+        while (_window.isOpen() && _sceneManager.getCurrentScene() != GameScenes::Quit) {
             sf::Time deltaTime = clock.restart();
             sf::Event event;
             while (_window.pollEvent(event)) {
@@ -218,8 +218,11 @@ public:
             }
             _window.clear();
             parallaxSystem(deltaTime.asSeconds());
-            menuSystem(deltaTime.asSeconds());
-            settingsSystem(deltaTime.asSeconds());
+            if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+                menuSystem(deltaTime.asSeconds());
+            } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
+                settingsSystem(deltaTime.asSeconds());
+            }
             enemySystem(explosionSound.sound);
             renderSystem();
             projectileSystem();

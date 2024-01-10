@@ -54,7 +54,6 @@ void GameManager::settingsSystem(float deltaTime)
 
     auto keyboardActions = _inputManager.getKeyboardActions();
 
-
     if (menuMoveCooldown <= 0) {
         if (keyboardActions.Enter) {
             for (auto entity : view) {
@@ -74,11 +73,15 @@ void GameManager::settingsSystem(float deltaTime)
                     break;
                 }
             }
+            menuMoveCooldown = menuMoveDelay;
         } else if (keyboardActions.Up) {
             moveSettingLine(1);
             menuMoveCooldown = menuMoveDelay;
         } else if (keyboardActions.Down) {
             moveSettingLine(-1);
+            menuMoveCooldown = menuMoveDelay;
+        } else if (keyboardActions.Backspace) {
+            _sceneManager.setCurrentScene(GameScenes::MainMenu);
             menuMoveCooldown = menuMoveDelay;
         }
     }

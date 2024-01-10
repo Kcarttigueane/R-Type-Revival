@@ -51,12 +51,16 @@ void GameManager::changeGameState(const std::string& label)
 {
     if (label == "Play") {
         _sceneManager.setCurrentScene(GameScenes::InGame);
+        menuMoveCooldown = menuMoveDelay;
     } else if (label == "Settings") {
         _sceneManager.setCurrentScene(GameScenes::Settings);
+        menuMoveCooldown = menuMoveDelay;
     } else if (label == "Tutorial") {
         _sceneManager.setCurrentScene(GameScenes::Tutorial);
+        menuMoveCooldown = menuMoveDelay;
     } else if (label == "About") {
         _sceneManager.setCurrentScene(GameScenes::About);
+        menuMoveCooldown = menuMoveDelay;
     } else if (label == "Quit") {
         _sceneManager.setCurrentScene(GameScenes::Quit);
     }
