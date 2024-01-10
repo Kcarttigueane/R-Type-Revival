@@ -1,4 +1,4 @@
-name: Manual Release
+name: Release
 
 on:
   workflow_dispatch:
@@ -6,8 +6,12 @@ on:
       version:
         description: 'Enter the version for the release'
         required: true
+      changelog:
+        description: 'Enter major changes for the release'
+        required: false
+
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,13 +24,12 @@ jobs:
         cmake ..
         cpack .
 
-    - name: Publish Release
-      uses: actions/create-release@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
       with:
-        files: build/*.tar.gz
-        token: ${{ secrets.GITHUB_TOKEN }}
-        release_name: Release ${{ github.event.inputs.version }}
-        body: |
-          Release ${{ github.event.inputs.version }}
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/*.tar.gz
+        asset_name: "release-${{ github.event.inputs.version }}.tar.gz"
+        tag: ${{ github.event.inputs.version }}
+        body: ${{ github.event.inputs.changelog }}
+        file_glob: true
