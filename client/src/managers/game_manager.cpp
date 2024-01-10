@@ -15,14 +15,20 @@ GameManager::GameManager(
       _settingsManager(_resourceManager),
       _entityFactory(_registry, _resourceManager, _window)
 {
-    _window.setFramerateLimit(60);
     std::cout << "GameManager created!" << std::endl;
+    _shootingSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
+    _explostionSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
+    _musicSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
+    _shootingSound.setVolumeLevel(1.5f);
+    _explostionSound.setVolumeLevel(7.5f);
+    _musicSound.setVolumeLevel(2.0f);
+    _musicSound.sound.setLoop(true);
+    _musicSound.sound.play();
 }
 
 void GameManager::start_game()
 {
     _entityFactory.createMainMenu();
-
     _entityFactory.createPlanet(
         WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
     );
@@ -30,9 +36,7 @@ void GameManager::start_game()
         WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
     );
     _entityFactory.createBackground();
-
     _network_thread = std::jthread([&]() { _io_service.run(); });
-
     game_loop();
 }
 
@@ -54,90 +58,45 @@ void GameManager::handle_closing_game()
 
 void GameManager::game_loop()
 {
-    auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav");
-    auto explosionSoundBuffer =
-        _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav");
-    auto musicSoundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav");
-
-    SoundComponent sound(*soundBuffer);
-    sound.setVolumeLevel(1.5f);
-    SoundComponent explosionSound(*explosionSoundBuffer);
-    explosionSound.setVolumeLevel(7.5f);
-    SoundComponent musicSound(*musicSoundBuffer);
-    musicSound.setVolumeLevel(2.0f);
-    musicSound.sound.setLoop(true);
-    musicSound.sound.play();
-
-    int wave = 0;
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
-        sf::Event event;
-        while (_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                handle_closing_game();
-            }
-            if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                    handle_closing_game();
-                }
-            }
-            if (isInputEvent(event)) {
-                _inputManager.processKeyPress(event);
-                _inputManager.processKeyRelease(event);
-            }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                // sound.playSound(); // TODO : play song only when GameScenes::InGame
-
-                // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
-                // entt::entity player = _playerProfileManager.getPlayerEntity();
-                // const sf::Vector2f& playerPosition =
-                //     _registry.get<RenderableComponent>(player).sprite.getPosition();
-                // _entityFactory.createProjectile(
-                //     1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 5.0f
-                // );
-            }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
-                rtype::Connect connect_message;
-                connect_message.set_player_name("Player Kevin");
-
-                rtype::Payload payload;
-                payload.mutable_connect()->CopyFrom(connect_message);
-
-                _networkManager.send(payload);
-            }
-        }
-        if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
-            transitionClock.restart();
-            //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
-            makeEnemyShoot();
-            wave++;
-        }
-        _window.clear();
-
-        processServerResponse();
+        processEvents();
         if (!_connectedPlayerIds.empty()) {
             processPlayerActions(deltaTime.asSeconds());
-
-            //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-            //             enemyClock.restart();
-            //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
-            //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-            //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
-            //         }
-            //     }
         }
+        _window.clear();
+        processServerResponse();
         planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
         renderSystem();
         makeAllAnimations();
-
-        // if (!_connectedPlayerIds.empty()) {
-        //     std::cout << MAGENTA << "PLAYERS IN THE GAME" << RESET << std::endl;
-        //     // enemySystem(explosionSound.sound);
-        //     // projectileSystem();
-        // }
-
         _window.display();
+    }
+}
+
+void GameManager::processEvents()
+{
+    sf::Event event;
+    while (_window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            handle_closing_game();
+        }
+        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                handle_closing_game();
+            }
+        }
+        if (isInputEvent(event)) {
+            _inputManager.processKeyPress(event);
+            _inputManager.processKeyRelease(event);
+        }
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
+            rtype::Connect connect_message;
+            connect_message.set_player_name("Player Kevin");
+            rtype::Payload payload;
+            payload.mutable_connect()->CopyFrom(connect_message);
+            _networkManager.send(payload);
+        }
     }
 }
 

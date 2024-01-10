@@ -60,6 +60,13 @@ private:
     boost::asio::io_service& _io_service;
 
     // --------------------------------------
+    // IF IMPROVABLE, IMPROVE! //
+
+    SoundComponent _shootingSound;
+    SoundComponent _explostionSound;
+    SoundComponent _musicSound;
+
+    // --------------------------------------
 
     std::set<uint32_t> _connectedPlayerIds;
 
@@ -87,6 +94,8 @@ public:
     void game_loop();
 
     void handle_closing_game();
+
+    void processEvents();
 
     // ! Collision and Event Handling methods
 
