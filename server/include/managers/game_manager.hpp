@@ -6,6 +6,8 @@
 #    include "./network_manager.hpp"
 #    include "./players_session_manager.hpp"
 
+#    include "../../../common/utils/id_generator.hpp"
+
 class GameManager {
 private:
     boost::asio::io_context _io_context;
@@ -18,9 +20,12 @@ private:
     EntityManager _entity_manager;
     NetworkManager _network_manager;
 
+    // ! ID generator
+    IdGenerator _idGenerator;
+
 public:
     GameManager(const std::string& server_address, std::string port)
-        : _network_manager(_io_context, port, _entity_manager)
+        : _network_manager(_io_context, port, _entity_manager, _idGenerator)
     {}
 
     ~GameManager() = default;
@@ -38,7 +43,7 @@ public:
 
             static auto last_update = std::chrono::steady_clock::now();
             auto now = std::chrono::steady_clock::now();
-            if (now - last_update >= std::chrono::milliseconds(1000)) {
+            if (now - last_update >= std::chrono::milliseconds(UPDATE_INTERVAL_MS)) {
                 _network_manager.broadcast_game_state();
                 last_update = now;
             }

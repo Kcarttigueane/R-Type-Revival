@@ -77,7 +77,9 @@ void NetworkManager::handle_connection_request(const rtype::Connect& connect_mes
     }
 
     std::cout << "Connection request from: " << connect_message.player_name() << std::endl;
-    std::uint32_t player_id = _next_player_id++;
+
+    std::uint32_t player_id = _idGenerator.generateId();
+    std::cout << YELLOW << "ID generated " << player_id << RESET << std::endl;
 
     entt::entity playerEntityId = static_cast<entt::entity>(player_id);
     entt::entity player = _entityManager.createPlayer(playerEntityId);
@@ -86,6 +88,20 @@ void NetworkManager::handle_connection_request(const rtype::Connect& connect_mes
     _sessions[_remote_endpoint] = session;
 
     send_connection_response(true, player_id);
+}
+
+void handle_projectile_creation(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity)
+{
+    std::cout << "Creating projectile" << std::endl;
+
+    // auto& transformComponent = _entityManager.getRegistry().get<TransformComponent>(playerEntity);
+
+    // entt::entity projectile = _entityManager.createProjectile();
+    // TransformComponent& projectileTransformComponent =
+    //     _entityManager.getRegistry().get<TransformComponent>(projectile);
+
+    // projectileTransformComponent.x = transformComponent.x + 50;
+    // projectileTransformComponent.y = transformComponent.y + 50;
 }
 
 void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint)
@@ -100,7 +116,6 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
 
         switch (event.event()) {
             case rtype::EventType::MOVE_UP:
-                std::cout << "MOVE_UP" << std::endl;
                 transformComponent.y -= 10;
                 break;
             case rtype::EventType::MOVE_DOWN:
@@ -114,11 +129,11 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
                 break;
             case rtype::EventType::SHOOT:
                 std::cout << "SHOOT" << std::endl;
+                handle_projectile_creation(session, playerEntity);
                 // TODO : should create a bullet component
                 break;
             case rtype::EventType::QUIT:
                 std::cout << "QUIT" << std::endl;
-                // TODO : should disconnect the player
                 handle_player_quit(session, playerEntity);
                 break;
             default:

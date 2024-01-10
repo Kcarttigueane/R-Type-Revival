@@ -17,6 +17,7 @@
 // Libraries
 
 #include "../../../common/components/component_includes.hpp"
+#include "../../../common/utils/id_generator.hpp"
 #include "../../../libs/EnTT/entt.hpp"
 
 #include <SFML/Audio.hpp>
@@ -57,6 +58,8 @@ private:
 
     boost::asio::io_service& _io_service;
 
+    // --------------------------------------
+
     std::set<uint32_t> _connectedPlayerIds;
 
     int _currentWaveLevel = 0;
@@ -88,6 +91,8 @@ public:
 
     void processPlayerActions(float deltaTime);
 
+    void send_event_to_server(rtype::EventType event_type);
+
     // ! Server Response Processing:
 
     void processServerResponse();
@@ -96,38 +101,7 @@ public:
 
     void handleConnectResponse(const rtype::Payload& payload);
 
-    void update_player_state(const rtype::GameState& game_state)
-    {
-        for (const auto& playerState : game_state.players()) {
-            // TODO : should maybe check with my set of uint32_t if the player is already connected
-            uint32_t playerID = playerState.player_id();
-            float posX = playerState.pos_x();
-            float posY = playerState.pos_y();
-            float health = playerState.health();
-            bool isShooting = playerState.is_shooting();
-
-            std::cout << "Player " << playerID << ": Position(" << posX << ", " << posY
-                      << "), Health: " << health << ", IsShooting: " << (isShooting ? "Yes" : "No")
-                      << std::endl;
-
-            entt::entity playerEntity = static_cast<entt::entity>(playerID);
-
-            if (_registry.all_of<TransformComponent, HealthComponent, ScoreComponent>(playerEntity
-                )) {
-                auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
-                auto& healthComponent = _registry.get<HealthComponent>(playerEntity);
-                auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
-
-                transformComponent.x = posX;
-                transformComponent.y = posY;
-
-                healthComponent.healthPoints = health;
-            } else {
-                std::cerr << "Entity with ID " << playerID << " does not have required components."
-                          << std::endl;
-            }
-        }
-    }
+    void update_player_state(const rtype::GameState& game_state);
 
     void update_game_wave(const rtype::GameState& game_state)
     {
@@ -147,6 +121,7 @@ public:
                     for (const auto& enemyState : game_state.enemies()) {
                         const bool isIdAlreadyPresent =
                             _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
+
                         std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
                         if (!isIdAlreadyPresent) {
                             uint32_t enemyID = enemyState.enemy_id();
@@ -215,9 +190,9 @@ public:
             const rtype::GameState& gameState = payload.game_state();
 
             update_player_state(gameState);
-            update_player_score(gameState);
+            // update_player_score(gameState);
             // update_enemies_state(gameState);
-            update_game_wave(gameState);
+            // update_game_wave(gameState);
             // TODO : Continue for powerUps, scores, bullets, etc.
         } else {
             std::cerr << "Payload does not contain a GameState." << std::endl;

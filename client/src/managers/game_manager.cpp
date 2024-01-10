@@ -33,7 +33,6 @@ void GameManager::start_game()
     );
     _entityFactory.createBackground();
 
-    // std::thread io_thread([&]() { _io_service.run(); });
     _network_thread = std::jthread([&]() { _io_service.run(); });
 
     game_loop();
@@ -155,51 +154,36 @@ void GameManager::deleteAIEnemies()
     }
 }
 
+void GameManager::send_event_to_server(rtype::EventType event_type)
+{
+    rtype::Event event;
+    event.set_event(event_type);
+
+    rtype::Payload payload;
+    payload.mutable_event()->CopyFrom(event);
+
+    _networkManager.send(payload);
+}
+
 void GameManager::processPlayerActions(float deltaTime)
 {
     auto& actions = _inputManager.getKeyboardActions();
     rtype::Event event;
 
     if (actions.Up == true) {
-
-        rtype::Event event;
-        event.set_event(rtype::EventType::MOVE_UP);
-
-        rtype::Payload payload;
-        payload.mutable_event()->CopyFrom(event);
-
-        _networkManager.send(payload);
+        send_event_to_server(rtype::EventType::MOVE_UP);
     }
     if (actions.Down == true) {
-        event.set_event(rtype::EventType::MOVE_DOWN);
-
-        rtype::Payload payload;
-        payload.mutable_event()->CopyFrom(event);
-
-        _networkManager.send(payload);
+        send_event_to_server(rtype::EventType::MOVE_DOWN);
     }
     if (actions.Right == true) {
-        event.set_event(rtype::EventType::MOVE_RIGHT);
-
-        rtype::Payload payload;
-        payload.mutable_event()->CopyFrom(event);
-
-        _networkManager.send(payload);
+        send_event_to_server(rtype::EventType::MOVE_RIGHT);
     }
     if (actions.Left == true) {
-        event.set_event(rtype::EventType::MOVE_LEFT);
-
-        rtype::Payload payload;
-        payload.mutable_event()->CopyFrom(event);
-
-        _networkManager.send(payload);
+        send_event_to_server(rtype::EventType::MOVE_LEFT);
     }
     if (actions.Shoot == true) {
-        event.set_event(rtype::EventType::SHOOT);
-        rtype::Payload payload;
-        payload.mutable_event()->CopyFrom(event);
-
-        _networkManager.send(payload);
+        send_event_to_server(rtype::EventType::SHOOT);
     }
 }
 
@@ -249,5 +233,55 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
         return;
     } else {
         std::cout << "Connect response -> Unknown" << std::endl;
+    }
+}
+
+void GameManager::update_player_state(const rtype::GameState& game_state)
+{
+    for (const auto& playerState : game_state.players()) {
+        // TODO : should maybe check with my set of uint32_t if the player is already connected
+        uint32_t playerID = playerState.player_id();
+        float posX = playerState.pos_x();
+        float posY = playerState.pos_y();
+        float health = playerState.health();
+        bool isShooting = playerState.is_shooting();
+
+        std::cout << MAGENTA << "Player " << playerID << ": Position(" << posX << ", " << posY
+                  << "), Health: " << health << ", IsShooting: " << (isShooting ? "Yes" : "No")
+                  << RESET << std::endl;
+
+        entt::entity playerEntity = static_cast<entt::entity>(playerID);
+
+        const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
+        if (!isPlayerAlreadyExist) {
+            _entityFactory.createPlayer(playerEntity);
+            _connectedPlayerIds.insert(playerID);
+        }
+
+        auto view = _registry.view<PlayerComponent>();
+
+        if (view.contains(playerEntity)) {
+            std::cout << "----> Player " << playerID << " is connected: " << std::endl;
+        }
+
+        if (_registry
+                .all_of<TransformComponent, HealthComponent, ScoreComponent, RenderableComponent>(
+                    playerEntity
+                )) {
+            auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
+            auto& healthComponent = _registry.get<HealthComponent>(playerEntity);
+            auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
+            auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
+
+            transformComponent.x = posX;
+            transformComponent.y = posY;
+
+            healthComponent.healthPoints = health;
+
+            renderableComponent.sprite.setPosition(posX, posY);
+        } else {
+            std::cerr << "update_player_state() << Entity with ID " << playerID
+                      << " does not have required components." << std::endl;
+        }
     }
 }

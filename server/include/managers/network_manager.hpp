@@ -21,6 +21,8 @@
 #    include "./entity_manager.hpp"
 #    include "./players_session_manager.hpp"
 
+#    include "../../../common/utils/id_generator.hpp"
+
 #    define BUFFER_SIZE 3000
 
 #    define MAX_NUMBER_OF_PLAYERS 4
@@ -36,8 +38,10 @@ private:
     std::map<udp::endpoint, std::shared_ptr<PlayerSession>> _sessions;
 
     // Game Data
-    std::uint32_t _next_player_id = 1;
+    std::uint32_t _next_player_id = 10;
     EntityManager& _entityManager;
+
+    IdGenerator& _idGenerator;
 
     void start_receive()
     {
@@ -78,10 +82,12 @@ private:
 
 public:
     NetworkManager(
-        boost::asio::io_context& io_context, std::string port, EntityManager& entityManager
+        boost::asio::io_context& io_context, std::string port, EntityManager& entityManager,
+        IdGenerator& idGenerator
     )
         : _socket(io_context, udp::endpoint(udp::v4(), std::stoi(port))),
-          _entityManager(entityManager)
+          _entityManager(entityManager),
+          _idGenerator(idGenerator)
     {
         std::cout << "NetworkManager running at " << _socket.local_endpoint() << std::endl;
         start_receive();
