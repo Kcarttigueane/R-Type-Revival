@@ -217,10 +217,10 @@ void NetworkManager::sendGameStateToAllSessions(const rtype::GameState& game_sta
     std::string serialized_state;
     payload.SerializeToString(&serialized_state);
 
-    std::cout << "Sending game state: " << payload.DebugString() << std::endl;
+    // std::cout << "Sending game state: " << payload.DebugString() << std::endl;
 
     for (const auto& [endpoint, session] : _sessions) {
-        std::cout << GREEN << "Sending game state to: " << endpoint << RESET << std::endl;
+        // std::cout << GREEN << "Sending game state to: " << endpoint << RESET << std::endl;
         _socket.async_send_to(
             boost::asio::buffer(serialized_state), session->endpoint(),
             [this](const boost::system::error_code& error, std::size_t /*bytes_transferred*/) {

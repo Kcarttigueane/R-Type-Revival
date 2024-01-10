@@ -106,9 +106,11 @@ void GameManager::game_loop()
 
                 _networkManager.send(payload);
             }
-
-            processServerResponse();
         }
+
+        _window.clear();
+
+        processServerResponse();
         if (!_connectedPlayerIds.empty()) {
             processPlayerActions(deltaTime.asSeconds());
 
@@ -120,9 +122,6 @@ void GameManager::game_loop()
             //         }
             //     }
         }
-
-        _window.clear();
-
         planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
         renderSystem();
@@ -171,18 +170,23 @@ void GameManager::processPlayerActions(float deltaTime)
     rtype::Event event;
 
     if (actions.Up == true) {
+        std::cout << RED << "MOVE UP" << RESET << std::endl;
         send_event_to_server(rtype::EventType::MOVE_UP);
     }
     if (actions.Down == true) {
+        std::cout << RED << "MOVE DOWN" << RESET << std::endl;
         send_event_to_server(rtype::EventType::MOVE_DOWN);
     }
     if (actions.Right == true) {
+        std::cout << RED << "MOVE RIGHT" << RESET << std::endl;
         send_event_to_server(rtype::EventType::MOVE_RIGHT);
     }
     if (actions.Left == true) {
+        std::cout << RED << "MOVE LEFT" << RESET << std::endl;
         send_event_to_server(rtype::EventType::MOVE_LEFT);
     }
     if (actions.Shoot == true) {
+        std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
         send_event_to_server(rtype::EventType::SHOOT);
     }
 }
