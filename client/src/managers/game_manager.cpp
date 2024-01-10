@@ -131,12 +131,6 @@ void GameManager::game_loop()
         renderSystem();
         makeAllAnimations();
 
-        // if (!_connectedPlayerIds.empty()) {
-        //     std::cout << MAGENTA << "PLAYERS IN THE GAME" << RESET << std::endl;
-        //     // enemySystem(explosionSound.sound);
-        //     // projectileSystem();
-        // }
-
         _window.display();
     }
 }
@@ -266,12 +260,6 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
             _connectedPlayerIds.insert(playerID);
         }
 
-        auto view = _registry.view<PlayerComponent>();
-
-        if (view.contains(playerEntity)) {
-            std::cout << "----> Player " << playerID << " is connected: " << std::endl;
-        }
-
         if (_registry
                 .all_of<TransformComponent, HealthComponent, ScoreComponent, RenderableComponent>(
                     playerEntity
@@ -318,7 +306,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                         uint32_t enemyID = enemyState.enemy_id();
                         float posX = enemyState.pos_x();
                         float posY = enemyState.pos_y();
-                        std::string type = enemyState.type();
+                        rtype::EnemyType type = enemyState.type();
                         float health = enemyState.health();
 
                         std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position("

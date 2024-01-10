@@ -4,4 +4,4 @@
 
 struct EnemyAIComponent {};
 
-#endif // ECS_ENEMY_AI_COMPONENT_HPP
+#endif  // ECS_ENEMY_AI_COMPONENT_HPP
