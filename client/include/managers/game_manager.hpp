@@ -26,7 +26,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <random>
 #include <vector>
 
 /**
@@ -45,11 +44,13 @@ private:
     entt::registry _registry;
     sf::Clock clock;
     sf::Clock enemyClock;
-    boost::asio::io_context _io_context;
+    sf::Clock transitionClock;
+
+    int _score = 0;
 
     // ! Managers
     InputManager _inputManager;
-    NetworkManager _networkManager;
+    // NetworkManager _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
@@ -60,6 +61,11 @@ private:
     float menuMoveCooldown = 0.2f;
     const float menuMoveDelay = 0.2f;
     entt::entity selectedLabelEntity;
+    std::set<uint32_t> _playerPresent;
+    bool _isFirstPlayer = true;
+
+    std::string _server_ip;
+    unsigned short _server_port;
 
 public:
     /**
@@ -68,9 +74,11 @@ public:
      * \param server_port Port number for the server.
      */
     GameManager(std::string server_ip, unsigned short server_port)
-        : _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
+        : _server_ip(server_ip),
+          _server_port(server_port),
+          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
           _inputManager(_registry, _window),
-          _networkManager(_io_context, server_ip, server_port),
+          //   _networkManager(_io_context, server_ip, server_port),
           _playerProfileManager(),
           _resourceManager(),
           _sceneManager(_inputManager),
@@ -83,62 +91,99 @@ public:
 
     ~GameManager() { _registry.clear(); }
 
-    /**
-     * \brief Generates a random float within a range.
-     * \param min Minimum value of the range.
-     * \param max Maximum value of the range.
-     * \return Randomly generated float.
-     */
-    float getRandomFloat(float min, float max)
+    void create_menu();
+
+    void start_game();
+
+    void game_loop(
+        std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
+    );
+
+    // ! Collision and Event Handling methods
+
+    void collisionProjectileAndEnemy()
     {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> distribution(min, max);
-        return distribution(gen);
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
+        auto projectiles = _registry.view<RenderableComponent, DamageComponent, PlayerProjectileComponent>();
+
+        for (auto& enemy : enemies) {
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
+            for (auto& projectile : projectiles) {
+                sf::Sprite& projectileSprite =
+                    projectiles.get<RenderableComponent>(projectile).sprite;
+                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
+                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
+                    enemyHealth -= projectileDamage;
+                    _registry.destroy(projectile);
+                }
+            }
+        }
     }
 
-    void start_game()
+    void collisionEnemyAndPlayer()
     {
-        std::vector<std::tuple<std::string, std::string, bool>> buttonInfo = {
-            {"/menu/quit.png", "Quit", false},
-            {"/menu/settings.png", "Settings", false},
-            {"/menu/play.png", "Play", true},
-            {"/menu/tutorial.png", "Tutorial", false},
-            {"/menu/about.png", "About", false}
-        };
+        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
+        auto player = _playerProfileManager.getPlayerEntity();
 
-        _entityFactory.createMainMenuTitle();
-
-        for (int i = 0; i < buttonInfo.size(); ++i) {
-            _entityFactory.createButton(
-                _assetsPath + std::get<0>(buttonInfo[i]),
-                std::get<1>(buttonInfo[i]),
-                i,
-                std::get<2>(buttonInfo[i])
-            );
+        for (auto& enemy : enemies) {
+            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
+            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
+            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
+                deleteAIEnemies();
+                _score = 0;
+                _sceneManager.setCurrentScene(GameScenes::Lose);
+            }
         }
+    };
 
-        selectedLabelEntity = _entityFactory.createSelectedLabel();
-
-        std::vector<std::pair<std::string, std::vector<std::string>>>
-            settingsInfo = {
-                {"Sound Volume", {"Low", "Medium", "High"}},
-                {"Music", {"On", "Off"}},
-                {"Resolution", {"1920x1080", "1280x720", "800x600"}},
-                {"Fullscreen", {"On", "Off"}},
-            };
-
-        for (int i = 0; i < settingsInfo.size(); ++i) {
-            _entityFactory.createSettingsItem(
-                settingsInfo[i].first, settingsInfo[i].second, 0, i );
+    void checkWin()
+    {
+        if (_score >= 20) {
+            deleteAIEnemies();
+            _score = 0;
+            _sceneManager.setCurrentScene(GameScenes::Win);
         }
-
-        _entityFactory.createAboutMenu();
-
-        auto playerEntity = _entityFactory.createPlayer();
-        _playerProfileManager.setPlayerEntity(playerEntity);
-        _entityFactory.createBackground();
     }
+
+    void deleteAIEnemies()
+    {
+        auto enemies = _registry.view<EnemyAIComponent>();
+        for (auto enemy : enemies) {
+            _registry.destroy(enemy);
+        }
+    }
+
+    void processPlayerActions(float deltaTime, std::queue<rtype::Event>& messages)
+    {
+        auto& actions = _inputManager.getKeyboardActions();
+        rtype::Event protoEvent;
+
+        if (actions.Up == true) {
+            protoEvent.set_event(rtype::EventType::MOVEUP);
+            messages.push(protoEvent);
+        }
+        if (actions.Down == true) {
+            protoEvent.set_event(rtype::EventType::MOVEDOWN);
+            messages.push(protoEvent);
+        }
+        if (actions.Right == true) {
+            protoEvent.set_event(rtype::EventType::MOVERIGHT);
+            messages.push(protoEvent);
+        }
+        if (actions.Left == true) {
+            protoEvent.set_event(rtype::EventType::MOVELEFT);
+            messages.push(protoEvent);
+        }
+    }
+
+    // ! Systems:
+
+    void enemySystem(sf::Sound& explosionSound);
+
+    void makeEnemyShoot();
+
+    void renderSystem();
 
     void parallaxSystem(float deltaTime);
 
@@ -152,6 +197,7 @@ public:
     void moveSettingLine(int direction);
     void updateSettingHighlight();
 
+    void planetSystem(float deltaTime);
 
     void makeAllAnimations();
 
@@ -161,140 +207,9 @@ public:
 
     void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
 
-    void game_loop()
-    {
-        auto soundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/shot2.wav"
-        );
-        auto explosionSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/explosion.wav"
-        );
-        auto musicSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/music.wav"
-        );
-        SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(2.5f);
-        SoundComponent explosionSound(*explosionSoundBuffer);
-        explosionSound.setVolumeLevel(5.0f);
-        SoundComponent musicSound(*musicSoundBuffer);
-        musicSound.setVolumeLevel(10.0f);
-        musicSound.sound.play();
-        while (_window.isOpen() && _sceneManager.getCurrentScene() != GameScenes::Quit) {
-            sf::Time deltaTime = clock.restart();
-            sf::Event event;
-            while (_window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    _window.close();
-                }
-                if (isInputEvent(event)) {
-                    _inputManager.processKeyPress(event);
-                    _inputManager.processKeyRelease(event);
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Space) {
-                    sound.playSound();
+    void velocitySystem();
 
-                    entt::entity player =
-                        _playerProfileManager.getPlayerEntity();
-                    const sf::Vector2f& playerPosition =
-                        _registry.get<RenderableComponent>(player)
-                            .sprite.getPosition();
-                    _entityFactory.createProjectile(
-                        1.0f, 0.0f, playerPosition.x + 145.0f,
-                        playerPosition.y + 47.5f, 5.0f
-                    );
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Escape) {
-                    _window.close();
-                }
-            }
-            if (musicSound.sound.getStatus() == sf::Music::Stopped) {
-                musicSound.sound.play();
-            }
-            processPlayerActions(deltaTime.asSeconds());
-            if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                enemyClock.restart();
-                float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                _entityFactory.createNormalEnemy(randomY, randomSpeed);
-            }
-            _window.clear();
-            parallaxSystem(deltaTime.asSeconds());
-            if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
-                menuSystem(deltaTime.asSeconds());
-            } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
-                settingsSystem(deltaTime.asSeconds());
-            }
-            enemySystem(explosionSound.sound);
-            renderSystem();
-            projectileSystem();
-            collisionProjectileAndEnemy();
-            makeAllAnimations();
-            _window.display();
-        }
-    }
-
-    void collisionProjectileAndEnemy()
-    {
-        auto enemies =
-            _registry
-                .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles =
-            _registry.view<RenderableComponent, DamageComponent>();
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite =
-                enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth =
-                enemies.get<HealthComponent>(enemy).healthPoints;
-            for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite =
-                    projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage =
-                    projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(
-                        projectileSprite.getGlobalBounds()
-                    )) {
-                    enemyHealth -= projectileDamage;
-                    _registry.destroy(projectile);
-                }
-            }
-        }
-    }
-
-    void processPlayerActions(float deltaTime)
-    {
-        auto& actions = _inputManager.getKeyboardActions();
-        auto playerEntity = _playerProfileManager.getPlayerEntity();
-
-        if (!_registry.all_of<TransformComponent>(playerEntity)) {
-            printf(
-                "Player entity does not have a "
-                "TransformComponent\n"
-            );
-            return;
-        }
-        auto& transform = _registry.get<TransformComponent>(playerEntity);
-        if (actions.Up == true && transform.y >= 0.0f) {
-            transform.y -= 500.0f * deltaTime;
-        }
-        if (actions.Down == true && transform.y <= WINDOW_HEIGHT) {
-            transform.y += 500.0f * deltaTime;
-        }
-        if (actions.Right == true && transform.x <= WINDOW_WIDTH) {
-            transform.x += 500.0f * deltaTime;
-        }
-        if (actions.Left == true && transform.x >= 0.0f) {
-            transform.x -= 500.0f * deltaTime;
-        }
-    }
-
-    void projectileSystem();
-
-    void enemySystem(sf::Sound& explosionSound);
-
-    void renderSystem();
-
+    // ! Utility methods
     /**
      * \brief Checks if an event is related to input.
      * \param event The SFML event to check.
@@ -303,11 +218,12 @@ public:
     bool isInputEvent(const sf::Event& event)
     {
         // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed ||
-               event.type == sf::Event::KeyReleased ||
+        return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
                event.type == sf::Event::MouseButtonPressed ||
                event.type == sf::Event::MouseButtonReleased;
     }
+
+    void drawHitBox(RenderableComponent& renderable);
 };
 
 #endif  // GAME_MANAGER_HPP

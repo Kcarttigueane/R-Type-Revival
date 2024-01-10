@@ -3,10 +3,13 @@ project(r-type_client)
 
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED)
+find_package(Protobuf REQUIRED)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${Protobuf_INCLUDE_DIRS})
 
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
-file(GLOB_RECURSE SOURCE_FILES "src/*.cpp")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.cc")
 
 add_executable(r-type_client ${SOURCE_FILES})
 
@@ -24,4 +27,7 @@ target_link_libraries(
   sfml-audio
   Boost::boost
   Boost::system
+  proto
 )
+
+target_include_directories(r-type_client PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

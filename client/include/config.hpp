@@ -13,6 +13,8 @@ enum class GameScenes {
     Tutorial,
     About,
     Quit,
+    Lose,
+    Win,
 };
 
 #endif  // CONFIG_HPP
