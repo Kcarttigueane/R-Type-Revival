@@ -1,7 +1,8 @@
 find_package(Protobuf REQUIRED)
+
 include_directories(${PROTOBUF_INCLUDE_DIR})
 
-protobuf_generate_cpp(PROTO_SRC PROTO_HEADER payload.proto)
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER r_type.proto)
 
 add_library(proto ${PROTO_SRC} ${PROTO_HEADER})
 target_include_directories(proto PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${Protobuf_INCLUDE_DIRS})

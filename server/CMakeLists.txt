@@ -9,12 +9,14 @@ find_package(
 
 find_package(Protobuf REQUIRED)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-INCLUDE_DIRECTORIES(${Protobuf_INCLUDE_DIRS})
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/proto/*.cc")
 
-file(GLOB_RECURSE SOURCE_FILES "UDP/*.cpp" "UDP/*.cc")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
+INCLUDE_DIRECTORIES(${Protobuf_INCLUDE_DIRS})
 
 add_executable(r-type_server ${SOURCE_FILES})
 
 target_link_libraries(r-type_server PRIVATE Boost::boost Boost::system proto)
+
 target_include_directories(r-type_server PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

@@ -23,17 +23,32 @@
 
 #    include <queue>
 
+#    include "../../../build/common/proto/r_type.pb.h"
 #    include "../../../common/components/component_includes.hpp"
-#    include "../../../build/common/proto/payload.pb.h"
 
+/**
+ * @file input_manager.hpp
+ * @brief Defines the InputManager class.
+ */
+
+/**
+ * @struct Actions
+ * @brief Represents the actions that can be performed by the player.
+ */
 struct Actions {
-    bool Spacebar;
+    bool Shoot;
     bool Up;
     bool Down;
     bool Right;
     bool Left;
 };
 
+/**
+ * @class InputManager
+ * @brief This class is responsible for managing the input in the game.
+ *
+ * It uses the SFML library to process keyboard events.
+ */
 class InputManager {
 private:
     GameScenes _currentScene;
@@ -42,24 +57,47 @@ private:
     Actions keyboardActions;
 
 public:
-    InputManager() = delete;
+    /**
+     * @brief Constructs a new InputManager.
+     *
+     * @param _registry The registry from EnTT.
+     * @param window The SFML window.
+     */
+    InputManager(entt::registry& _registry, sf::RenderWindow& window);
 
-    InputManager(entt::registry& _registry, sf::RenderWindow& window)
-        : _currentScene(GameScenes::InGame),
-          _registry(_registry),
-          _window(window)
-    {}
-
-    ~InputManager() = default;
-
+    /**
+     * @brief Returns the current game scene.
+     *
+     * @return The current game scene.
+     */
     [[nodiscard]] GameScenes getContext() const;
 
+    /**
+     * @brief Sets the current game scene.
+     *
+     * @param context The new game scene.
+     */
     void setContext(GameScenes context);
 
+    /**
+     * @brief Returns the actions that can be performed by the player.
+     *
+     * @return The actions that can be performed by the player.
+     */
     [[nodiscard]] Actions& getKeyboardActions();
 
+    /**
+     * @brief Processes a key press event.
+     *
+     * @param event The SFML event.
+     */
     void processKeyPress(sf::Event& event);
 
+    /**
+     * @brief Processes a key release event.
+     *
+     * @param event The SFML event.
+     */
     void processKeyRelease(sf::Event& event);
 };
 

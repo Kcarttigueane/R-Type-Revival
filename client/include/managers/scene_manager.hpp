@@ -13,7 +13,7 @@
  */
 class SceneManager {
 private:
-    GameScenes _current_scene = GameScenes::InGame;
+    GameScenes _current_scene = GameScenes::MainMenu;
     InputManager& _inputManager;
 
 public:

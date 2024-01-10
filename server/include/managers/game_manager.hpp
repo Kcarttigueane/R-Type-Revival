@@ -1,24 +1,39 @@
 #if !defined(GAME_MANGER_HPP)
 #    define GAME_MANGER_HPP
 
+#    include <thread>
+
+#    include "../game_metadata.hpp"
 #    include "./entity_manager.hpp"
 #    include "./network_manager.hpp"
-#    include "./players_manager.hpp"
+#    include "./players_session_manager.hpp"
+
+#    include "../../../common/utils/id_generator.hpp"
 
 class GameManager {
 private:
+    boost::asio::io_context _io_context;
+    // std::thread _network_thread;
+    std::jthread _network_thread;
+
+    // ! Game metadata
+    GameMetadata _game_metadata;
+
+    // ! Managers
     EntityManager _entity_manager;
     NetworkManager _network_manager;
-    PlayersManager _players_manager;
+
+    // ! ID generator
+    IdGenerator _idGenerator;
 
 public:
-    GameManager(const std::string& server_address, unsigned short port)
-        : _network_manager(port)
-    {}
+    GameManager(const std::string& server_address, std::string port);
 
-    ~GameManager() = default;
+    ~GameManager();
 
-    void run() {}
+    void run();
+
+    void game_loop();
 };
 
 #endif  // GAME_MANGER_HPP

@@ -7,13 +7,11 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include "../../build/common/proto/payload.pb.h"
+#include "../../build/common/proto/r_type.pb.h"
 
 class UDPSession {
 public:
-    UDPSession(
-        boost::asio::io_context& io_context, boost::asio::ip::udp::socket socket
-    )
+    UDPSession(boost::asio::io_context& io_context, boost::asio::ip::udp::socket socket)
         : socket_(std::move(socket)), io_context_(io_context)
     {
         std::cout << "Access" << std::endl;
@@ -35,12 +33,8 @@ public:
         std::string serialized_payload = payload.SerializeAsString();
         rtype::PayloadHeader header;
         header.set_body_size(serialized_payload.size());
-        socket_.send_to(
-            boost::asio::buffer(&header, sizeof(header)), remote_endpoint_
-        );
-        socket_.send_to(
-            boost::asio::buffer(serialized_payload), remote_endpoint_
-        );
+        socket_.send_to(boost::asio::buffer(&header, sizeof(header)), remote_endpoint_);
+        socket_.send_to(boost::asio::buffer(serialized_payload), remote_endpoint_);
     }
 
     void start()
@@ -53,15 +47,9 @@ public:
 
     void setId(uint32_t id) { player_id_ = id; }
 
-    boost::asio::ip::udp::endpoint get_endpoint() const
-    {
-        return remote_endpoint_;
-    }
+    boost::asio::ip::udp::endpoint get_endpoint() const { return remote_endpoint_; }
 
-    void setEndpoint(boost::asio::ip::udp::endpoint endpoint)
-    {
-        remote_endpoint_ = endpoint;
-    }
+    void setEndpoint(boost::asio::ip::udp::endpoint endpoint) { remote_endpoint_ = endpoint; }
 
     uint32_t getPosX() const { return posX_; }
 
@@ -75,19 +63,14 @@ private:
     void receive_payload()
     {
         socket_.async_receive_from(
-            boost::asio::buffer(
-                &current_payload_header_, sizeof(current_payload_header_)
-            ),
+            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
             remote_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     handle_receive_header(bytes_transferred);
                 } else {
-                    std::cerr << "Error in receive_payload header: "
-                              << error.message() << std::endl;
+                    std::cerr << "Error in receive_payload header: " << error.message()
+                              << std::endl;
                 }
             }
         );
@@ -99,35 +82,25 @@ private:
 
         socket_.async_receive_from(
             boost::asio::buffer(current_payload_data_), remote_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
                     handle_receive_payload(bytes_transferred);
                     receive_payload();  // Receive the next payload
                 } else {
-                    std::cerr
-                        << "Error in receive_payload data: " << error.message()
-                        << std::endl;
+                    std::cerr << "Error in receive_payload data: " << error.message() << std::endl;
                 }
             }
         );
     }
 
-    void handle_receive_payload(std::size_t bytes_transferred)
-    {
-        process_payload();
-    }
+    void handle_receive_payload(std::size_t bytes_transferred) { process_payload(); }
 
     void process_payload()
     {
         rtype::Event event;
         event.ParseFromString(current_payload_data_);
-        std::cout << "Event from client "
-                  << remote_endpoint_.address().to_string() << ":"
-                  << remote_endpoint_.port() << ": " << event.ShortDebugString()
-                  << std::endl;
+        std::cout << "Event from client " << remote_endpoint_.address().to_string() << ":"
+                  << remote_endpoint_.port() << ": " << event.ShortDebugString() << std::endl;
 
         switch (event.event()) {
             case rtype::EventType::MOVEUP:
@@ -153,9 +126,8 @@ private:
         // Handle the received payload as needed for your game logic
 
         if (event.event() == rtype::EventType::QUIT) {
-            std::cout << "Client " << remote_endpoint_.address().to_string()
-                      << ":" << remote_endpoint_.port() << " disconnected"
-                      << std::endl;
+            std::cout << "Client " << remote_endpoint_.address().to_string() << ":"
+                      << remote_endpoint_.port() << " disconnected" << std::endl;
         }
     }
 
@@ -175,10 +147,7 @@ private:
 class UDPServer {
 public:
     UDPServer(boost::asio::io_context& io_context, unsigned short port)
-        : socket_(
-              io_context,
-              boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port)
-          ),
+        : socket_(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), port)),
           io_context_(io_context)
     {
         std::cout << "Server started on port " << port << std::endl;
@@ -229,37 +198,28 @@ private:
     void receive_payload_connect()
     {
         socket_.async_receive_from(
-            boost::asio::buffer(
-                &current_payload_header_, sizeof(current_payload_header_)
-            ),
+            boost::asio::buffer(&current_payload_header_, sizeof(current_payload_header_)),
             remote_endpoint_,
-            [this](
-                const boost::system::error_code& error,
-                std::size_t bytes_transferred
-            ) {
+            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
                 if (!error) {
-                    current_payload_data_.resize(
-                        current_payload_header_.body_size()
-                    );
+                    current_payload_data_.resize(current_payload_header_.body_size());
 
                     socket_.async_receive_from(
-                        boost::asio::buffer(current_payload_data_),
-                        remote_endpoint_,
+                        boost::asio::buffer(current_payload_data_), remote_endpoint_,
                         [this](
-                            const boost::system::error_code& error,
-                            std::size_t bytes_transferred
+                            const boost::system::error_code& error, std::size_t bytes_transferred
                         ) {
                             if (!error) {
                                 handle_connect_payload(bytes_transferred);
                             } else {
-                                std::cerr << "Error in receive_payload data: "
-                                          << error.message() << std::endl;
+                                std::cerr << "Error in receive_payload data: " << error.message()
+                                          << std::endl;
                             }
                         }
                     );
                 } else {
-                    std::cerr << "Error in receive_payload header: "
-                              << error.message() << std::endl;
+                    std::cerr << "Error in receive_payload header: " << error.message()
+                              << std::endl;
                 }
             }
         );
@@ -270,8 +230,7 @@ private:
     {
         rtype::Connect connect;
         connect.ParseFromString(current_payload_data_);
-        std::cout << "Recept Connect : " << connect.ShortDebugString()
-                  << std::endl;
+        std::cout << "Recept Connect : " << connect.ShortDebugString() << std::endl;
 
         // Créer un nouveau socket pour cette session
         boost::asio::ip::udp::socket session_socket(io_context_);
@@ -281,8 +240,7 @@ private:
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<int32_t> dis(
-            std::numeric_limits<int32_t>::min(),
-            std::numeric_limits<int32_t>::max()
+            std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()
         );
         uint32_t id = dis(gen);
         rtype::ID connect_send;
@@ -290,19 +248,12 @@ private:
         std::string serialized_payload = connect_send.SerializeAsString();
         rtype::PayloadHeader header;
         header.set_body_size(serialized_payload.size());
-        session_socket.send_to(
-            boost::asio::buffer(&header, sizeof(header)), remote_endpoint_
-        );
-        session_socket.send_to(
-            boost::asio::buffer(serialized_payload), remote_endpoint_
-        );
+        session_socket.send_to(boost::asio::buffer(&header, sizeof(header)), remote_endpoint_);
+        session_socket.send_to(boost::asio::buffer(serialized_payload), remote_endpoint_);
 
-        std::cout << "Send id : " << connect_send.ShortDebugString()
-                  << std::endl;
+        std::cout << "Send id : " << connect_send.ShortDebugString() << std::endl;
         // Créer une nouvelle session avec le nouveau socket
-        auto session = std::make_unique<UDPSession>(
-            io_context_, std::move(session_socket)
-        );
+        auto session = std::make_unique<UDPSession>(io_context_, std::move(session_socket));
         session->setEndpoint(remote_endpoint_);
         session->setId(id);
         session->start();
@@ -314,10 +265,7 @@ private:
         receive_payload_connect();
     }
 
-    void send_payload(
-        const rtype::Payload& payload,
-        const boost::asio::ip::udp::endpoint& endpoint
-    )
+    void send_payload(const rtype::Payload& payload, const boost::asio::ip::udp::endpoint& endpoint)
     {
         std::string serialized_payload = payload.SerializeAsString();
         rtype::PayloadHeader header;
@@ -337,9 +285,7 @@ int main()
 {
     boost::asio::io_context io_context;
     UDPServer server(io_context, 12345);
-    std::thread send_payload_thread([&server]() {
-        server.send_payload_thread();
-    });
+    std::thread send_payload_thread([&server]() { server.send_payload_thread(); });
     io_context.run();
 
     return 0;

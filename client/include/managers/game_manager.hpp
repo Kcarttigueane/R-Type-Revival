@@ -17,6 +17,7 @@
 // Libraries
 
 #include "../../../common/components/component_includes.hpp"
+#include "../../../common/utils/id_generator.hpp"
 #include "../../../libs/EnTT/entt.hpp"
 
 #include <SFML/Audio.hpp>
@@ -38,19 +39,17 @@
  */
 class GameManager {
 private:
-    // Game
     string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
+
     sf::Clock clock;
     sf::Clock enemyClock;
     sf::Clock transitionClock;
 
-    int _score = 0;
-
     // ! Managers
     InputManager _inputManager;
-    // NetworkManager _networkManager;
+    NetworkManagerAsyncUDPClient _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
@@ -58,11 +57,18 @@ private:
 
     EntityFactory _entityFactory;
 
-    std::set<uint32_t> _playerPresent;
-    bool _isFirstPlayer = true;
+    boost::asio::io_service& _io_service;
 
-    std::string _server_ip;
-    unsigned short _server_port;
+    // --------------------------------------
+
+    std::set<uint32_t> _connectedPlayerIds;
+
+    int _currentWaveLevel = 0;
+    std::set<uint32_t> _enemiesIds;
+    int _numberOfWaveEnemies = 0;
+    bool _isWaveInProgress = false;
+
+    std::jthread _network_thread;
 
 public:
     /**
@@ -70,107 +76,41 @@ public:
      * \param server_ip IP address for the server.
      * \param server_port Port number for the server.
      */
-    GameManager(std::string server_ip, unsigned short server_port)
-        : _server_ip(server_ip),
-          _server_port(server_port),
-          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(_registry, _window),
-          //   _networkManager(_io_context, server_ip, server_port),
-          _playerProfileManager(),
-          _resourceManager(),
-          _sceneManager(_inputManager),
-          _settingsManager(_resourceManager),
-          _entityFactory(_registry, _resourceManager, _window)
-    {
-        _window.setFramerateLimit(60);
-        std::cout << "GameManager created!" << std::endl;
-    }
+    GameManager(
+        std::string server_ip, std::string server_port, boost::asio::io_service& io_service
+    );
 
-    ~GameManager() { _registry.clear(); }
+    ~GameManager() = default;
 
     void start_game();
 
-    void game_loop(
-        std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
-    );
+    void game_loop();
+
+    void handle_closing_game();
 
     // ! Collision and Event Handling methods
 
-    void collisionProjectileAndEnemy()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent, PlayerProjectileComponent>();
+    void deleteAIEnemies();
 
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
-            for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite =
-                    projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
-                    enemyHealth -= projectileDamage;
-                    _registry.destroy(projectile);
-                }
-            }
-        }
-    }
+    void processPlayerActions(float deltaTime);
 
-    void collisionEnemyAndPlayer()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
-        auto player = _playerProfileManager.getPlayerEntity();
+    void send_event_to_server(rtype::EventType event_type);
 
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
-                deleteAIEnemies();
-                _score = 0;
-                _sceneManager.setCurrentScene(GameScenes::Lose);
-            }
-        }
-    };
+    // ! Server Response Processing:
 
-    void checkWin()
-    {
-        if (_score >= 20) {
-            deleteAIEnemies();
-            _score = 0;
-            _sceneManager.setCurrentScene(GameScenes::Win);
-        }
-    }
+    void processServerResponse();
 
-    void deleteAIEnemies()
-    {
-        auto enemies = _registry.view<EnemyAIComponent>();
-        for (auto enemy : enemies) {
-            _registry.destroy(enemy);
-        }
-    }
+    void processPayload(const rtype::Payload& payload);
 
-    void processPlayerActions(float deltaTime, std::queue<rtype::Event>& messages)
-    {
-        auto& actions = _inputManager.getKeyboardActions();
-        rtype::Event protoEvent;
+    void handleConnectResponse(const rtype::Payload& payload);
 
-        if (actions.Up == true) {
-            protoEvent.set_event(rtype::EventType::MOVEUP);
-            messages.push(protoEvent);
-        }
-        if (actions.Down == true) {
-            protoEvent.set_event(rtype::EventType::MOVEDOWN);
-            messages.push(protoEvent);
-        }
-        if (actions.Right == true) {
-            protoEvent.set_event(rtype::EventType::MOVERIGHT);
-            messages.push(protoEvent);
-        }
-        if (actions.Left == true) {
-            protoEvent.set_event(rtype::EventType::MOVELEFT);
-            messages.push(protoEvent);
-        }
-    }
+    void update_player_state(const rtype::GameState& game_state);
+
+    void update_game_wave(const rtype::GameState& game_state);
+
+    void update_player_score(const rtype::GameState& game_state);
+
+    void handleGameState(const rtype::Payload& payload);
 
     // ! Systems:
 
@@ -200,13 +140,7 @@ public:
      * \param event The SFML event to check.
      * \return True if the event is an input event, false otherwise.
      */
-    bool isInputEvent(const sf::Event& event)
-    {
-        // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
-               event.type == sf::Event::MouseButtonPressed ||
-               event.type == sf::Event::MouseButtonReleased;
-    }
+    bool isInputEvent(const sf::Event& event);
 
     void drawHitBox(RenderableComponent& renderable);
 };
