@@ -43,7 +43,7 @@ void GameManager::handle_closing_game()
 {
     rtype::Payload payload;
     rtype::Event* event = payload.mutable_event();
-    event->set_event(rtype::EventType::MOVE_UP);
+    event->set_event(rtype::EventType::QUIT);
 
     _networkManager.send(payload);
 
@@ -108,10 +108,10 @@ void GameManager::game_loop()
                 _networkManager.send(payload);
             }
 
-            // processServerResponse();
+            processServerResponse();
         }
         if (!_connectedPlayerIds.empty()) {
-            // processPlayerActions(deltaTime.asSeconds());
+            processPlayerActions(deltaTime.asSeconds());
 
             //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
             //             enemyClock.restart();
@@ -161,11 +161,12 @@ void GameManager::processPlayerActions(float deltaTime)
     rtype::Event event;
 
     if (actions.Up == true) {
+
         rtype::Event event;
         event.set_event(rtype::EventType::MOVE_UP);
 
         rtype::Payload payload;
-        payload.set_allocated_event(&event);
+        payload.mutable_event()->CopyFrom(event);
 
         _networkManager.send(payload);
     }
@@ -173,7 +174,7 @@ void GameManager::processPlayerActions(float deltaTime)
         event.set_event(rtype::EventType::MOVE_DOWN);
 
         rtype::Payload payload;
-        payload.set_allocated_event(&event);
+        payload.mutable_event()->CopyFrom(event);
 
         _networkManager.send(payload);
     }
@@ -181,7 +182,7 @@ void GameManager::processPlayerActions(float deltaTime)
         event.set_event(rtype::EventType::MOVE_RIGHT);
 
         rtype::Payload payload;
-        payload.set_allocated_event(&event);
+        payload.mutable_event()->CopyFrom(event);
 
         _networkManager.send(payload);
     }
@@ -189,14 +190,14 @@ void GameManager::processPlayerActions(float deltaTime)
         event.set_event(rtype::EventType::MOVE_LEFT);
 
         rtype::Payload payload;
-        payload.set_allocated_event(&event);
+        payload.mutable_event()->CopyFrom(event);
 
         _networkManager.send(payload);
     }
     if (actions.Shoot == true) {
         event.set_event(rtype::EventType::SHOOT);
         rtype::Payload payload;
-        payload.set_allocated_event(&event);
+        payload.mutable_event()->CopyFrom(event);
 
         _networkManager.send(payload);
     }
