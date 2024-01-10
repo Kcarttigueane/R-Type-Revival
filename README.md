@@ -16,6 +16,8 @@ Primary Goals:
 - Developer and User Documentation: Comprehensive documentation aimed at assisting developers in understanding the intricate details of the game's development and aiding users in appreciating the technical intricacies of their favorite game.
 
 ## Installation Process
+**Supported OS** : Windows, Linux
+
 ### Linux
 Make sure to clone vcpkg at the root of the project via 
 ``git clone https://github.com/Microsoft/vcpkg.git``
@@ -34,9 +36,60 @@ To launch the client just use
 and for the server 
 ``./r_type_server  <port>``
 
+## Developer quick start
+### Prerequises
 
-## More details 
-You can see more detailed docs on how our games works on this [link](https://r-type-4.gitbook.io/r-type/)
+- [CMake](https://cmake.org/download/) (>= 3.16)
+- [Visual Studio](https://visualstudio.microsoft.com/fr/downloads/) (Windows only)
+- [vcpkg](https://vcpkg.io/en/getting-started.html)
+- [g++](https://gcc.gnu.org/install/)
+- [clang](https://clang.llvm.org/get_started.html)
+- [git](https://git-scm.com/downloads)
+
+### Setting Up the Development Environment
+
+1. Clone the repository
+```bash
+git clone https://github.com/your-username/r-type.git
+cd r-type
+```
+2. build with cmake
+```bash
+mkdir build
+cd build
+cmake ..
+```
+3. compile with make
+```bash
+make
+```
+
+### Running the Development Server
+
+```bash
+cd server && ./r_type_server <port>
+```
+
+### Running the Development Client
+
+```bash
+cd client && ./r_type_client <address> <port>
+```
+
+### Contributing to the Project
+If you wish to contribute to the R-Type project, follow these steps:
+
+1. Fork the project
+2. Create a new branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am "Add some feature"`)
+4. Push the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+### Additional ressources
+For more in-depth information on the project's architecture, code structure, and development guidelines, refer to the [developer documentation](https://r-type-4.gitbook.io/r-type/).
+
+Feel free to reach out to the core maintainers listed below if you have any questions or need assistance during the development process.
+
 
 ## Core maintainers :sunglasses:
 

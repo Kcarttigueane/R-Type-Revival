@@ -1,0 +1,249 @@
+
+
+
+
+
+
+Epitech Lyon                                                        L. HISSINGER
+Request for Comments: 4890                                          J. DUTEL
+Category: Standards Track                                           D. WINTER
+                                                                    K. CARRRIGUEANE
+                                                                    T. DESALMAND
+                                                                 Epitech
+                                                            January 2024
+
+                            R-Type Protocols
+
+Status of this Memo
+
+   This memo is the official specification of the 2 R-Type Protocols
+   (the R-Type TCP Protocol and the R-Type UDP Protocol). The R-Type is
+   a third year project from EPITECH. Distribution of this memo is
+   unlimited.
+
+Table of Contents
+
+   1.   Introduction . . . . . . . . . . . . . . . . . . . . . . . . . 1
+   2.   R-Type architecture  . . . . . . . . . . . . . . . . . . . . . 2
+   3.   R-Type UDP Protocol  . . . . . . . . . . . . . . . . . . . . . 2
+   3a.  R-Type Connexion . . . . . . . . . . . . . . . . . . . . . . . 2
+   3b.  Frames transmission . . . . . . . . . . . . . . . . . . . . . .3
+   3c.  Player events . . . . . . . . . . . . . . . . . . . . . . . . .4
+
+
+
+1.  Introduction
+
+   The goal of the R-Type project is to create an online multiplayer
+   copy of the classic R-Type game (1987).
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119.
+
+2.  R-Type architecture
+
+   The R-Type architecture is a classic client-server game architecture.
+   All the game engine is in the server. A client connects to the server
+   by using the R-Type TCP protocol. When connected, the client MUST wait
+   for all the other player to be connected.
+   Then, the R-Type UDP protocol is used to send the game frames from
+   the server to the client and to send the player events from the
+   client to the server.
+
+
+Hissinger                     Standards Track                     [Page 1]
+
+RFC 4890                    R-Type Protocols               January 2024
+
+
+3.  R-Type UDP Protocol
+
+   Once the game is launched, the client-server communications are done
+   by using this R-Type UDP Protocol.
+
+   3a.  R-Type Connexion
+
+      For the connexion phase, the client MUST send a Payload containing
+      a Connect message containing the player's name and a sequence_number
+      Each payload MUST be preceded by a 4 bytes long header containing
+      the size of the payload (in bytes).
+
+      message Payload {
+         oneof payload_type {
+            Connect connect = 1;
+            ConnectResponse connect_response = 2;
+            Event event = 3;
+            GameState gameState = 4;
+         }
+         uint32 sequence_number = 5; // For handling ordered processing
+      }
+
+      Where the Connect message is:
+
+      message Connect {
+         string player_name = 1;
+      }
+
+      The server MUST respond with a Payload containing a ConnectResponse
+      message containing the player's unique ID and a sequence_number.
+
+      message Payload {
+         oneof payload_type {
+            Connect connect = 1;
+            ConnectResponse connect_response = 2;
+            Event event = 3;
+            GameState gameState = 4;
+         }
+         uint32 sequence_number = 5; // For handling ordered processing
+      }
+
+   Where the ConnectResponse message is:
+
+      message ConnectResponse {
+         uint32 player_id = 1;
+         enum Status {
+            OK = 0;
+            SERVER_FULL = 1;
+         }
+      }
+
+
+Hissinger                     Standards Track                     [Page 2]
+
+RFC 4890                    R-Type Protocols               January 2024
+
+
+3.  R-Type UDP Protocol
+
+   3a.  Frames transmission
+
+      Once the game is launched, the client-server communications are done
+      by using this R-Type UDP Protocol for the fralme transmission and
+      the player events.
+
+      The first purpose of the R-Type UDP Protocol is to send all the
+      frames to display (in the client) from the server to the
+      client. The payload MUST be preceded by a 4 bytes long header
+
+      The Payload MUST contain the GameState and a sequence_number.
+
+      message Payload {
+         oneof payload_type {
+            Connect connect = 1;
+            ConnectResponse connect_response = 2;
+            Event event = 3;
+            GameState gameState = 4;
+         }
+         uint32 sequence_number = 5; // For handling ordered processing
+      }
+
+      Where the GameState is described below:
+
+      message GameState {
+         repeated PlayerState players = 1;
+         repeated EnemyState enemies = 2;
+         repeated PowerUpState power_ups = 3;
+         repeated ScoreUpdate scores = 4;
+         repeated BulletState bullets = 6;
+         WaveInfo wave_info = 7;
+         uint64 timestamp = 5; // Unix timestamp in milliseconds
+      }
+
+      Each state is described below:
+
+      message PlayerState {
+         uint32 player_id = 1;
+         float pos_x = 2;
+         float pos_y = 3;
+         bool is_shooting = 5;
+      }
+
+      message EnemyState {
+         uint32 enemyId = 1;
+         float pos_x = 2;
+         float pos_y = 3;
+         string type = 4;
+         float health = 5;
+      }
+
+      message PowerUpState {
+         uint32 power_up_id = 1;
+         float pos_x = 2;
+         float pos_y = 3;
+         string type = 4;
+      }
+
+      message ScoreUpdate {
+         uint32 player_id = 1;
+         int32 score = 2;
+      }
+
+      message BulletState {
+         uint32 bulletId = 1;
+         float pos_x = 2;
+         float pos_y = 3;
+         float direction_x = 4;
+         float direction_y = 5;
+         float speed = 6;
+         uint32 owner_id = 7; // ID of the player or enemy who fired the bullet
+      }
+
+      message WaveInfo {
+         int32 current_wave = 1;
+         int32 total_enemies = 2;
+         bool wave_in_progress = 3;
+      }
+
+   The client MUST NOT respond to the server.
+
+
+Hissinger                     Standards Track                     [Page 3]
+
+RFC 4890                    R-Type Protocols               January 2024
+
+
+   3b.  Player events
+
+      The player, on the client-side, can execute several actions. On
+      each player action, the client MUST send to the server a specific
+      payload containing the event informations about the action. This
+      payload MUST containing a sequence_number and a Event message.
+
+         message Payload {
+            oneof payload_type {
+               Connect connect = 1;
+               ConnectResponse connect_response = 2;
+               Event event = 3;
+               GameState gameState = 4;
+            }
+            uint32 sequence_number = 5; // For handling ordered processing
+         }
+
+         where the Event is an enum containing all the possible events :
+
+         enum EVENT {
+            MOVEUP,
+            MOVEDOWN,
+            MOVELEFT,
+            MOVERIGHT,
+            SHOOT,
+            QUIT
+         };
+
+         The MOVE event:
+
+            The player wants to move (to the left, right, up or down).
+
+         The SHOOT event:
+
+            The player wants to shoot.
+
+         The QUIT event:
+
+            The player wants to quit the game. The client MUST warn the
+            server with this 4 bytes long payload before quitting. The
+            client MAY exit without any response from the server.
+
+Hissinger                     Standards Track                     [Page 4]
+
