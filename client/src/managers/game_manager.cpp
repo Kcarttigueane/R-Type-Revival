@@ -205,6 +205,8 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
 
 void GameManager::update_player_state(const rtype::GameState& game_state)
 {
+    std::set<std::uint32_t> currentIds;
+
     for (const auto& playerState : game_state.players()) {
         // TODO : should maybe check with my set of uint32_t if the player is already connected
         uint32_t playerID = playerState.player_id();
@@ -218,6 +220,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
                   << RESET << std::endl;
 
         entt::entity playerEntity = static_cast<entt::entity>(playerID);
+        currentIds.insert(playerID);
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
         if (!isPlayerAlreadyExist) {
@@ -249,6 +252,17 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
                       << " does not have required components." << std::endl;
+        }
+    }
+    for (auto it = _connectedPlayerIds.begin(); it != _connectedPlayerIds.end();) {
+        std::uint32_t id = *it;
+        if (!currentIds.contains(id)) {
+            if (_registry.valid(static_cast<entt::entity>(id))) {
+                _registry.destroy(static_cast<entt::entity>(id));
+            }
+            it = _connectedPlayerIds.erase(it);
+        } else {
+            ++it;
         }
     }
 }
