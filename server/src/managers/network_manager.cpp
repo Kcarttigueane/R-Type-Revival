@@ -100,7 +100,7 @@ void NetworkManager::handle_player_projectile_creation(
     std::uint32_t bulletId = _idGenerator.generateId();
     entt::entity bulletEntityId = static_cast<entt::entity>(bulletId);
     entt::entity projectile = _entityManager.createProjectile(
-        bulletEntityId, 1.0f, 0.0f, playerTransform.x + 50.0f, playerTransform.y, 25.0f,
+        bulletEntityId, std::pair(1.0f, 0.0f), std::pair(playerTransform.x + 100.0f, playerTransform.y + 15.0f), 25.0f,
         EntityType::PLAYER, static_cast<uint32_t>(playerEntity)
     );
 }

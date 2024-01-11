@@ -193,10 +193,7 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
     if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
         std::cout << "Connect response -> OK" << std::endl;
         // TODO : should I check if the set can container max 4 players
-        entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
-        auto playerEntity = _entityFactory.createPlayer(player);
-        _connectedPlayerIds.insert(payload.connect_response().player_id());
-
+        _playerProfileManager.setPlayerEntity(static_cast<entt::entity>(payload.connect_response().player_id()));
         _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
         std::cout << "Connect response  -> KO" << std::endl;
@@ -209,23 +206,23 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
 
 void GameManager::update_player_state(const rtype::GameState& game_state)
 {
+    std::set<std::uint32_t> currentIds;
+
     for (const auto& playerState : game_state.players()) {
         // TODO : should maybe check with my set of uint32_t if the player is already connected
         uint32_t playerID = playerState.player_id();
         float posX = playerState.pos_x();
         float posY = playerState.pos_y();
-        float health = playerState.health();
-        bool isShooting = playerState.is_shooting();
 
         std::cout << MAGENTA << "Player " << playerID << ": Position(" << posX << ", " << posY
-                  << "), Health: " << health << ", IsShooting: " << (isShooting ? "Yes" : "No")
-                  << RESET << std::endl;
+                  << ")" << RESET << std::endl;
 
         entt::entity playerEntity = static_cast<entt::entity>(playerID);
+        currentIds.insert(playerID);
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
         if (!isPlayerAlreadyExist) {
-            _entityFactory.createPlayer(playerEntity);
+            _entityFactory.createPlayer(playerEntity, std::pair(posX, posY));
             _connectedPlayerIds.insert(playerID);
         }
 
@@ -236,23 +233,33 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         }
 
         if (_registry
-                .all_of<TransformComponent, HealthComponent, ScoreComponent, RenderableComponent>(
+                .all_of<TransformComponent, RenderableComponent>(
                     playerEntity
                 )) {
             auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
-            auto& healthComponent = _registry.get<HealthComponent>(playerEntity);
-            auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
             auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
 
             transformComponent.x = posX;
             transformComponent.y = posY;
 
-            healthComponent.healthPoints = health;
-
             renderableComponent.sprite.setPosition(posX, posY);
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
                       << " does not have required components." << std::endl;
+        }
+    }
+
+    for (auto it = _connectedPlayerIds.begin(); it != _connectedPlayerIds.end();) {
+        std::uint32_t id = *it;
+        if (!currentIds.contains(id)) {
+            if (_registry.valid(static_cast<entt::entity>(id))) {
+                TransformComponent& transformable = _registry.get<TransformComponent>(static_cast<entt::entity>(id));
+                _entityFactory.createExplosion(std::pair(transformable.x, transformable.y));
+                _registry.destroy(static_cast<entt::entity>(id));
+            }
+            it = _connectedPlayerIds.erase(it);
+        } else {
+            ++it;
         }
     }
 }
@@ -263,15 +270,11 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
 
     for (const auto& bulletState : game_state.bullets()) {
         std::uint32_t bulletID = bulletState.bullet_id();
-        float pos_x = bulletState.pos_x();
-        float pos_y = bulletState.pos_y();
-        float direction_x = bulletState.direction_x();
-        float direction_y = bulletState.direction_y();
-        float velocity = bulletState.speed();
+        float posX = bulletState.pos_x();
+        float posY = bulletState.pos_y();
         std::uint32_t ownerID = bulletState.owner_id();
 
-        std::cout << MAGENTA << "Bullet " << bulletID << ": DirectionX: " << direction_x << ", "
-                  << "DirectionY: " << direction_y << RESET << std::endl;
+        std::cout << MAGENTA << "Bullet " << bulletID << RESET << std::endl;
 
         entt::entity bulletEntity = static_cast<entt::entity>(bulletID);
         currentIds.insert(bulletID);
@@ -279,11 +282,11 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
         if (!_bulletIds.contains(bulletID)) {
             if (_connectedPlayerIds.contains(ownerID)) {
                 _entityFactory.createProjectile(
-                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                    bulletEntity, std::pair(posX, posY)
                 );
             } else {
                 _entityFactory.createEnemyProjectile(
-                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                    bulletEntity, std::pair(posX, posY)
                 );
             }
             _bulletIds.insert(bulletID);
@@ -293,8 +296,8 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
             TransformComponent& transformable = _registry.get<TransformComponent>(bulletEntity);
             RenderableComponent& renderable = _registry.get<RenderableComponent>(bulletEntity);
 
-            transformable.x = pos_x;
-            transformable.y = pos_y;
+            transformable.x = posX;
+            transformable.y = posY;
 
             renderable.sprite.setPosition(sf::Vector2f(transformable.x, transformable.y));
         } else {
