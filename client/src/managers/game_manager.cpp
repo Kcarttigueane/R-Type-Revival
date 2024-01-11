@@ -145,7 +145,7 @@ bool GameManager::isInputEvent(const sf::Event& event)
 
 void GameManager::deleteAIEnemies()
 {
-    auto enemies = _registry.view<EnemyAIComponent>();
+    auto enemies = _registry.view<EnemyComponent>();
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
     }

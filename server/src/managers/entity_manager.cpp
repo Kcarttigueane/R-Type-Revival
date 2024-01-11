@@ -30,7 +30,7 @@ entt::entity EntityManager::createNormalEnemy(entt::entity hint, float spawnHeig
 {
     auto enemy = _registry.create();
 
-    _registry.emplace<EnemyAIComponent>(enemy);
+    _registry.emplace<EnemyComponent>(enemy, EnemyType::NORMAL);
     _registry.emplace<TransformComponent>(
         enemy, WINDOW_WIDTH + 128.0f, spawnHeight, 0.0f, 1.0f, 1.0f, 0.0f
     );
@@ -61,7 +61,8 @@ entt::entity EntityManager::createFastEnemy(entt::entity hint, float spawnWidth,
 {
     auto enemy = _registry.create();
 
-    _registry.emplace<EnemyAIComponent>(enemy);
+    _registry.emplace<EnemyComponent>(enemy, EnemyType::FAST);
+
     TransformComponent transformComponent = {
         .x = spawnWidth,
         .y = -128.0f,

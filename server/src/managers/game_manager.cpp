@@ -2,7 +2,9 @@
 
 GameManager::GameManager(const std::string& server_address, std::string port)
     : _network_manager(_io_context, port, _entity_manager, _idGenerator)
-{}
+{
+    initializeWaves();
+}
 
 GameManager::~GameManager()
 {
@@ -13,23 +15,24 @@ GameManager::~GameManager()
 
 void GameManager::run()
 {
-    // _network_thread = std::thread([this]() { _io_context.run(); });
     _network_thread = std::jthread([this]() { _io_context.run(); });
     game_loop();
 }
 
 void GameManager::game_loop()
 {
-    while (_game_metadata.isRunning) {
-        // TODO : Deal with game updates
+    using Clock = std::chrono::steady_clock;
+    auto last_update = Clock::now();
 
-        static auto last_update = std::chrono::steady_clock::now();
-        auto now = std::chrono::steady_clock::now();
-        if (now - last_update >= std::chrono::milliseconds(UPDATE_INTERVAL_MS)) {
+    while (_game_metadata.isRunning) {
+        auto now = Clock::now();
+        float deltaTime =
+            std::chrono::duration<float, std::chrono::seconds::period>(now - last_update).count();
+
+        if (deltaTime >= UPDATE_INTERVAL_MS / 1000.0f) {
+            updateGameLogic(deltaTime);
             _network_manager.broadcast_game_state();
             last_update = now;
         }
-
-        // TODO : Deal with game process -> enemies creations
     }
 }

@@ -100,7 +100,7 @@ public:
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addWaveStateToGameState(rtype::GameState& game_state);
     void sendGameStateToAllSessions(rtype::GameState& game_state);
-    void broadcast_game_state(rtype::GameState& gameState);
+    void broadcast_game_state();
 };
 
 #endif  // UPD_SERVER_HPP

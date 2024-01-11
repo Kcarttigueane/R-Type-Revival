@@ -192,19 +192,19 @@ void NetworkManager::addEnemyStatesToGameState(
     rtype::GameState& game_state, entt::registry& registry
 )
 {
-    auto view = registry.view<EnemyAIComponent, TransformComponent, HealthComponent>();
+    auto view = registry.view<EnemyComponent, TransformComponent, HealthComponent>();
 
     for (auto entity : view) {
         auto& transformComponent = view.get<TransformComponent>(entity);
         auto& healthComponent = view.get<HealthComponent>(entity);
+        auto& enemyComponent = view.get<EnemyComponent>(entity);
 
         rtype::EnemyState enemy_state;
         enemy_state.set_enemy_id(static_cast<uint32_t>(entity));
         enemy_state.set_pos_x(transformComponent.x);
         enemy_state.set_pos_y(transformComponent.y);
         enemy_state.set_health(healthComponent.healthPoints);
-        enemy_state.set_type(rtype::NORMAL);
-        // TODO : see with other how we deal with type of weapons
+        enemy_state.set_type(static_cast<rtype::EnemyType>(enemyComponent.type));
 
         game_state.add_enemies()->CopyFrom(enemy_state);
     }
@@ -218,7 +218,7 @@ void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
     std::string serialized_state;
     payload.SerializeToString(&serialized_state);
 
-    // std::cout << "Sending game state: " << payload.DebugString() << std::endl;
+    std::cout << "Sending game state: " << payload.DebugString() << std::endl;
 
     for (const auto& [endpoint, session] : _sessions) {
         // std::cout << GREEN << "Sending game state to: " << endpoint << RESET << std::endl;
@@ -233,24 +233,26 @@ void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
 
 void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
 {
-    rtype::WaveState wave_state;
-    wave_state.set_current_wave(1);
-    wave_state.set_total_enemies(1);
-    wave_state.set_wave_in_progress(true);
+    // rtype::WaveState wave_state;
+    // wave_state.set_current_wave(1);
+    // wave_state.set_total_enemies(1);
+    // wave_state.set_wave_in_progress(true);
 
-    game_state.mutable_wave_state()->CopyFrom(wave_state);
+    // game_state.mutable_wave_state()->CopyFrom(wave_state);
 
-    rtype::Payload payload;
+    // rtype::Payload payload;
 
-    payload.mutable_game_state()->CopyFrom(game_state);
+    // payload.mutable_game_state()->CopyFrom(game_state);
 
-    std::string serialized_state;
+    // std::string serialized_state;
 
-    payload.SerializeToString(&serialized_state);
+    // payload.SerializeToString(&serialized_state);
 }
 
-void NetworkManager::broadcast_game_state(rtype::GameState& game_state)
+void NetworkManager::broadcast_game_state()
 {
+    rtype::GameState game_state;
+
     entt::registry& registry = _entityManager.getRegistry();
 
     addPlayerStateToGameState(game_state, registry);

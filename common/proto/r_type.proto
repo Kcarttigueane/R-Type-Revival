@@ -3,92 +3,94 @@ syntax = "proto3";
 package rtype;
 
 enum EventType {
-    MOVE_UP = 0;
-    MOVE_DOWN = 1;
-    MOVE_LEFT = 2;
-    MOVE_RIGHT = 3;
-    SHOOT = 4;
-    QUIT = 5;
+  MOVE_UP = 0;
+  MOVE_DOWN = 1;
+  MOVE_LEFT = 2;
+  MOVE_RIGHT = 3;
+  SHOOT = 4;
+  QUIT = 5;
 }
 
-message Event {
-    EventType event = 1;
+enum EnemyType {
+  NORMAL = 0;
+  FAST = 1;
+  BOSS = 2;
 }
+
+message Event { EventType event = 1; }
 
 message PlayerState {
-    uint32 player_id = 1;
-    float pos_x = 2;
-    float pos_y = 3;
-    float health = 5;
-    bool is_shooting = 6;
+  uint32 player_id = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+  float health = 5;
+  bool is_shooting = 6;
 }
 
 message EnemyState {
-    uint32 enemy_id = 1;
-    float pos_x = 2;
-    float pos_y = 3;
-    string type = 4;
-    float health = 5;
+  uint32 enemy_id = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+  EnemyType type = 4;
+  float health = 5;
 }
 
 message PowerUpState {
-    uint32 power_up_id = 1;
-    float pos_x = 2;
-    float pos_y = 3;
-    string type = 4;
+  uint32 power_up_id = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+  string type = 4;
 }
 
 message ScoreUpdate {
-    uint32 player_id = 1;
-    int32 score = 2;
+  uint32 player_id = 1;
+  int32 score = 2;
 }
 
 message WaveState {
-    int32 current_wave = 1;
-    int32 total_enemies = 2;
-    bool wave_in_progress = 3;
+  int32 current_wave = 1;
+  int32 total_enemies = 2;
+  bool wave_in_progress = 3;
 }
 
 message BulletState {
-    uint32 bullet_id = 1;
-    float pos_x = 2;
-    float pos_y = 3;
-    float direction_x = 4;
-    float direction_y = 5;
-    float speed = 6;
-    uint32 owner_id = 7; // ID of the player or enemy who fired the bullet
+  uint32 bullet_id = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+  float direction_x = 4;
+  float direction_y = 5;
+  float speed = 6;
+  uint32 owner_id = 7; // ID of the player or enemy who fired the bullet
 }
 
 message GameState {
-    repeated PlayerState players = 1;
-    repeated EnemyState enemies = 2;
-    repeated PowerUpState power_ups = 3;
-    repeated ScoreUpdate scores = 4;
-    repeated BulletState bullets = 6;
-    WaveState wave_state = 7;
-    uint64 timestamp = 5; // Unix timestamp in milliseconds
+  repeated PlayerState players = 1;
+  repeated EnemyState enemies = 2;
+  repeated PowerUpState power_ups = 3;
+  repeated ScoreUpdate scores = 4;
+  repeated BulletState bullets = 6;
+  WaveState wave_state = 7;
+  uint64 timestamp = 5; // Unix timestamp in milliseconds
 }
 
-message Connect {
-    string player_name = 1;
-}
+message Connect { string player_name = 1; }
 
 enum ConnectResponseStatus {
-    SUCCESS = 0;
-    SERVER_FULL = 1;
+  SUCCESS = 0;
+  SERVER_FULL = 1;
 }
 
 message ConnectResponse {
-    uint32 player_id = 1;
-    ConnectResponseStatus status = 2;
+  uint32 player_id = 1;
+  ConnectResponseStatus status = 2;
 }
 
 message Payload {
-    oneof payload_type {
-        Connect connect = 1;
-        ConnectResponse connect_response = 2;
-        Event event = 3;
-        GameState game_state = 4;
-    }
-    uint32 sequence_number = 5; // For handling ordered processing
+  oneof payload_type {
+    Connect connect = 1;
+    ConnectResponse connect_response = 2;
+    Event event = 3;
+    GameState game_state = 4;
+  }
+  uint32 sequence_number = 5; // For handling ordered processing
 }
