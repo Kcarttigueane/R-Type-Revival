@@ -98,30 +98,6 @@ void WaveManager::updateCurrentWave(float deltaTime)
     }
 }
 
-// void WaveManager::updateWaves(float deltaTime)
-// {
-//     if (_currentWaveIndex < _waves.size()) {
-//         Wave& currentWave = _waves[_currentWaveIndex];
-//         std::cout << "Wave " << currentWave.number << " is active: " << currentWave.isActive
-//                   << std::endl;
-//         std::cout << "Wave active: " << currentWave.isActive << std::endl;
-
-//         if (!currentWave.isActive) {
-//             startWave(currentWave);
-//         } else {
-//             _waveTimer += deltaTime;
-//             std::cout << "Wave " << currentWave.number << " timer: " << _waveTimer << std::endl;
-
-//             if (_waveTimer >= currentWave.duration) {
-//                 std::cout << "Ending wave " << currentWave.number << std::endl;
-//                 endWave(currentWave);
-//                 _waveTimer = 0.0f;
-//                 _currentWaveIndex++;
-//             }
-//         }
-//     }
-// }
-
 void WaveManager::startWave(Wave& wave)
 {
     if (!wave.isActive) {
