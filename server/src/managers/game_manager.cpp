@@ -28,6 +28,7 @@ void GameManager::game_loop()
         if (now - last_update >= std::chrono::milliseconds(UPDATE_INTERVAL_MS)) {
             _network_manager.broadcast_game_state();
             last_update = now;
+            velocitySystem();
         }
 
         // TODO : Deal with game process -> enemies creations

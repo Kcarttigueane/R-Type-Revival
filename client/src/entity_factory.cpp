@@ -25,6 +25,28 @@ entt::entity EntityFactory::createPlayer(entt::entity hint)
     return player;
 }
 
+entt::entity EntityFactory::createProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity)
+{
+    auto projectile = _registry.create(hint);
+    auto texture = _resourceManager.loadTexture(_assetsPath + "/player/player_shots_revamped.png");
+    sf::IntRect initialFrameRect(0, 0, 54, 12);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(x, y));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
+    _registry.emplace<TransformComponent>(projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
+    _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
+    _registry.emplace<DamageComponent>(projectile, 100.0f);
+    _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
+    _registry.emplace<HoldAnimationComponent>(projectile, 6, 0.2f, true);
+    _registry.emplace<PlayerProjectileComponent>(projectile);
+    return projectile;
+}
+
 entt::entity EntityFactory::createNormalEnemy(float spawnHeight, float speed)
 {
     auto enemy = _registry.create();
@@ -81,31 +103,10 @@ entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
     return enemy;
 }
 
-entt::entity EntityFactory::createProjectile(float dx, float dy, float x, float y, float velocity)
-{
-    auto projectile = _registry.create();
-    auto texture = _resourceManager.loadTexture(_assetsPath + "/player/player_shots_revamped.png");
-    sf::IntRect initialFrameRect(0, 0, 54, 12);
-    RenderableComponent renderable;
-    renderable.texture = texture;
-    renderable.sprite.setPosition(sf::Vector2f(x, y));
-    renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
-    renderable.frameRect = initialFrameRect;
-    renderable.sprite.setTextureRect(initialFrameRect);
-    _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
-    _registry.emplace<TransformComponent>(projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
-    _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
-    _registry.emplace<DamageComponent>(projectile, 100.0f);
-    _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
-    _registry.emplace<HoldAnimationComponent>(projectile, 6, 0.2f, true);
-    _registry.emplace<PlayerProjectileComponent>(projectile);
-    return projectile;
-}
 
-entt::entity EntityFactory::createEnemyProjectile(float dx, float dy, float x, float y, float velocity)
+entt::entity EntityFactory::createEnemyProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity)
 {
-    auto projectile = _registry.create();
+    auto projectile = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/enemy_shot.png");
     sf::IntRect initialFrameRect(0, 0, 7, 6);
     RenderableComponent renderable;

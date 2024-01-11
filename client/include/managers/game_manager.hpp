@@ -69,6 +69,7 @@ private:
     // --------------------------------------
 
     std::set<uint32_t> _connectedPlayerIds;
+    std::set<uint32_t> _bulletIds;
 
     int _currentWaveLevel = 0;
     std::set<uint32_t> _enemiesIds;
@@ -114,6 +115,8 @@ public:
     void handleConnectResponse(const rtype::Payload& payload);
 
     void update_player_state(const rtype::GameState& game_state);
+
+    void updateBulletState(const rtype::GameState& game_state);
 
     void update_game_wave(const rtype::GameState& game_state);
 

@@ -69,7 +69,7 @@ public:
      * @param velocity The velocity of the projectile.
      * @return The created projectile entity.
      */
-    entt::entity createProjectile(float dx, float dy, float x, float y, float velocity);
+    entt::entity createProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity, uint32_t ownerID);
 };
 
 #endif  // ENTITY_MANAGER_HPP

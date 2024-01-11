@@ -15,12 +15,6 @@ void GameManager::renderSystem()
     for (auto entity : view) {
         auto& renderable = view.get<RenderableComponent>(entity);
         auto& sceneComponent = view.get<SceneComponent>(entity);
-
-        if (_registry.all_of<TransformComponent>(entity)) {
-            auto& transform = _registry.get<TransformComponent>(entity);
-            renderable.sprite.setPosition(sf::Vector2f(transform.x, transform.y));
-        }
-
         if (sceneComponent.scene.has_value() &&
             sceneComponent.scene == _sceneManager.getCurrentScene()) {
 

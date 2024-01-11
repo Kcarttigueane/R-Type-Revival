@@ -63,6 +63,8 @@ private:
 
     void handle_player_quit(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
 
+    void handle_player_projectile_creation(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
+
     void send_message(const std::string& serialized_message, const udp::endpoint& target_endpoint)
     {
         _socket.async_send_to(
@@ -98,6 +100,7 @@ public:
     // ! Broadcast GameState Payload:
     void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
+    void addBulletStatesToGameState(rtype::GameState& gameState, entt::registry &registry);
     void addWaveStateToGameState(rtype::GameState& game_state);
     void sendGameStateToAllSessions(const rtype::GameState& game_state);
     void broadcast_game_state();
