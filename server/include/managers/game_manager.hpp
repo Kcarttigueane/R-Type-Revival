@@ -34,6 +34,8 @@ public:
     void run();
 
     void game_loop();
+
+    void velocitySystem();
 };
 
 #endif  // GAME_MANGER_HPP

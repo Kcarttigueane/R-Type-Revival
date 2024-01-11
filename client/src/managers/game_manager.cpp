@@ -16,11 +16,15 @@ GameManager::GameManager(
       _entityFactory(_registry, _resourceManager, _window)
 {
     std::cout << "GameManager created!" << std::endl;
-    _shootingSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
-    _explostionSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
-    _musicSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
+
+    _shootingSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
+    _explosionSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
+    _musicSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
     _shootingSound.setVolumeLevel(1.5f);
-    _explostionSound.setVolumeLevel(7.5f);
+    _explosionSound.setVolumeLevel(7.5f);
     _musicSound.setVolumeLevel(2.0f);
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
@@ -253,6 +257,65 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
     }
 }
 
+void GameManager::updateBulletState(const rtype::GameState& game_state)
+{
+    std::set<std::uint32_t> currentIds;
+
+    for (const auto& bulletState : game_state.bullets()) {
+        std::uint32_t bulletID = bulletState.bullet_id();
+        float pos_x = bulletState.pos_x();
+        float pos_y = bulletState.pos_y();
+        float direction_x = bulletState.direction_x();
+        float direction_y = bulletState.direction_y();
+        float velocity = bulletState.speed();
+        std::uint32_t ownerID = bulletState.owner_id();
+
+        std::cout << MAGENTA << "Bullet " << bulletID << ": DirectionX: " << direction_x << ", "
+                  << "DirectionY: " << direction_y << RESET << std::endl;
+
+        entt::entity bulletEntity = static_cast<entt::entity>(bulletID);
+        currentIds.insert(bulletID);
+
+        if (!_bulletIds.contains(bulletID)) {
+            if (_connectedPlayerIds.contains(ownerID)) {
+                _entityFactory.createProjectile(
+                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                );
+            } else {
+                _entityFactory.createEnemyProjectile(
+                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                );
+            }
+            _bulletIds.insert(bulletID);
+        }
+
+        if (_registry.all_of<TransformComponent, RenderableComponent>(bulletEntity)) {
+            TransformComponent& transformable = _registry.get<TransformComponent>(bulletEntity);
+            RenderableComponent& renderable = _registry.get<RenderableComponent>(bulletEntity);
+
+            transformable.x = pos_x;
+            transformable.y = pos_y;
+
+            renderable.sprite.setPosition(sf::Vector2f(transformable.x, transformable.y));
+        } else {
+            std::cerr << "updateBulletState() << Entity with ID " << bulletID
+                      << " does not have required components." << std::endl;
+        }
+    }
+
+    for (auto it = _bulletIds.begin(); it != _bulletIds.end();) {
+        std::uint32_t id = *it;
+        if (!currentIds.contains(id)) {
+            if (_registry.valid(static_cast<entt::entity>(id))) {
+                _registry.destroy(static_cast<entt::entity>(id));
+            }
+            it = _bulletIds.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 void GameManager::update_game_wave(const rtype::GameState& game_state)
 {
     if (game_state.has_wave_state()) {
@@ -338,6 +401,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
         const rtype::GameState& gameState = payload.game_state();
 
         update_player_state(gameState);
+        updateBulletState(gameState);
         // update_player_score(gameState);
         // update_enemies_state(gameState);
         // update_game_wave(gameState);
