@@ -44,7 +44,10 @@ entt::entity EntityManager::createNormalEnemy(float spawnHeight, float speed)
     return enemy;
 }
 
-entt::entity EntityManager::createProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity, EntityType type, std::uint32_t ownerId)
+entt::entity EntityManager::createProjectile(
+    entt::entity hint, float dx, float dy, float x, float y, float velocity, EntityType type,
+    std::uint32_t ownerId
+)
 {
     auto projectile = _registry.create(hint);
     _registry.emplace<OwnerComponent>(projectile, ownerId);

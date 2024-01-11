@@ -63,7 +63,7 @@ private:
     // IF IMPROVABLE, IMPROVE! //
 
     SoundComponent _shootingSound;
-    SoundComponent _explostionSound;
+    SoundComponent _explosionSound;
     SoundComponent _musicSound;
 
     // --------------------------------------

@@ -25,7 +25,9 @@ entt::entity EntityFactory::createPlayer(entt::entity hint)
     return player;
 }
 
-entt::entity EntityFactory::createProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity)
+entt::entity EntityFactory::createProjectile(
+    entt::entity hint, float dx, float dy, float x, float y, float velocity
+)
 {
     auto projectile = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/player/player_shots_revamped.png");
@@ -90,9 +92,7 @@ entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
     renderable.sprite.setTextureRect(initialFrameRect);
     _registry.emplace<EnemyAIComponent>(enemy);
     _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
-    _registry.emplace<TransformComponent>(
-        enemy, spawnWidth, -128.0f, 0.0f, 1.0f, 1.0f, 0.0f
-    );
+    _registry.emplace<TransformComponent>(enemy, spawnWidth, -128.0f, 0.0f, 1.0f, 1.0f, 0.0f);
     _registry.emplace<VelocityComponent>(enemy, 0.0f, 1.0f, speed);
     _registry.emplace<WeaponComponent>(
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
@@ -103,8 +103,9 @@ entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
     return enemy;
 }
 
-
-entt::entity EntityFactory::createEnemyProjectile(entt::entity hint, float dx, float dy, float x, float y, float velocity)
+entt::entity EntityFactory::createEnemyProjectile(
+    entt::entity hint, float dx, float dy, float x, float y, float velocity
+)
 {
     auto projectile = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/enemy_shot.png");
@@ -187,14 +188,18 @@ entt::entity EntityFactory::createWaveTransition(std::string title)
     renderable.text.setCharacterSize(96);
     sf::FloatRect titleBounds = renderable.text.getLocalBounds();
     renderable.text.setOrigin(titleBounds.width / 2, titleBounds.height / 2);
-    renderable.text.setPosition(_window.getSize().x + titleBounds.width / 2, _window.getSize().y / 2);
-    _registry.emplace<TransformComponent>(transitionTitle, _window.getSize().x + titleBounds.width / 2.0f, _window.getSize().y / 2.0f, 0.0f, 1.0f, 1.0f, 0.0f);
+    renderable.text.setPosition(
+        _window.getSize().x + titleBounds.width / 2, _window.getSize().y / 2
+    );
+    _registry.emplace<TransformComponent>(
+        transitionTitle, _window.getSize().x + titleBounds.width / 2.0f, _window.getSize().y / 2.0f,
+        0.0f, 1.0f, 1.0f, 0.0f
+    );
     _registry.emplace<VelocityComponent>(transitionTitle, -1.0f, 0.0f, 5.0f);
     _registry.emplace<RenderableComponent>(transitionTitle, std::move(renderable));
     _registry.emplace<SceneComponent>(transitionTitle, GameScenes::InGame);
     return transitionTitle;
 }
-
 
 entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFilepath)
 {

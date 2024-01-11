@@ -90,13 +90,19 @@ void NetworkManager::handle_connection_request(const rtype::Connect& connect_mes
     send_connection_response(true, player_id);
 }
 
-void NetworkManager::handle_player_projectile_creation(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity)
+void NetworkManager::handle_player_projectile_creation(
+    std::shared_ptr<PlayerSession>& session, entt::entity playerEntity
+)
 {
     std::cout << "Creating projectile" << std::endl;
-    TransformComponent playerTransform = _entityManager.getRegistry().get<TransformComponent>(playerEntity);
+    TransformComponent playerTransform =
+        _entityManager.getRegistry().get<TransformComponent>(playerEntity);
     std::uint32_t bulletId = _idGenerator.generateId();
     entt::entity bulletEntityId = static_cast<entt::entity>(bulletId);
-    entt::entity projectile = _entityManager.createProjectile(bulletEntityId, 1.0f, 0.0f, playerTransform.x + 50.0f, playerTransform.y, 25.0f, EntityType::PLAYER, static_cast<uint32_t>(playerEntity));
+    entt::entity projectile = _entityManager.createProjectile(
+        bulletEntityId, 1.0f, 0.0f, playerTransform.x + 50.0f, playerTransform.y, 25.0f,
+        EntityType::PLAYER, static_cast<uint32_t>(playerEntity)
+    );
 }
 
 void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint)
@@ -211,9 +217,13 @@ void NetworkManager::addEnemyStatesToGameState(
     }
 }
 
-void NetworkManager::addBulletStatesToGameState(rtype::GameState& gameState, entt::registry &registry)
+void NetworkManager::addBulletStatesToGameState(
+    rtype::GameState& gameState, entt::registry& registry
+)
 {
-    auto view = registry.view<VelocityComponent, TransformComponent, DamageComponent, BulletTypeComponent, OwnerComponent>();
+    auto view = registry.view<
+        VelocityComponent, TransformComponent, DamageComponent, BulletTypeComponent,
+        OwnerComponent>();
     for (auto& entity : view) {
         TransformComponent& transformable = view.get<TransformComponent>(entity);
         VelocityComponent& velocity = view.get<VelocityComponent>(entity);

@@ -6,4 +6,6 @@
 
 #define UPDATE_INTERVAL_MS 15
 
+#define OUT_OF_BOUND 1000.0f
+
 #endif  // !CONFIG_HPP

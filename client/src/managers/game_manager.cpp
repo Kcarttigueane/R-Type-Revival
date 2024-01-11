@@ -16,11 +16,15 @@ GameManager::GameManager(
       _entityFactory(_registry, _resourceManager, _window)
 {
     std::cout << "GameManager created!" << std::endl;
-    _shootingSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
-    _explostionSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
-    _musicSound = SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
+
+    _shootingSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
+    _explosionSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
+    _musicSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
     _shootingSound.setVolumeLevel(1.5f);
-    _explostionSound.setVolumeLevel(7.5f);
+    _explosionSound.setVolumeLevel(7.5f);
     _musicSound.setVolumeLevel(2.0f);
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
@@ -266,7 +270,7 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
         float velocity = bulletState.speed();
         std::uint32_t ownerID = bulletState.owner_id();
 
-        std::cout << MAGENTA << "Bullet " << bulletID << ": DirectionX: " << direction_x << ", " 
+        std::cout << MAGENTA << "Bullet " << bulletID << ": DirectionX: " << direction_x << ", "
                   << "DirectionY: " << direction_y << RESET << std::endl;
 
         entt::entity bulletEntity = static_cast<entt::entity>(bulletID);
@@ -274,9 +278,13 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
 
         if (!_bulletIds.contains(bulletID)) {
             if (_connectedPlayerIds.contains(ownerID)) {
-                _entityFactory.createProjectile(bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity);
+                _entityFactory.createProjectile(
+                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                );
             } else {
-                _entityFactory.createEnemyProjectile(bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity);
+                _entityFactory.createEnemyProjectile(
+                    bulletEntity, direction_x, direction_y, pos_x, pos_y, velocity
+                );
             }
             _bulletIds.insert(bulletID);
         }
