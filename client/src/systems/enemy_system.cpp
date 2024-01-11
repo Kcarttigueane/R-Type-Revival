@@ -4,7 +4,7 @@
 void GameManager::enemySystem(sf::Sound& explosionSound)
 {
     entt::basic_view enemies =
-        _registry.view<EnemyAIComponent, TransformComponent, HealthComponent>();
+        _registry.view<EnemyComponent, TransformComponent, HealthComponent>();
 
     for (auto& entity : enemies) {
         float& health = enemies.get<HealthComponent>(entity).healthPoints;
@@ -21,7 +21,7 @@ void GameManager::enemySystem(sf::Sound& explosionSound)
 void GameManager::makeEnemyShoot()
 {
     entt::basic_view shootingEnemies =
-        _registry.view<EnemyAIComponent, WeaponComponent, TransformComponent>();
+        _registry.view<EnemyComponent, WeaponComponent, TransformComponent>();
 
     for (auto& enemy : shootingEnemies) {
         float enemyX = shootingEnemies.get<TransformComponent>(enemy).x;
