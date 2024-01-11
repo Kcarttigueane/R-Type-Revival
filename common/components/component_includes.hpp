@@ -17,5 +17,6 @@
 #    include "./weapon.hpp"
 #    include "./planet.hpp"
 #    include "./owner.hpp"
+#    include "./bulletType.hpp"
 
 #endif  // COMPONENTS_INCLUDE

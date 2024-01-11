@@ -10,6 +10,8 @@
 
 #    include "../../../common/utils/id_generator.hpp"
 
+#define OUT_OF_BOUND 1000.0f
+
 class GameManager {
 private:
     boost::asio::io_context _io_context;

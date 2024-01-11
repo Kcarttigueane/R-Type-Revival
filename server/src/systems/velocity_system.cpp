@@ -9,8 +9,8 @@ void GameManager::velocitySystem()
         VelocityComponent &velocity = registry.get<VelocityComponent>(entity);
         transformable.x = transformable.x + velocity.dx * velocity.speed;
         transformable.y = transformable.y + velocity.dy * velocity.speed;
-        if (transformable.x > WINDOW_WIDTH + 1000.0f || transformable.x < -1000.0f ||
-        transformable.y > WINDOW_HEIGHT + 1000.0f || transformable.y <- 1000.0f) {
+        if (transformable.x > WINDOW_WIDTH + OUT_OF_BOUND || transformable.x < -OUT_OF_BOUND ||
+        transformable.y > WINDOW_HEIGHT + OUT_OF_BOUND || transformable.y < -OUT_OF_BOUND) {
             registry.destroy(entity);
             printf("Entity out of bound destroyed\n");
         }
