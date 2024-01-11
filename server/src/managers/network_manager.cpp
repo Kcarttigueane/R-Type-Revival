@@ -111,16 +111,24 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
 
         switch (event.event()) {
             case rtype::EventType::MOVE_UP:
-                transformComponent.y -= 10;
+                if (transformComponent.y > 0) {
+                    transformComponent.y -= 10;
+                }
                 break;
             case rtype::EventType::MOVE_DOWN:
-                transformComponent.y += 10;
+                if (transformComponent.y < WINDOW_HEIGHT) {
+                    transformComponent.y += 10;
+                }
                 break;
             case rtype::EventType::MOVE_LEFT:
-                transformComponent.x -= 10;
+                if (transformComponent.x > 0) {
+                    transformComponent.x -= 10;
+                }
                 break;
             case rtype::EventType::MOVE_RIGHT:
-                transformComponent.x += 10;
+                if (transformComponent.x < WINDOW_WIDTH) {
+                    transformComponent.x += 10;
+                }
                 break;
             case rtype::EventType::SHOOT:
                 std::cout << "SHOOT" << std::endl;
