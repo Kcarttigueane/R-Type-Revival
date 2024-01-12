@@ -19,3 +19,14 @@ void PlayerProfileManager::setPlayerName(string name)
 {
     player_name = name;
 }
+
+[[nodiscard]] int PlayerProfileManager::getPlayerHealth() const
+{
+    return player_health;
+}
+
+void PlayerProfileManager::setPlayerHealth(int health)
+{
+    player_health = health;
+}
+
