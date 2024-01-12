@@ -106,12 +106,12 @@ void GameManager::game_loop()
                 _networkManager.send(payload);
             }
         }
-        if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
-            transitionClock.restart();
-            //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
-            makeEnemyShoot();
-            wave++;
-        }
+        // if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
+        //     transitionClock.restart();
+        //     //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
+        //     // makeEnemyShoot();
+        //     wave++;
+        // }
         _window.clear();
 
         processServerResponse();

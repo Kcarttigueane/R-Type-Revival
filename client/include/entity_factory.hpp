@@ -27,13 +27,17 @@ public:
 
     entt::entity createPlayer(entt::entity hint);
 
-    entt::entity createNormalEnemy(float spawnHeight, float speed);
+    entt::entity createNormalEnemy(entt::entity hint, float spawnHeight, float speed);
 
-    entt::entity createFastEnemy(float spawnWidth, float speed);
+    entt::entity createFastEnemy(entt::entity hint, float spawnWidth, float speed);
 
-    entt::entity createProjectile(float dx, float dy, float x, float y, float velocity);
+    entt::entity createProjectile(
+        entt::entity hint, float dx, float dy, float x, float y, float velocity
+    );
 
-    entt::entity createEnemyProjectile(float dx, float dy, float x, float y, float velocity);
+    entt::entity createEnemyProjectile(
+        entt::entity hint, float dx, float dy, float x, float y, float velocity
+    );
 
     entt::entity createExplosion(float x, float y);
 

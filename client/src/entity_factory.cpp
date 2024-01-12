@@ -25,7 +25,7 @@ entt::entity EntityFactory::createPlayer(entt::entity hint)
     return player;
 }
 
-entt::entity EntityFactory::createNormalEnemy(float spawnHeight, float speed)
+entt::entity EntityFactory::createNormalEnemy(entt::entity hint, float spawnHeight, float speed)
 {
     auto enemy = _registry.create();
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
@@ -53,7 +53,7 @@ entt::entity EntityFactory::createNormalEnemy(float spawnHeight, float speed)
     return enemy;
 }
 
-entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
+entt::entity EntityFactory::createFastEnemy(entt::entity hint, float spawnWidth, float speed)
 {
     auto enemy = _registry.create();
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
@@ -79,7 +79,9 @@ entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
     return enemy;
 }
 
-entt::entity EntityFactory::createProjectile(float dx, float dy, float x, float y, float velocity)
+entt::entity EntityFactory::createProjectile(
+    entt::entity hint, float dx, float dy, float x, float y, float velocity
+)
 {
     auto projectile = _registry.create();
     auto texture = _resourceManager.loadTexture(_assetsPath + "/player/player_shots_revamped.png");
@@ -102,7 +104,7 @@ entt::entity EntityFactory::createProjectile(float dx, float dy, float x, float 
 }
 
 entt::entity EntityFactory::createEnemyProjectile(
-    float dx, float dy, float x, float y, float velocity
+    entt::entity hint, float dx, float dy, float x, float y, float velocity
 )
 {
     auto projectile = _registry.create();
