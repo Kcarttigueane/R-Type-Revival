@@ -175,8 +175,13 @@ void GameManager::game_loop(
         _window.clear();
         parallaxSystem(deltaTime.asSeconds());
         planetSystem(deltaTime.asSeconds());
+        renderSystem();
+        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+            menuSystem(deltaTime.asSeconds());
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
+            settingsSystem(deltaTime.asSeconds());
+        }
         if (!_playerPresent.empty()) {
-            renderSystem();
             enemySystem(explosionSound.sound);
             velocitySystem();
             collisionProjectileAndEnemy();
