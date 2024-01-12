@@ -1,5 +1,28 @@
 #include "../../include/managers/network_manager.hpp"
 
+NetworkManager::NetworkManager(
+    boost::asio::io_context& io_context, std::string port, EntityManager& entityManager,
+    WaveManager& waveManager, IdGenerator& idGenerator
+)
+    : _socket(io_context, udp::endpoint(udp::v4(), std::stoi(port))),
+      _entityManager(entityManager),
+      _wave_manager(waveManager),
+      _idGenerator(idGenerator)
+{
+    std::cout << "NetworkManager running at " << _socket.local_endpoint() << std::endl;
+    start_receive();
+}
+
+void NetworkManager::start_receive()
+{
+    _socket.async_receive_from(
+        boost::asio::buffer(_recv_buffer), _remote_endpoint,
+        [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
+            handle_receive(error, bytes_transferred);
+        }
+    );
+}
+
 void NetworkManager::handle_receive(
     const boost::system::error_code& error, std::size_t bytes_transferred
 )
@@ -233,20 +256,20 @@ void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
 
 void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
 {
-    // rtype::WaveState wave_state;
-    // wave_state.set_current_wave(1);
-    // wave_state.set_total_enemies(1);
-    // wave_state.set_wave_in_progress(true);
 
-    // game_state.mutable_wave_state()->CopyFrom(wave_state);
+    bool _isInDelayPeriod = _wave_manager.getIsInDelayPeriod();
+    float _delayTimer = _wave_manager.getDelayTimer();
+    int _currentWaveIndex = _wave_manager.getCurrentWaveIndex();
 
-    // rtype::Payload payload;
+    rtype::WaveState wave_state;
 
-    // payload.mutable_game_state()->CopyFrom(game_state);
+    wave_state.set_current_wave(_currentWaveIndex);
+    wave_state.set_is_wave_in_progress(!_isInDelayPeriod);
+    wave_state.set_time_until_next_wave(_delayTimer);
 
-    // std::string serialized_state;
+    game_state.mutable_wave_state()->CopyFrom(wave_state);
 
-    // payload.SerializeToString(&serialized_state);
+    std::cout << "Sending wave state: " << wave_state.DebugString() << std::endl;
 }
 
 void NetworkManager::broadcast_game_state()

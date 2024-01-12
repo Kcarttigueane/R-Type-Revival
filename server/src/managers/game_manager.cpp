@@ -1,8 +1,8 @@
 #include "../../include/managers/game_manager.hpp"
 
 GameManager::GameManager(const std::string& server_address, std::string port)
-    : _network_manager(_io_context, port, _entity_manager, _idGenerator),
-      _wave_manager(_entity_manager, _idGenerator)
+    : _wave_manager(_entity_manager, _idGenerator),
+      _network_manager(_io_context, port, _entity_manager, _wave_manager, _idGenerator)
 {}
 
 GameManager::~GameManager()

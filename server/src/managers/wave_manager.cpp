@@ -147,3 +147,28 @@ void WaveManager::endWave(Wave& wave)
         _entityManager.getRegistry().destroy(entity);
     }
 }
+
+Wave& WaveManager::getCurrentWave()
+{
+    return _waves[_currentWaveIndex];
+}
+
+int WaveManager::getCurrentWaveIndex()
+{
+    return _currentWaveIndex;
+}
+
+float WaveManager::getWaveTimer()
+{
+    return _waveTimer;
+}
+
+float WaveManager::getDelayTimer()
+{
+    return _delayTimer;
+}
+
+bool WaveManager::getIsInDelayPeriod()
+{
+    return _isInDelayPeriod;
+}

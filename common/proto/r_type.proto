@@ -49,8 +49,8 @@ message ScoreUpdate {
 
 message WaveState {
   int32 current_wave = 1;
-  int32 total_enemies = 2;
-  bool wave_in_progress = 3;
+  bool is_wave_in_progress = 2;
+  float time_until_next_wave = 3;
 }
 
 message BulletState {

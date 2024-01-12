@@ -117,14 +117,6 @@ void GameManager::game_loop()
         processServerResponse();
         if (!_connectedPlayerIds.empty()) {
             processPlayerActions(deltaTime.asSeconds());
-
-            //         if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-            //             enemyClock.restart();
-            //             float randomSpeed = getRandomFloat(2.0f, 5.0f);
-            //             float randomY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-            //             _entityFactory.createNormalEnemy(randomY, randomSpeed);
-            //         }
-            //     }
         }
         planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
@@ -288,11 +280,9 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
         const rtype::WaveState& gameWave = game_state.wave_state();
 
         _currentWaveLevel = gameWave.current_wave();
-        _numberOfWaveEnemies = gameWave.total_enemies();
-        _isWaveInProgress = gameWave.wave_in_progress();
+        _isWaveInProgress = gameWave.is_wave_in_progress();
 
         std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
-                  << ", Total Enemies: " << _numberOfWaveEnemies
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
 
         if (_isWaveInProgress) {
@@ -313,6 +303,8 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                                   << posX << ", " << posY << "), Health: " << health << std::endl;
 
                         entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                        _enemiesIds.insert(enemyID);
+                        // _entityFactory.createEnemy(enemyEntity, type);
 
                         if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity)) {
                             auto& transformComponent =
@@ -369,7 +361,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
         update_player_state(gameState);
         // update_player_score(gameState);
         // update_enemies_state(gameState);
-        // update_game_wave(gameState);
+        update_game_wave(gameState);
         // TODO : Continue for powerUps, scores, bullets, etc.
     } else {
         std::cerr << "Payload does not contain a GameState." << std::endl;

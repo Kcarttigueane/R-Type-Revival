@@ -101,6 +101,36 @@ public:
      * @param wave The wave to end.
      */
     void endWave(Wave& wave);
+
+    /**
+     * @brief Gets the current wave.
+     * @return The current wave.
+     */
+    Wave& getCurrentWave();
+
+    /**
+     * @brief Gets the current wave index.
+     * @return The current wave index.
+     */
+    int getCurrentWaveIndex();
+
+    /**
+     * @brief Gets the current wave timer.
+     * @return The current wave timer.
+     */
+    float getWaveTimer();
+
+    /**
+     * @brief Gets the delay timer.
+     * @return The delay timer.
+     */
+    float getDelayTimer();
+
+    /**
+     * @brief Gets whether the game is currently in a delay period between waves.
+     * @return Whether the game is currently in a delay period between waves.
+     */
+    bool getIsInDelayPeriod();
 };
 
 #endif  // WAVE_MANAGER_HPP
