@@ -238,15 +238,17 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         }
 
         if (_registry
-                .all_of<TransformComponent, RenderableComponent>(
+                .all_of<TransformComponent, ScoreComponent, RenderableComponent>(
                     playerEntity
                 )) {
             auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
             auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
+            auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
 
             transformComponent.x = posX;
             transformComponent.y = posY;
 
+            renderableComponent.text.setString(std::to_string(scoreComponent.score));
             renderableComponent.sprite.setPosition(posX, posY);
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
@@ -410,7 +412,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
 
         update_player_state(gameState);
         updateBulletState(gameState);
-        // update_player_score(gameState);
+        update_player_score(gameState);
         // update_enemies_state(gameState);
         // update_game_wave(gameState);
         // TODO : Continue for powerUps, scores, bullets, etc.

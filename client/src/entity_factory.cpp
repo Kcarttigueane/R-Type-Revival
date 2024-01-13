@@ -5,7 +5,6 @@ entt::entity EntityFactory::createPlayer(entt::entity hint, std::pair<float, flo
     auto player = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
     sf::IntRect initialFrameRect(277, 44, 86, 40);
-
     RenderableComponent renderable;
     renderable.texture = texture;
     renderable.sprite.setTexture(*texture);
@@ -14,8 +13,20 @@ entt::entity EntityFactory::createPlayer(entt::entity hint, std::pair<float, flo
     renderable.sprite.setTextureRect(initialFrameRect);
     sf::Vector2f scaledSize = sf::Vector2f(86.0f, 40.0f);
     renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+    renderable.text.setFont(*font);
+    renderable.text.setString("100");
+    renderable.text.setCharacterSize(50);
+    renderable.text.setPosition(WINDOW_WIDTH - 200, 50);
 
     _registry.emplace<RenderableComponent>(player, std::move(renderable));
+
+    ScoreComponent scoreComponent;
+    scoreComponent.score = 100;
+    scoreComponent.multiplier = 1.0f;
+    scoreComponent.bonusPoints = 0;
+
+    _registry.emplace<ScoreComponent>(player, scoreComponent);
 
     TransformComponent transformComponent = {
         .x = position.first,
