@@ -70,9 +70,6 @@ void GameManager::handle_closing_game()
 
 void GameManager::game_loop()
 {
-    _entityFactory.createNormalEnemy(
-        static_cast<entt::entity>(123), std::make_pair(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-    );
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
         processEvents();
