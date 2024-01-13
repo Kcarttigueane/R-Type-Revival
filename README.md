@@ -19,7 +19,7 @@ Primary Goals:
 **Supported OS** : Windows, Linux
 
 ### Linux
-Make sure to clone vcpkg at the root of the project via 
+Make sure to clone vcpkg at the root of the project via
 ``git clone https://github.com/Microsoft/vcpkg.git``
 then just launch our script via
 ``./install.sh``
