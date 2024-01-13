@@ -193,10 +193,12 @@ RFC 4890                    R-Type Protocols               January 2024
          uint32 owner_id = 7; // ID of the player or enemy who fired the bullet
       }
 
-      message WaveInfo {
+      message WaveState {
          int32 current_wave = 1;
-         int32 total_enemies = 2;
-         bool wave_in_progress = 3;
+         bool is_wave_in_progress = 2; // ! Should be remove after
+         float time_until_next_wave = 3;
+         float pos_x = 4;
+         float pos_y = 5;
       }
 
    The client MUST NOT respond to the server.
