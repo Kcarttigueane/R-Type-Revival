@@ -249,13 +249,22 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
             _connectedPlayerIds.insert(playerID);
         }
 
-        if (_registry.all_of<TransformComponent, RenderableComponent>(playerEntity)) {
+        auto view = _registry.view<PlayerComponent>();
+
+        if (view.contains(playerEntity)) {
+            std::cout << "----> Player " << playerID << " is connected: " << std::endl;
+        }
+
+        if (_registry.all_of<TransformComponent, ScoreComponent, RenderableComponent>(playerEntity
+            )) {
             auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
             auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
+            auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
 
             transformComponent.x = posX;
             transformComponent.y = posY;
 
+            renderableComponent.text.setString(std::to_string(scoreComponent.score));
             renderableComponent.sprite.setPosition(posX, posY);
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
@@ -412,7 +421,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
 
         update_player_state(gameState);
         updateBulletState(gameState);
-        // update_player_score(gameState);
+        update_player_score(gameState);
         // update_enemies_state(gameState);
         update_game_wave(gameState);
     } else {
