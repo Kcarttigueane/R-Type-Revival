@@ -32,15 +32,24 @@ GameManager::GameManager(
 
 void GameManager::start_game()
 {
-    _entityFactory.createMainMenu();
+    entt::entity backgroundEntityId = static_cast<entt::entity>(BACKGROUND_ID);
+    entt::entity MainMenuId = static_cast<entt::entity>(MAIN_MENU_ID);
+    entt::entity PlaneWetId = static_cast<entt::entity>(PLANET_WET_ID);
+    entt::entity PlaneIceId = static_cast<entt::entity>(PLANET_ICE_ID);
+    entt::entity HealthId = static_cast<entt::entity>(HEALTH_ID);
+
+    _entityFactory.createMainMenu(MainMenuId);
     _entityFactory.createPlanet(
-        WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
+        PlaneWetId, std::make_pair(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
+        "/background/layer_1/wet_256.png"
     );
     _entityFactory.createPlanet(
-        WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
+        PlaneIceId, std::make_pair(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300),
+        "/background/layer_1/ice_256.png"
     );
-    _entityFactory.createBackground();
-    _entityFactory.createHealth();
+    _entityFactory.createBackground(backgroundEntityId);
+    _entityFactory.createHealth(HealthId);
+
     _network_thread = std::jthread([&]() { _io_service.run(); });
     game_loop();
 }
@@ -115,7 +124,7 @@ bool GameManager::isInputEvent(const sf::Event& event)
 
 void GameManager::deleteAIEnemies()
 {
-    auto enemies = _registry.view<EnemyAIComponent>();
+    auto enemies = _registry.view<EnemyComponent>();
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
     }
@@ -199,7 +208,9 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
     if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
         std::cout << "Connect response -> OK" << std::endl;
         // TODO : should I check if the set can container max 4 players
-        _playerProfileManager.setPlayerEntity(static_cast<entt::entity>(payload.connect_response().player_id()));
+        _playerProfileManager.setPlayerEntity(
+            static_cast<entt::entity>(payload.connect_response().player_id())
+        );
         _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
         std::cout << "Connect response  -> KO" << std::endl;
@@ -234,7 +245,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
         if (!isPlayerAlreadyExist) {
-            _entityFactory.createPlayer(playerEntity, std::pair(posX, posY));
+            _entityFactory.createPlayer(playerEntity, std::make_pair(posX, posY));
             _connectedPlayerIds.insert(playerID);
         }
 
@@ -244,10 +255,8 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
             std::cout << "----> Player " << playerID << " is connected: " << std::endl;
         }
 
-        if (_registry
-                .all_of<TransformComponent, ScoreComponent, RenderableComponent>(
-                    playerEntity
-                )) {
+        if (_registry.all_of<TransformComponent, ScoreComponent, RenderableComponent>(playerEntity
+            )) {
             auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
             auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
             auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
@@ -267,8 +276,9 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         std::uint32_t id = *it;
         if (!currentIds.contains(id)) {
             if (_registry.valid(static_cast<entt::entity>(id))) {
-                TransformComponent& transformable = _registry.get<TransformComponent>(static_cast<entt::entity>(id));
-                _entityFactory.createExplosion(std::pair(transformable.x, transformable.y));
+                TransformComponent& transformable =
+                    _registry.get<TransformComponent>(static_cast<entt::entity>(id));
+                _entityFactory.createExplosion(std::make_pair(transformable.x, transformable.y));
                 _registry.destroy(static_cast<entt::entity>(id));
             }
             it = _connectedPlayerIds.erase(it);
@@ -295,13 +305,9 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
 
         if (!_bulletIds.contains(bulletID)) {
             if (_connectedPlayerIds.contains(ownerID)) {
-                _entityFactory.createProjectile(
-                    bulletEntity, std::pair(posX, posY)
-                );
+                _entityFactory.createProjectile(bulletEntity, std::make_pair(posX, posY));
             } else {
-                _entityFactory.createEnemyProjectile(
-                    bulletEntity, std::pair(posX, posY)
-                );
+                _entityFactory.createEnemyProjectile(bulletEntity, std::make_pair(posX, posY));
             }
             _bulletIds.insert(bulletID);
         }
@@ -339,54 +345,50 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
         const rtype::WaveState& gameWave = game_state.wave_state();
 
         _currentWaveLevel = gameWave.current_wave();
-        _numberOfWaveEnemies = gameWave.total_enemies();
-        _isWaveInProgress = gameWave.wave_in_progress();
+        _isWaveInProgress = gameWave.is_wave_in_progress();
 
         std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
-                  << ", Total Enemies: " << _numberOfWaveEnemies
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
 
         if (_isWaveInProgress) {
-            if (_enemiesIds.size() < _numberOfWaveEnemies) {
-                for (const auto& enemyState : game_state.enemies()) {
-                    const bool isIdAlreadyPresent =
-                        _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
+            for (const auto& enemyState : game_state.enemies()) {
+                uint32_t enemyID = enemyState.enemy_id();
+                float posX = enemyState.pos_x();
+                float posY = enemyState.pos_y();
+                rtype::EnemyType type = enemyState.type();
+                float health = enemyState.health();  // Not needed for normal and fast enemies
 
-                    std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
-                    if (!isIdAlreadyPresent) {
-                        uint32_t enemyID = enemyState.enemy_id();
-                        float posX = enemyState.pos_x();
-                        float posY = enemyState.pos_y();
-                        std::string type = enemyState.type();
-                        float health = enemyState.health();
+                std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
+                          << ", " << posY << "), Health: " << health << std::endl;
 
-                        std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position("
-                                  << posX << ", " << posY << "), Health: " << health << std::endl;
+                entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
 
-                        entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                const bool isIdAlreadyPresent = _enemiesIds.contains(enemyState.enemy_id());
 
-                        if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity)) {
-                            auto& transformComponent =
-                                _registry.get<TransformComponent>(enemyEntity);
-                            auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
-
-                            transformComponent.x = posX;
-                            transformComponent.y = posY;
-
-                            healthComponent.healthPoints = health;
-
-                        } else {
-                            std::cerr << "Enemy entity with ID " << enemyID
-                                      << " does not have required components." << std::endl;
-                        }
-                    }
+                std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
+                if (!isIdAlreadyPresent) {
+                    std::cout << "la vie est belle" << std::endl;
+                    entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                    _enemiesIds.insert(enemyID);
+                    _entityFactory.createEnemy(type, enemyEntity, std::make_pair(posX, posY));
                 }
-            } else {
-                std::cout << "No enemies to create" << std::endl;
+
+                if (_registry.all_of<TransformComponent, RenderableComponent>(enemyEntity)) {
+                    auto& transformComponent = _registry.get<TransformComponent>(enemyEntity);
+                    auto& renderableComponent = _registry.get<RenderableComponent>(enemyEntity);
+
+                    transformComponent.x = posX;
+                    transformComponent.y = posY;
+
+                    renderableComponent.sprite.setPosition(posX, posY);
+                } else {
+                    std::cerr << "Enemy entity with ID " << enemyID
+                              << " does not have required components." << std::endl;
+                }
             }
+        } else {
+            std::cerr << "Wave not in progress or no wave info." << std::endl;
         }
-    } else {
-        std::cerr << "Wave not in progress or no wave info." << std::endl;
     }
 }
 
@@ -421,8 +423,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
         updateBulletState(gameState);
         update_player_score(gameState);
         // update_enemies_state(gameState);
-        // update_game_wave(gameState);
-        // TODO : Continue for powerUps, scores, bullets, etc.
+        update_game_wave(gameState);
     } else {
         std::cerr << "Payload does not contain a GameState." << std::endl;
     }

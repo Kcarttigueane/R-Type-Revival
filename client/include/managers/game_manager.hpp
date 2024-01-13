@@ -72,10 +72,9 @@ private:
 
     std::set<uint32_t> _connectedPlayerIds;
     std::set<uint32_t> _bulletIds;
+    std::set<uint32_t> _enemiesIds;
 
     int _currentWaveLevel = 0;
-    std::set<uint32_t> _enemiesIds;
-    int _numberOfWaveEnemies = 0;
     bool _isWaveInProgress = false;
 
     std::jthread _network_thread;

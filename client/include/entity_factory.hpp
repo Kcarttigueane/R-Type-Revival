@@ -6,6 +6,7 @@
 
 #    include "../../common/components/component_includes.hpp"
 
+#    include "../../build/common/proto/r_type.pb.h"
 #    include "./managers/resource_manager.hpp"
 
 using std::string;
@@ -27,29 +28,31 @@ public:
 
     entt::entity createPlayer(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createNormalEnemy(std::pair<float, float> position);
-
-    entt::entity createFastEnemy(std::pair<float, float> position);
-
-    entt::entity createProjectile(
-        entt::entity hint, std::pair<float, float> position
+    entt::entity createEnemy(
+        rtype::EnemyType type, entt::entity hint, std::pair<float, float> position
     );
 
-    entt::entity createEnemyProjectile(
-        entt::entity hint, std::pair<float, float> position
-    );
+    entt::entity createNormalEnemy(entt::entity hint, std::pair<float, float> position);
+
+    entt::entity createFastEnemy(entt::entity hint, std::pair<float, float> position);
+
+    entt::entity createProjectile(entt::entity hint, std::pair<float, float> position);
+
+    entt::entity createEnemyProjectile(entt::entity hint, std::pair<float, float> position);
 
     entt::entity createExplosion(std::pair<float, float> position);
 
-    entt::entity createBackground();
+    entt::entity createBackground(entt::entity hint);
 
-    entt::entity createMainMenu();
+    entt::entity createMainMenu(entt::entity hint);
 
-    entt::entity createWaveTransition(std::string title);
+    entt::entity createWaveTransition(entt::entity hint, std::string title);
 
-    entt::entity createPlanet(float x, float y, std::string randomFilepath);
+    entt::entity createPlanet(
+        entt::entity hint, std::pair<float, float> position, std::string randomFilepath
+    );
 
-    entt::entity createHealth();
+    entt::entity createHealth(entt::entity hint);
 };
 
 #endif  // ENTITY_FACTORY_HPP

@@ -25,10 +25,12 @@ entt::entity EntityManager::createPlayer(entt::entity hint)
     return player;
 }
 
-entt::entity EntityManager::createNormalEnemy(std::pair<float, float> position, float speed)
+entt::entity EntityManager::createNormalEnemy(
+    entt::entity hint, std::pair<float, float> position, float speed
+)
 {
-    auto enemy = _registry.create();
-    _registry.emplace<EnemyAIComponent>(enemy);
+    auto enemy = _registry.create(hint);
+    _registry.emplace<EnemyComponent>(enemy);
 
     TransformComponent transformComponent = {
         .x = position.first,
@@ -71,4 +73,30 @@ entt::entity EntityManager::createProjectile(
     _registry.emplace<DamageComponent>(projectile, 1.0f);
 
     return projectile;
+}
+
+entt::entity EntityManager::createFastEnemy(
+    entt::entity hint, std::pair<float, float> position, float velocity
+)
+{
+    auto enemy = _registry.create(hint);
+
+    _registry.emplace<EnemyComponent>(enemy, EnemyType::FAST);
+
+    TransformComponent transformComponent = {
+        .x = position.first,
+        .y = position.second,
+        .scaleX = 1.0f,
+        .scaleY = 1.0f,
+    };
+
+    _registry.emplace<TransformComponent>(enemy, transformComponent);
+    _registry.emplace<VelocityComponent>(enemy, 0.0f, 1.0f, velocity);
+    _registry.emplace<WeaponComponent>(
+        enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
+    );
+    _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
+    _registry.emplace<HealthComponent>(enemy, 100.0f);
+
+    return enemy;
 }

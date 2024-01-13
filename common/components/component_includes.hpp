@@ -5,7 +5,7 @@
 #    include "./bulletType.hpp"
 #    include "./collider.hpp"
 #    include "./damage.hpp"
-#    include "./enemyAI.hpp"
+#    include "./enemy.hpp"
 #    include "./health.hpp"
 #    include "./owner.hpp"
 #    include "./parallax.hpp"
