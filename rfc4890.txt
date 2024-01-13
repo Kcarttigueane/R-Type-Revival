@@ -66,8 +66,6 @@ RFC 4890                    R-Type Protocols               January 2024
 
       For the connexion phase, the client MUST send a Payload containing
       a Connect message containing the player's name and a sequence_number
-      Each payload MUST be preceded by a 4 bytes long header containing
-      the size of the payload (in bytes).
 
       message Payload {
          oneof payload_type {
@@ -124,7 +122,7 @@ RFC 4890                    R-Type Protocols               January 2024
 
       The first purpose of the R-Type UDP Protocol is to send all the
       frames to display (in the client) from the server to the
-      client. The payload MUST be preceded by a 4 bytes long header
+      client.
 
       The Payload MUST contain the GameState and a sequence_number.
 
@@ -163,8 +161,14 @@ RFC 4890                    R-Type Protocols               January 2024
          uint32 enemyId = 1;
          float pos_x = 2;
          float pos_y = 3;
-         string type = 4;
+         EnemyState type = 4;
          float health = 5;
+      }
+
+      enum EnemyState {
+         BASIC = 0;
+         FAST = 1;
+         BOSS = 2;
       }
 
       message PowerUpState {
