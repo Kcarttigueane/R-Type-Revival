@@ -49,8 +49,10 @@ message ScoreUpdate {
 
 message WaveState {
   int32 current_wave = 1;
-  bool is_wave_in_progress = 2;
+  bool is_wave_in_progress = 2; // ! Should be remove after
   float time_until_next_wave = 3;
+  float pos_x = 4;
+  float pos_y = 5;
 }
 
 message BulletState {

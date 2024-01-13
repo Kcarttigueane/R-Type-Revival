@@ -256,7 +256,6 @@ void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
 
 void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
 {
-
     bool _isInDelayPeriod = _wave_manager.getIsInDelayPeriod();
     float _delayTimer = _wave_manager.getDelayTimer();
     int _currentWaveIndex = _wave_manager.getCurrentWaveIndex();
