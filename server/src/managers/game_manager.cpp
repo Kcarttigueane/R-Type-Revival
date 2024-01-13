@@ -36,3 +36,16 @@ void GameManager::game_loop()
         }
     }
 }
+
+void GameManager::updateGameLogic(float deltaTime)
+{
+    entt::registry& registry = _entity_manager.getRegistry();
+
+    auto view = registry.view<PlayerComponent>();
+
+    if (view.size() == 0) {
+        return;
+    }
+
+    _wave_manager.updateWaves(deltaTime);
+}

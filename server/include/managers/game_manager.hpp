@@ -39,7 +39,7 @@ public:
 
     void game_loop();
 
-    void updateGameLogic(float deltaTime) { _wave_manager.updateWaves(deltaTime); }
+    void updateGameLogic(float deltaTime);
 
     void velocitySystem();
 };

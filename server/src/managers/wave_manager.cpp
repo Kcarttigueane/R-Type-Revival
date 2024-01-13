@@ -112,6 +112,7 @@ void WaveManager::startWave(Wave& wave)
 void WaveManager::spawnEnemy(rtype::EnemyType enemyType)
 {
     std::uint32_t newEnemyId = _idGenerator.generateId();
+    std::cout << "New enemy id: " << newEnemyId << std::endl;
     entt::entity playerEntityId = static_cast<entt::entity>(newEnemyId);
 
     switch (enemyType) {

@@ -32,14 +32,22 @@ GameManager::GameManager(
 
 void GameManager::start_game()
 {
-    _entityFactory.createMainMenu();
+    entt::entity backgroundEntityId = static_cast<entt::entity>(BACKGROUND_ID);
+    entt::entity MainMenuId = static_cast<entt::entity>(MAIN_MENU_ID);
+    entt::entity PlaneWetId = static_cast<entt::entity>(PLANET_WET_ID);
+    entt::entity PlaneIceId = static_cast<entt::entity>(PLANET_ICE_ID);
+
+    _entityFactory.createMainMenu(MainMenuId);
     _entityFactory.createPlanet(
-        WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
+        PlaneWetId, std::make_pair(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
+        "/background/layer_1/wet_256.png"
     );
     _entityFactory.createPlanet(
-        WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
+        PlaneIceId, std::make_pair(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300),
+        "/background/layer_1/ice_256.png"
     );
-    _entityFactory.createBackground();
+    _entityFactory.createBackground(backgroundEntityId);
+
     _network_thread = std::jthread([&]() { _io_service.run(); });
     game_loop();
 }
@@ -326,47 +334,45 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
 
         if (_isWaveInProgress) {
-            if (_enemiesIds.size() < _numberOfWaveEnemies) {
-                for (const auto& enemyState : game_state.enemies()) {
-                    const bool isIdAlreadyPresent =
-                        _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
+            for (const auto& enemyState : game_state.enemies()) {
+                const bool isIdAlreadyPresent =
+                    _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
 
-                    std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
-                    if (!isIdAlreadyPresent) {
-                        uint32_t enemyID = enemyState.enemy_id();
-                        float posX = enemyState.pos_x();
-                        float posY = enemyState.pos_y();
-                        rtype::EnemyType type = enemyState.type();
-                        float health = enemyState.health();
+                std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
+                if (!isIdAlreadyPresent) {
+                    uint32_t enemyID = enemyState.enemy_id();
+                    float posX = enemyState.pos_x();
+                    float posY = enemyState.pos_y();
+                    rtype::EnemyType type = enemyState.type();
+                    float health = enemyState.health();
 
-                        std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position("
-                                  << posX << ", " << posY << "), Health: " << health << std::endl;
+                    std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
+                              << ", " << posY << "), Health: " << health << std::endl;
 
-                        entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
-                        _enemiesIds.insert(enemyID);
-                        // _entityFactory.createEnemy(enemyEntity, type);
+                    entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                    _enemiesIds.insert(enemyID);
+                    EnemyType enemyType = static_cast<EnemyType>(type);
+                    _entityFactory.createEnemy(enemyType, enemyEntity, std::make_pair(posX, posY));
 
-                        if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity)) {
-                            auto& transformComponent =
-                                _registry.get<TransformComponent>(enemyEntity);
-                            auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
+                    if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity)) {
+                        auto& transformComponent = _registry.get<TransformComponent>(enemyEntity);
+                        auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
 
-                            transformComponent.x = posX;
-                            transformComponent.y = posY;
+                        transformComponent.x = posX;
+                        transformComponent.y = posY;
 
-                            healthComponent.healthPoints = health;
+                        healthComponent.healthPoints = health;
 
-                        } else {
-                            std::cerr << "Enemy entity with ID " << enemyID
-                                      << " does not have required components." << std::endl;
-                        }
+                    } else {
+                        std::cerr << "Enemy entity with ID " << enemyID
+                                  << " does not have required components." << std::endl;
                     }
                 }
-            } else {
-                std::cout << "No enemies to create" << std::endl;
             }
         }
-    } else {
+    }
+
+    else {
         std::cerr << "Wave not in progress or no wave info." << std::endl;
     }
 }

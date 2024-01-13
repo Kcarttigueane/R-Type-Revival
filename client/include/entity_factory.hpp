@@ -27,6 +27,8 @@ public:
 
     entt::entity createPlayer(entt::entity hint, std::pair<float, float> position);
 
+    entt::entity createEnemy(EnemyType type, entt::entity hint, std::pair<float, float> position);
+
     entt::entity createNormalEnemy(entt::entity hint, std::pair<float, float> position);
 
     entt::entity createFastEnemy(entt::entity hint, std::pair<float, float> position);
@@ -37,13 +39,15 @@ public:
 
     entt::entity createExplosion(std::pair<float, float> position);
 
-    entt::entity createBackground();
+    entt::entity createBackground(entt::entity hint);
 
-    entt::entity createMainMenu();
+    entt::entity createMainMenu(entt::entity hint);
 
-    entt::entity createWaveTransition(std::string title);
+    entt::entity createWaveTransition(entt::entity hint, std::string title);
 
-    entt::entity createPlanet(float x, float y, std::string randomFilepath);
+    entt::entity createPlanet(
+        entt::entity hint, std::pair<float, float> position, std::string randomFilepath
+    );
 };
 
 #endif  // ENTITY_FACTORY_HPP

@@ -94,6 +94,24 @@ entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float
     return enemy;
 }
 
+entt::entity EntityFactory::createEnemy(
+    EnemyType type, entt::entity hint, std::pair<float, float> position
+)
+{
+    switch (type) {
+        case EnemyType::NORMAL:
+            return createNormalEnemy(hint, position);
+        case EnemyType::FAST:
+            return createFastEnemy(hint, position);
+        case EnemyType::BOSS:
+            // TODO: Implement boss enemy creation logic
+            break;
+        default:
+            break;
+    }
+    return entt::null;
+}
+
 entt::entity EntityFactory::createFastEnemy(entt::entity hint, std::pair<float, float> position)
 {
     auto enemy = _registry.create();
@@ -192,11 +210,11 @@ entt::entity EntityFactory::createExplosion(std::pair<float, float> position)
     return explosion;
 }
 
-entt::entity EntityFactory::createBackground()
+entt::entity EntityFactory::createBackground(entt::entity hint)
 {
     auto texture =
         _resourceManager.loadTexture(_assetsPath + "/background/layer_3/space_background.png");
-    auto background = _registry.create();
+    auto background = _registry.create(hint);
     RenderableComponent renderable;
     renderable.texture = texture;
     renderable.sprite.setTexture(*texture);
@@ -208,10 +226,10 @@ entt::entity EntityFactory::createBackground()
     return background;
 };
 
-entt::entity EntityFactory::createMainMenu()
+entt::entity EntityFactory::createMainMenu(entt::entity hint)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto mainMenuTitle = _registry.create();
+    auto mainMenuTitle = _registry.create(hint);
     RenderableComponent renderable;
     renderable.text.setFont(*font);
     renderable.text.setString(GAME_TITLE);
@@ -224,10 +242,10 @@ entt::entity EntityFactory::createMainMenu()
     return mainMenuTitle;
 };
 
-entt::entity EntityFactory::createWaveTransition(std::string title)
+entt::entity EntityFactory::createWaveTransition(entt::entity hint, std::string title)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto transitionTitle = _registry.create();
+    auto transitionTitle = _registry.create(hint);
     RenderableComponent renderable;
     renderable.text.setFont(*font);
     renderable.text.setString(title);
@@ -247,23 +265,28 @@ entt::entity EntityFactory::createWaveTransition(std::string title)
     return transitionTitle;
 }
 
-entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFilepath)
+entt::entity EntityFactory::createPlanet(
+    entt::entity hint, std::pair<float, float> position, std::string randomFilepath
+)
 {
-    auto planet = _registry.create();
+    auto planet = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + randomFilepath);
 
     sf::IntRect initialFrameRect(0, 0, 64, 64);
     RenderableComponent renderable;
     renderable.texture = texture;
-    renderable.sprite.setPosition(sf::Vector2f(x, y));
+    renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
     renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
     _registry.emplace<RenderableComponent>(planet, std::move(renderable));
-    _registry.emplace<TransformComponent>(planet, x, y, 1.0f, 1.0f, 0, 0);
+    _registry.emplace<TransformComponent>(
+        planet, position.first, position.second, 1.0f, 1.0f, 0, 0
+    );
     _registry.emplace<PlanetComponent>(planet);
     _registry.emplace<SceneComponent>(planet);
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
+
     return planet;
 }

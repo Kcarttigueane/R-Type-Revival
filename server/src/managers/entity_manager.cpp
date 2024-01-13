@@ -29,7 +29,7 @@ entt::entity EntityManager::createNormalEnemy(
     entt::entity hint, std::pair<float, float> position, float speed
 )
 {
-    auto enemy = _registry.create();
+    auto enemy = _registry.create(hint);
     _registry.emplace<EnemyComponent>(enemy);
 
     TransformComponent transformComponent = {
@@ -77,7 +77,7 @@ entt::entity EntityManager::createProjectile(
 
 entt::entity EntityManager::createFastEnemy(entt::entity hint, float spawnWidth, float speed)
 {
-    auto enemy = _registry.create();
+    auto enemy = _registry.create(hint);
 
     _registry.emplace<EnemyComponent>(enemy, EnemyType::FAST);
 

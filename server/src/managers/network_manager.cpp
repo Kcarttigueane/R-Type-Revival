@@ -293,6 +293,10 @@ void NetworkManager::addWaveStateToGameState(rtype::GameState& game_state)
     float _delayTimer = _wave_manager.getDelayTimer();
     int _currentWaveIndex = _wave_manager.getCurrentWaveIndex();
 
+    if (_isInDelayPeriod) {
+        return;
+    }
+
     rtype::WaveState wave_state;
 
     wave_state.set_current_wave(_currentWaveIndex);
