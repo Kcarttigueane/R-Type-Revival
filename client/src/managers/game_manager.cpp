@@ -40,7 +40,6 @@ void GameManager::start_game()
         WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
     );
     _entityFactory.createBackground();
-    _entityFactory.createHealth();
     _network_thread = std::jthread([&]() { _io_service.run(); });
     game_loop();
 }
@@ -219,18 +218,12 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         uint32_t playerID = playerState.player_id();
         float posX = playerState.pos_x();
         float posY = playerState.pos_y();
-        float health = playerState.health();
 
         std::cout << MAGENTA << "Player " << playerID << ": Position(" << posX << ", " << posY
                   << ")" << RESET << std::endl;
 
         entt::entity playerEntity = static_cast<entt::entity>(playerID);
         currentIds.insert(playerID);
-
-        if (playerID == static_cast<std::uint32_t>(_playerProfileManager.getPlayerEntity())) {
-            _playerProfileManager.setPlayerHealth(health);
-            std::cout << "Profile Player health updated for player " << playerID << std::endl;
-        }
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
         if (!isPlayerAlreadyExist) {

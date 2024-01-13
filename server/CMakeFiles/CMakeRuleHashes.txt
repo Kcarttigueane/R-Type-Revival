@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-9a9bfd8df976b1d5bfc8faff788baa02 common/proto/r_type.pb.h
