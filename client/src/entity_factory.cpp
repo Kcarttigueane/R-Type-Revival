@@ -195,7 +195,7 @@ entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFil
     _registry.emplace<RenderableComponent>(planet, std::move(renderable));
     _registry.emplace<TransformComponent>(planet, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
     _registry.emplace<PlanetComponent>(planet);
-    _registry.emplace<SceneComponent>(planet);
+    _registry.emplace<SceneComponent>(planet, GameScenes::InGame);
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
     return planet;
 }
@@ -339,4 +339,35 @@ entt::entity EntityFactory::createAboutMenu()
     _registry.emplace<SceneComponent>(aboutMenuEntity, GameScenes::About);
 
     return aboutMenuEntity;
+}
+
+entt::entity EntityFactory::createTutorialPage()
+{
+    auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+    auto tutorialPageEntity = _registry.create();
+    RenderableComponent renderable;
+
+    std::string tutorialText =
+        "Welcome to the R-Type 2 Tutorial!\n\n"
+        "In this tutorial, we will guide you through the basics of the game.\n"
+        "Follow these steps to get started:\n\n"
+        "1. Move your ship using the arrow keys.\n"
+        "2. Press the Spacebar to shoot.\n"
+        "3. Dodge enemy attacks to stay alive.\n"
+        "4. Collect power-ups to upgrade your ship.\n\n"
+        "Have fun and save the galaxy!\n\n"
+        "Good luck, Captain!";
+
+    renderable.text.setFont(*font);
+    renderable.text.setString(tutorialText);
+    renderable.text.setCharacterSize(32);
+    renderable.text.setFillColor(sf::Color::White);
+    sf::FloatRect textBounds = renderable.text.getLocalBounds();
+    renderable.text.setOrigin(textBounds.width / 2, textBounds.height / 2);
+    renderable.text.setPosition(_window.getSize().x / 2, _window.getSize().y * 0.50);
+
+    _registry.emplace<RenderableComponent>(tutorialPageEntity, std::move(renderable));
+    _registry.emplace<SceneComponent>(tutorialPageEntity, GameScenes::Tutorial);
+
+    return tutorialPageEntity;
 }

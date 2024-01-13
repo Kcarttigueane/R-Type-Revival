@@ -30,6 +30,12 @@ void InputManager::processKeyPress(sf::Event& event)
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = true;
         }
+        if (event.key.code == sf::Keyboard::Enter) {
+            keyboardActions.Enter = true;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = true;
+        }
     }
 }
 
@@ -47,6 +53,12 @@ void InputManager::processKeyRelease(sf::Event& event)
         }
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = false;
+        }
+        if (event.key.code == sf::Keyboard::Enter) {
+            keyboardActions.Enter = false;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = false;
         }
     }
 }

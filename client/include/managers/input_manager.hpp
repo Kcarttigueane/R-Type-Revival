@@ -64,6 +64,10 @@ public:
     void processKeyPress(sf::Event& event);
 
     void processKeyRelease(sf::Event& event);
+
+    void processTextInput(sf::Event& event);
+
+    void clearTextInput();
 };
 
 #endif  // INPUT_MANAGER_HPP

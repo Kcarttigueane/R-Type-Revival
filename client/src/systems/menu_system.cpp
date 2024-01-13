@@ -50,7 +50,7 @@ void GameManager::moveMenuItems(int direction)
 void GameManager::changeGameState(const std::string& label)
 {
     if (label == "Play") {
-        _sceneManager.setCurrentScene(GameScenes::InGame);
+        _sceneManager.setCurrentScene(GameScenes::Lobby);
         menuMoveCooldown = menuMoveDelay;
     } else if (label == "Settings") {
         _sceneManager.setCurrentScene(GameScenes::Settings);

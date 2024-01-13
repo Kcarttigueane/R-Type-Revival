@@ -56,6 +56,8 @@ public:
 
     entt::entity createAboutMenu();
 
+    entt::entity createTutorialPage();
+
     entt::entity createPlanet(float x, float y, std::string randomFilepath);
 };
 

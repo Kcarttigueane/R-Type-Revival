@@ -35,11 +35,9 @@ void GameManager::updateSettingHighlight()
         auto& renderable = view.get<RenderableComponent>(entity);
 
         if (settingItem.isSelected) {
-            renderable.text.setFillColor(sf::Color::Red
-            );
+            renderable.text.setFillColor(sf::Color::Red);
         } else {
-            renderable.text.setFillColor(sf::Color::White
-            );
+            renderable.text.setFillColor(sf::Color::White);
         }
     }
 }

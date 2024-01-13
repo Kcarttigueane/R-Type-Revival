@@ -197,10 +197,7 @@ public:
     void moveSettingLine(int direction);
     void updateSettingHighlight();
 
-    void lobbySystem(float deltaTime);
-    void updateLobbyHighlight();
-    void moveLobbyLine(int direction);
-    void handleTextInput(sf::Event& event);
+    void lobbySystem();
 
     void aboutSystem();
     void tutorialSystem();
@@ -228,7 +225,8 @@ public:
         // TODO: Add more input events if needed define scope with gars
         return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
                event.type == sf::Event::MouseButtonPressed ||
-               event.type == sf::Event::MouseButtonReleased;
+               event.type == sf::Event::MouseButtonReleased ||
+               event.type == sf::Event::TextEntered;
     }
 
     void drawHitBox(RenderableComponent& renderable);

@@ -13,14 +13,12 @@ void GameManager::create_menu()
         {"/menu/tutorial.png", "Tutorial", false},
         {"/menu/about.png", "About", false}
     };
-
     for (int i = 0; i < buttonInfo.size(); ++i) {
         _entityFactory.createButton(
             _assetsPath + std::get<0>(buttonInfo[i]), std::get<1>(buttonInfo[i]), i,
             std::get<2>(buttonInfo[i])
         );
     }
-
     selectedLabelEntity = _entityFactory.createSelectedLabel();
 
     std::vector<std::pair<std::string, std::vector<std::string>>> settingsInfo = {
@@ -29,13 +27,15 @@ void GameManager::create_menu()
         {"Resolution", {"1920x1080", "1280x720", "800x600"}},
         {"Fullscreen", {"On", "Off"}},
     };
-
     for (int i = 0; i < settingsInfo.size(); ++i) {
         _entityFactory.createSettingsItem(settingsInfo[i].first, settingsInfo[i].second, 0, i);
     }
 
     _entityFactory.createAboutMenu();
+
+    _entityFactory.createTutorialPage();
 }
+
 
 void GameManager::start_game()
 {
@@ -101,7 +101,7 @@ void GameManager::game_loop(
     musicSound.sound.play();
 
     int wave = 0;
-    while (_window.isOpen()) {
+    while (_window.isOpen() && _sceneManager.getCurrentScene() != GameScenes::Quit) {
         sf::Time deltaTime = clock.restart();
         sf::Event event;
         while (_window.pollEvent(event)) {
@@ -121,9 +121,6 @@ void GameManager::game_loop(
                 _entityFactory.createProjectile(
                     1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 25.0f
                 );
-            }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                _sceneManager.setCurrentScene(GameScenes::InGame);
             }
         }
         if (musicSound.sound.getStatus() == sf::Music::Stopped) {
@@ -174,13 +171,21 @@ void GameManager::game_loop(
         }
         _window.clear();
         parallaxSystem(deltaTime.asSeconds());
-        planetSystem(deltaTime.asSeconds());
-        renderSystem();
+        if (_sceneManager.getCurrentScene() == GameScenes::InGame) {
+            planetSystem(deltaTime.asSeconds());
+        }
         if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
             menuSystem(deltaTime.asSeconds());
         } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
             settingsSystem(deltaTime.asSeconds());
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Lobby) {
+            lobbySystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Tutorial) {
+            tutorialSystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::About) {
+            aboutSystem();
         }
+        renderSystem();
         if (!_playerPresent.empty()) {
             enemySystem(explosionSound.sound);
             velocitySystem();
