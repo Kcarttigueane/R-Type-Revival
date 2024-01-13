@@ -46,6 +46,8 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
     sf::Clock transitionClock;
+    sf::Clock sendEventClock;
+    sf::Clock shootClock;
 
     // ! Managers
     InputManager _inputManager;
