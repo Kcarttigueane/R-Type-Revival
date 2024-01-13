@@ -161,11 +161,11 @@ RFC 4890                    R-Type Protocols               January 2024
          uint32 enemyId = 1;
          float pos_x = 2;
          float pos_y = 3;
-         EnemyState type = 4;
+         EnemyType type = 4;
          float health = 5;
       }
 
-      enum EnemyState {
+      enum EnemyType {
          BASIC = 0;
          FAST = 1;
          BOSS = 2;
