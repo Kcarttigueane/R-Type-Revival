@@ -32,6 +32,7 @@ void GameManager::game_loop()
             updateGameLogic(deltaTime);
             _network_manager.broadcast_game_state();
             last_update = now;
+            velocitySystem();
         }
     }
 }

@@ -116,9 +116,12 @@ void WaveManager::spawnEnemy(rtype::EnemyType enemyType)
 
     switch (enemyType) {
         case rtype::EnemyType::NORMAL: {
+            float randomNormalX = getRandomFloat(WINDOW_WIDTH, WINDOW_WIDTH + 100.0f);
             float randomNormalY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
             float randomNormalSpeed = getRandomFloat(2.0f, 5.0f);
-            _entityManager.createNormalEnemy(playerEntityId, randomNormalY, randomNormalSpeed);
+            _entityManager.createNormalEnemy(
+                playerEntityId, std::make_pair(randomNormalX, randomNormalY), randomNormalSpeed
+            );
             break;
         }
         case rtype::EnemyType::FAST: {

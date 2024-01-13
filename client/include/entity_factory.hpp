@@ -25,21 +25,17 @@ public:
 
     ~EntityFactory() = default;
 
-    entt::entity createPlayer(entt::entity hint);
+    entt::entity createPlayer(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createNormalEnemy(entt::entity hint, float spawnHeight, float speed);
+    entt::entity createNormalEnemy(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createFastEnemy(entt::entity hint, float spawnWidth, float speed);
+    entt::entity createFastEnemy(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createProjectile(
-        entt::entity hint, float dx, float dy, float x, float y, float velocity
-    );
+    entt::entity createProjectile(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createEnemyProjectile(
-        entt::entity hint, float dx, float dy, float x, float y, float velocity
-    );
+    entt::entity createEnemyProjectile(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createExplosion(float x, float y);
+    entt::entity createExplosion(std::pair<float, float> position);
 
     entt::entity createBackground();
 

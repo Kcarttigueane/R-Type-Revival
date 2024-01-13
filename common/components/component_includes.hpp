@@ -2,10 +2,12 @@
 #    define COMPONENTS_INCLUDE
 
 #    include "./animation.hpp"
+#    include "./bulletType.hpp"
 #    include "./collider.hpp"
 #    include "./damage.hpp"
 #    include "./enemy.hpp"
 #    include "./health.hpp"
+#    include "./owner.hpp"
 #    include "./parallax.hpp"
 #    include "./planet.hpp"
 #    include "./player.hpp"

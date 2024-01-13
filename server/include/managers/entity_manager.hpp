@@ -57,7 +57,9 @@ public:
      * @param speed The speed of the enemy.
      * @return The created enemy entity.
      */
-    entt::entity createNormalEnemy(entt::entity hint, float spawnHeight, float speed);
+    entt::entity createNormalEnemy(
+        entt::entity hint, std::pair<float, float> position, float speed
+    );
 
     /**
      * @brief Creates a new projectile entity.
@@ -70,7 +72,8 @@ public:
      * @return The created projectile entity.
      */
     entt::entity createProjectile(
-        entt::entity hint, float dx, float dy, float x, float y, float velocity
+        entt::entity hint, std::pair<float, float> direction, std::pair<float, float> position,
+        float velocity, EntityType type, std::uint32_t ownerId
     );
 
     entt::entity createFastEnemy(entt::entity hint, float spawnWidth, float speed);

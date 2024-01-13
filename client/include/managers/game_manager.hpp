@@ -46,6 +46,8 @@ private:
     sf::Clock clock;
     sf::Clock enemyClock;
     sf::Clock transitionClock;
+    sf::Clock sendEventClock;
+    sf::Clock shootClock;
 
     // ! Managers
     InputManager _inputManager;
@@ -60,8 +62,16 @@ private:
     boost::asio::io_service& _io_service;
 
     // --------------------------------------
+    // IF IMPROVABLE, IMPROVE! //
+
+    SoundComponent _shootingSound;
+    SoundComponent _explosionSound;
+    SoundComponent _musicSound;
+
+    // --------------------------------------
 
     std::set<uint32_t> _connectedPlayerIds;
+    std::set<uint32_t> _bulletIds;
 
     int _currentWaveLevel = 0;
     std::set<uint32_t> _enemiesIds;
@@ -88,6 +98,8 @@ public:
 
     void handle_closing_game();
 
+    void processEvents();
+
     // ! Collision and Event Handling methods
 
     void deleteAIEnemies();
@@ -105,6 +117,8 @@ public:
     void handleConnectResponse(const rtype::Payload& payload);
 
     void update_player_state(const rtype::GameState& game_state);
+
+    void updateBulletState(const rtype::GameState& game_state);
 
     void update_game_wave(const rtype::GameState& game_state);
 

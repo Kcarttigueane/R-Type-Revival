@@ -113,18 +113,20 @@ void NetworkManager::handle_connection_request(const rtype::Connect& connect_mes
     send_connection_response(true, player_id);
 }
 
-void handle_projectile_creation(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity)
+void NetworkManager::handle_player_projectile_creation(
+    std::shared_ptr<PlayerSession>& session, entt::entity playerEntity
+)
 {
     std::cout << "Creating projectile" << std::endl;
-
-    // auto& transformComponent = _entityManager.getRegistry().get<TransformComponent>(playerEntity);
-
-    // entt::entity projectile = _entityManager.createProjectile();
-    // TransformComponent& projectileTransformComponent =
-    //     _entityManager.getRegistry().get<TransformComponent>(projectile);
-
-    // projectileTransformComponent.x = transformComponent.x + 50;
-    // projectileTransformComponent.y = transformComponent.y + 50;
+    TransformComponent playerTransform =
+        _entityManager.getRegistry().get<TransformComponent>(playerEntity);
+    std::uint32_t bulletId = _idGenerator.generateId();
+    entt::entity bulletEntityId = static_cast<entt::entity>(bulletId);
+    entt::entity projectile = _entityManager.createProjectile(
+        bulletEntityId, std::pair(1.0f, 0.0f),
+        std::pair(playerTransform.x + 100.0f, playerTransform.y + 15.0f), 25.0f, EntityType::PLAYER,
+        static_cast<uint32_t>(playerEntity)
+    );
 }
 
 void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint)
@@ -139,21 +141,28 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
 
         switch (event.event()) {
             case rtype::EventType::MOVE_UP:
-                transformComponent.y -= 10;
+                if (transformComponent.y > 0) {
+                    transformComponent.y -= 10;
+                }
                 break;
             case rtype::EventType::MOVE_DOWN:
-                transformComponent.y += 10;
+                if (transformComponent.y < WINDOW_HEIGHT) {
+                    transformComponent.y += 10;
+                }
                 break;
             case rtype::EventType::MOVE_LEFT:
-                transformComponent.x -= 10;
+                if (transformComponent.x > 0) {
+                    transformComponent.x -= 10;
+                }
                 break;
             case rtype::EventType::MOVE_RIGHT:
-                transformComponent.x += 10;
+                if (transformComponent.x < WINDOW_WIDTH) {
+                    transformComponent.x += 10;
+                }
                 break;
             case rtype::EventType::SHOOT:
                 std::cout << "SHOOT" << std::endl;
-                handle_projectile_creation(session, playerEntity);
-                // TODO : should create a bullet component
+                handle_player_projectile_creation(session, playerEntity);
                 break;
             case rtype::EventType::QUIT:
                 std::cout << "QUIT" << std::endl;
@@ -233,6 +242,30 @@ void NetworkManager::addEnemyStatesToGameState(
     }
 }
 
+void NetworkManager::addBulletStatesToGameState(
+    rtype::GameState& gameState, entt::registry& registry
+)
+{
+    auto view = registry.view<
+        VelocityComponent, TransformComponent, DamageComponent, BulletTypeComponent,
+        OwnerComponent>();
+    for (auto& entity : view) {
+        TransformComponent& transformable = view.get<TransformComponent>(entity);
+        VelocityComponent& velocity = view.get<VelocityComponent>(entity);
+        DamageComponent& damage = view.get<DamageComponent>(entity);
+        OwnerComponent& owner = view.get<OwnerComponent>(entity);
+        rtype::BulletState bulletState;
+        bulletState.set_bullet_id(static_cast<uint32_t>(entity));
+        bulletState.set_pos_x(transformable.x);
+        bulletState.set_pos_y(transformable.y);
+        bulletState.set_direction_x(velocity.dx);
+        bulletState.set_direction_y(velocity.dy);
+        bulletState.set_speed(velocity.speed);
+        bulletState.set_owner_id(owner.id);
+        gameState.add_bullets()->CopyFrom(bulletState);
+    }
+}
+
 void NetworkManager::sendGameStateToAllSessions(rtype::GameState& game_state)
 {
     rtype::Payload payload;
@@ -280,6 +313,8 @@ void NetworkManager::broadcast_game_state()
     addPlayerStateToGameState(game_state, registry);
 
     addEnemyStatesToGameState(game_state, registry);
+
+    addBulletStatesToGameState(game_state, registry);
 
     addWaveStateToGameState(game_state);
 

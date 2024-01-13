@@ -15,14 +15,24 @@ GameManager::GameManager(
       _settingsManager(_resourceManager),
       _entityFactory(_registry, _resourceManager, _window)
 {
-    _window.setFramerateLimit(60);
     std::cout << "GameManager created!" << std::endl;
+
+    _shootingSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav"));
+    _explosionSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
+    _musicSound =
+        SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
+    _shootingSound.setVolumeLevel(1.5f);
+    _explosionSound.setVolumeLevel(7.5f);
+    _musicSound.setVolumeLevel(2.0f);
+    _musicSound.sound.setLoop(true);
+    _musicSound.sound.play();
 }
 
 void GameManager::start_game()
 {
     _entityFactory.createMainMenu();
-
     _entityFactory.createPlanet(
         WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, "/background/layer_1/wet_256.png"
     );
@@ -30,9 +40,7 @@ void GameManager::start_game()
         WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 300, "/background/layer_1/ice_256.png"
     );
     _entityFactory.createBackground();
-
     _network_thread = std::jthread([&]() { _io_service.run(); });
-
     game_loop();
 }
 
@@ -54,76 +62,45 @@ void GameManager::handle_closing_game()
 
 void GameManager::game_loop()
 {
-    auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav");
-    auto explosionSoundBuffer =
-        _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav");
-    auto musicSoundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav");
-
-    SoundComponent sound(*soundBuffer);
-    sound.setVolumeLevel(1.5f);
-    SoundComponent explosionSound(*explosionSoundBuffer);
-    explosionSound.setVolumeLevel(7.5f);
-    SoundComponent musicSound(*musicSoundBuffer);
-    musicSound.setVolumeLevel(2.0f);
-    musicSound.sound.setLoop(true);
-    musicSound.sound.play();
-
-    int wave = 0;
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
-        sf::Event event;
-        while (_window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                handle_closing_game();
-            }
-            if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
-                if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                    handle_closing_game();
-                }
-            }
-            if (isInputEvent(event)) {
-                _inputManager.processKeyPress(event);
-                _inputManager.processKeyRelease(event);
-            }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                // sound.playSound(); // TODO : play song only when GameScenes::InGame
-
-                // TODO : handle key to send to the server as rtype::Event in the rtype::Payload
-                // entt::entity player = _playerProfileManager.getPlayerEntity();
-                // const sf::Vector2f& playerPosition =
-                //     _registry.get<RenderableComponent>(player).sprite.getPosition();
-                // _entityFactory.createProjectile(
-                //     1.0f, 0.0f, playerPosition.x + 145.0f, playerPosition.y + 47.5f, 5.0f
-                // );
-            }
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
-                rtype::Connect connect_message;
-                connect_message.set_player_name("Player Kevin");
-
-                rtype::Payload payload;
-                payload.mutable_connect()->CopyFrom(connect_message);
-
-                _networkManager.send(payload);
-            }
-        }
-        // if (transitionClock.getElapsedTime().asSeconds() > 5.0f) {
-        //     transitionClock.restart();
-        //     //_entityFactory.createWaveTransition("wave " + std::to_string(wave));
-        //     // makeEnemyShoot();
-        //     wave++;
-        // }
-        _window.clear();
-
-        processServerResponse();
+        processEvents();
         if (!_connectedPlayerIds.empty()) {
             processPlayerActions(deltaTime.asSeconds());
         }
+        _window.clear();
+        processServerResponse();
         planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
         renderSystem();
         makeAllAnimations();
-
         _window.display();
+    }
+}
+
+void GameManager::processEvents()
+{
+    sf::Event event;
+    while (_window.pollEvent(event)) {
+        if (event.type == sf::Event::Closed) {
+            handle_closing_game();
+        }
+        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                handle_closing_game();
+            }
+        }
+        if (isInputEvent(event)) {
+            _inputManager.processKeyPress(event);
+            _inputManager.processKeyRelease(event);
+        }
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
+            rtype::Connect connect_message;
+            connect_message.set_player_name("Player Kevin");
+            rtype::Payload payload;
+            payload.mutable_connect()->CopyFrom(connect_message);
+            _networkManager.send(payload);
+        }
     }
 }
 
@@ -158,26 +135,31 @@ void GameManager::processPlayerActions(float deltaTime)
 {
     auto& actions = _inputManager.getKeyboardActions();
     rtype::Event event;
-
-    if (actions.Up == true) {
-        std::cout << RED << "MOVE UP" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_UP);
-    }
-    if (actions.Down == true) {
-        std::cout << RED << "MOVE DOWN" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_DOWN);
-    }
-    if (actions.Right == true) {
-        std::cout << RED << "MOVE RIGHT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_RIGHT);
-    }
-    if (actions.Left == true) {
-        std::cout << RED << "MOVE LEFT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_LEFT);
-    }
-    if (actions.Shoot == true) {
-        std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::SHOOT);
+    if (sendEventClock.getElapsedTime().asSeconds() >= INPUT_LIMITER) {
+        if (actions.Up == true) {
+            std::cout << RED << "MOVE UP" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_UP);
+        }
+        if (actions.Down == true) {
+            std::cout << RED << "MOVE DOWN" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_DOWN);
+        }
+        if (actions.Right == true) {
+            std::cout << RED << "MOVE RIGHT" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_RIGHT);
+        }
+        if (actions.Left == true) {
+            std::cout << RED << "MOVE LEFT" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_LEFT);
+        }
+        if (actions.Shoot == true) {
+            if (shootClock.getElapsedTime().asSeconds() >= SHOOT_LIMITER) {
+                std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
+                send_event_to_server(rtype::EventType::SHOOT);
+                shootClock.restart();
+            }
+        }
+        sendEventClock.restart();
     }
 }
 
@@ -216,10 +198,9 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
     if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
         std::cout << "Connect response -> OK" << std::endl;
         // TODO : should I check if the set can container max 4 players
-        entt::entity player = static_cast<entt::entity>(payload.connect_response().player_id());
-        auto playerEntity = _entityFactory.createPlayer(player);
-        _connectedPlayerIds.insert(payload.connect_response().player_id());
-
+        _playerProfileManager.setPlayerEntity(
+            static_cast<entt::entity>(payload.connect_response().player_id())
+        );
         _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (responseStatus == rtype::ConnectResponseStatus::SERVER_FULL) {
         std::cout << "Connect response  -> KO" << std::endl;
@@ -232,44 +213,103 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
 
 void GameManager::update_player_state(const rtype::GameState& game_state)
 {
+    std::set<std::uint32_t> currentIds;
+
     for (const auto& playerState : game_state.players()) {
         // TODO : should maybe check with my set of uint32_t if the player is already connected
         uint32_t playerID = playerState.player_id();
         float posX = playerState.pos_x();
         float posY = playerState.pos_y();
-        float health = playerState.health();
-        bool isShooting = playerState.is_shooting();
 
         std::cout << MAGENTA << "Player " << playerID << ": Position(" << posX << ", " << posY
-                  << "), Health: " << health << ", IsShooting: " << (isShooting ? "Yes" : "No")
-                  << RESET << std::endl;
+                  << ")" << RESET << std::endl;
 
         entt::entity playerEntity = static_cast<entt::entity>(playerID);
+        currentIds.insert(playerID);
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
         if (!isPlayerAlreadyExist) {
-            _entityFactory.createPlayer(playerEntity);
+            _entityFactory.createPlayer(playerEntity, std::make_pair(posX, posY));
             _connectedPlayerIds.insert(playerID);
         }
 
-        if (_registry
-                .all_of<TransformComponent, HealthComponent, ScoreComponent, RenderableComponent>(
-                    playerEntity
-                )) {
+        if (_registry.all_of<TransformComponent, RenderableComponent>(playerEntity)) {
             auto& transformComponent = _registry.get<TransformComponent>(playerEntity);
-            auto& healthComponent = _registry.get<HealthComponent>(playerEntity);
-            auto& scoreComponent = _registry.get<ScoreComponent>(playerEntity);
             auto& renderableComponent = _registry.get<RenderableComponent>(playerEntity);
 
             transformComponent.x = posX;
             transformComponent.y = posY;
 
-            healthComponent.healthPoints = health;
-
             renderableComponent.sprite.setPosition(posX, posY);
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
                       << " does not have required components." << std::endl;
+        }
+    }
+
+    for (auto it = _connectedPlayerIds.begin(); it != _connectedPlayerIds.end();) {
+        std::uint32_t id = *it;
+        if (!currentIds.contains(id)) {
+            if (_registry.valid(static_cast<entt::entity>(id))) {
+                TransformComponent& transformable =
+                    _registry.get<TransformComponent>(static_cast<entt::entity>(id));
+                _entityFactory.createExplosion(std::make_pair(transformable.x, transformable.y));
+                _registry.destroy(static_cast<entt::entity>(id));
+            }
+            it = _connectedPlayerIds.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void GameManager::updateBulletState(const rtype::GameState& game_state)
+{
+    std::set<std::uint32_t> currentIds;
+
+    for (const auto& bulletState : game_state.bullets()) {
+        std::uint32_t bulletID = bulletState.bullet_id();
+        float posX = bulletState.pos_x();
+        float posY = bulletState.pos_y();
+        std::uint32_t ownerID = bulletState.owner_id();
+
+        std::cout << MAGENTA << "Bullet " << bulletID << RESET << std::endl;
+
+        entt::entity bulletEntity = static_cast<entt::entity>(bulletID);
+        currentIds.insert(bulletID);
+
+        if (!_bulletIds.contains(bulletID)) {
+            if (_connectedPlayerIds.contains(ownerID)) {
+                _entityFactory.createProjectile(bulletEntity, std::make_pair(posX, posY));
+            } else {
+                _entityFactory.createEnemyProjectile(bulletEntity, std::make_pair(posX, posY));
+            }
+            _bulletIds.insert(bulletID);
+        }
+
+        if (_registry.all_of<TransformComponent, RenderableComponent>(bulletEntity)) {
+            TransformComponent& transformable = _registry.get<TransformComponent>(bulletEntity);
+            RenderableComponent& renderable = _registry.get<RenderableComponent>(bulletEntity);
+
+            transformable.x = posX;
+            transformable.y = posY;
+
+            renderable.sprite.setPosition(sf::Vector2f(transformable.x, transformable.y));
+        } else {
+            std::cerr << "updateBulletState() << Entity with ID " << bulletID
+                      << " does not have required components." << std::endl;
+        }
+    }
+
+    for (auto it = _bulletIds.begin(); it != _bulletIds.end();) {
+        std::uint32_t id = *it;
+        if (!currentIds.contains(id)) {
+            if (_registry.valid(static_cast<entt::entity>(id))) {
+                _registry.destroy(static_cast<entt::entity>(id));
+            }
+            it = _bulletIds.erase(it);
+        } else {
+            ++it;
         }
     }
 }
@@ -359,6 +399,7 @@ void GameManager::handleGameState(const rtype::Payload& payload)
         const rtype::GameState& gameState = payload.game_state();
 
         update_player_state(gameState);
+        updateBulletState(gameState);
         // update_player_score(gameState);
         // update_enemies_state(gameState);
         update_game_wave(gameState);
