@@ -21,7 +21,7 @@ class PlayerProfileManager {
 private:
     string player_name;
     entt::entity playerEntity;
-    int player_health;
+    float player_health;
 
 public:
     /**
@@ -62,14 +62,14 @@ public:
      *
      * @return The health of the player.
      */
-    [[nodiscard]] int getPlayerHealth() const;
+    [[nodiscard]] float getPlayerHealth() const;
 
     /**
      * @brief Sets the health of the player.
      *
      * @param health The new health of the player.
      */
-    void setPlayerHealth(int health);
+    void setPlayerHealth(float health);
 };
 
 #endif  // PLAYER_PROFILE_MANAGER_HPP

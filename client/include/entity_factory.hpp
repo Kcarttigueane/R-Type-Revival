@@ -48,6 +48,8 @@ public:
     entt::entity createWaveTransition(std::string title);
 
     entt::entity createPlanet(float x, float y, std::string randomFilepath);
+    
+    entt::entity createHealth();
 };
 
 #endif  // ENTITY_FACTORY_HPP

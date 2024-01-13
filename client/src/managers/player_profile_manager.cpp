@@ -20,12 +20,12 @@ void PlayerProfileManager::setPlayerName(string name)
     player_name = name;
 }
 
-[[nodiscard]] int PlayerProfileManager::getPlayerHealth() const
+[[nodiscard]] float PlayerProfileManager::getPlayerHealth() const
 {
     return player_health;
 }
 
-void PlayerProfileManager::setPlayerHealth(int health)
+void PlayerProfileManager::setPlayerHealth(float health)
 {
     player_health = health;
 }

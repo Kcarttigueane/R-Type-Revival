@@ -20,7 +20,7 @@ entt::entity EntityManager::createPlayer(entt::entity hint)
         player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(player, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(player, 100.0f);
+    _registry.emplace<HealthComponent>(player, 3.0f);
     _registry.emplace<PlayerComponent>(player);
 
     return player;
@@ -39,7 +39,7 @@ entt::entity EntityManager::createNormalEnemy(float spawnHeight, float speed)
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(enemy, 100.0f);
+    _registry.emplace<HealthComponent>(enemy, 1.0f);
 
     return enemy;
 }
@@ -54,7 +54,7 @@ entt::entity EntityManager::createProjectile(
     _registry.emplace<BulletTypeComponent>(projectile, type);
     _registry.emplace<TransformComponent>(projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f);
     _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
-    _registry.emplace<DamageComponent>(projectile, 100.0f);
+    _registry.emplace<DamageComponent>(projectile, 1.0f);
 
     return projectile;
 }

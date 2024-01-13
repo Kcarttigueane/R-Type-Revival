@@ -19,7 +19,6 @@ entt::entity EntityFactory::createPlayer(entt::entity hint)
         player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(player, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(player, 100.0f);
     _registry.emplace<SceneComponent>(player, GameScenes::InGame);
     _registry.emplace<PlayerComponent>(player);
     return player;
@@ -71,7 +70,6 @@ entt::entity EntityFactory::createNormalEnemy(float spawnHeight, float speed)
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(enemy, 100.0f);
     _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
 
     return enemy;
@@ -98,7 +96,6 @@ entt::entity EntityFactory::createFastEnemy(float spawnWidth, float speed)
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(enemy, 100.0f);
     _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
     return enemy;
 }
@@ -220,4 +217,24 @@ entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFil
     _registry.emplace<SceneComponent>(planet);
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
     return planet;
+}
+
+entt::entity EntityFactory::createHealth() {
+    auto health = _registry.create();
+    auto texture = _resourceManager.loadTexture(_assetsPath + "/player/heart.png");
+
+    sf::IntRect initialFrameRect(0, 0, 3068, 3068);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(100.0f, 1820.0f));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(0.03f, 0.03f));
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<RenderableComponent>(health, std::move(renderable));
+
+    _registry.emplace<TransformComponent>(health, 100.0f, WINDOW_HEIGHT - 3068.0f / 26, 0.0f, 1.0f, 1.0f, 0.0f);
+    _registry.emplace<SceneComponent>(health, GameScenes::InGame);
+    _registry.emplace<HealthComponent>(health, 3.0f);
+    return health;
 }
