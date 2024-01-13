@@ -271,7 +271,6 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
                       << " does not have required components." << std::endl;
         }
     }
-
     for (auto it = _connectedPlayerIds.begin(); it != _connectedPlayerIds.end();) {
         std::uint32_t id = *it;
         if (!currentIds.contains(id)) {
