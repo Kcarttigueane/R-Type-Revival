@@ -135,26 +135,31 @@ void GameManager::processPlayerActions(float deltaTime)
 {
     auto& actions = _inputManager.getKeyboardActions();
     rtype::Event event;
-
-    if (actions.Up == true) {
-        std::cout << RED << "MOVE UP" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_UP);
-    }
-    if (actions.Down == true) {
-        std::cout << RED << "MOVE DOWN" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_DOWN);
-    }
-    if (actions.Right == true) {
-        std::cout << RED << "MOVE RIGHT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_RIGHT);
-    }
-    if (actions.Left == true) {
-        std::cout << RED << "MOVE LEFT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::MOVE_LEFT);
-    }
-    if (actions.Shoot == true) {
-        std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
-        send_event_to_server(rtype::EventType::SHOOT);
+    if (sendEventClock.getElapsedTime().asSeconds() >= 0.016f) {
+        if (actions.Up == true) {
+            std::cout << RED << "MOVE UP" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_UP);
+        }
+        if (actions.Down == true) {
+            std::cout << RED << "MOVE DOWN" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_DOWN);
+        }
+        if (actions.Right == true) {
+            std::cout << RED << "MOVE RIGHT" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_RIGHT);
+        }
+        if (actions.Left == true) {
+            std::cout << RED << "MOVE LEFT" << RESET << std::endl;
+            send_event_to_server(rtype::EventType::MOVE_LEFT);
+        }
+        if (actions.Shoot == true) {
+            if (shootClock.getElapsedTime().asSeconds() >= 0.5f) {
+                std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
+                send_event_to_server(rtype::EventType::SHOOT);
+                shootClock.restart();
+            }
+        }
+        sendEventClock.restart();
     }
 }
 
