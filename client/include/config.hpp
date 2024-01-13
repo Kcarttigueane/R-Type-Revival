@@ -6,6 +6,7 @@
 
 enum class GameScenes {
     InGame,
+    Lobby,
     MainMenu,
     Settings,
     PauseMenu,

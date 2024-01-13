@@ -27,13 +27,13 @@
 #    include "../../../build/common/proto/payload.pb.h"
 
 struct Actions {
-    bool Spacebar;
-    bool Up;
-    bool Down;
-    bool Right;
-    bool Left;
-    bool Enter;
-    bool Backspace;
+    bool Spacebar = false;
+    bool Up = false;
+    bool Down = false;
+    bool Right = false;
+    bool Left = false;
+    bool Enter = false;
+    bool Backspace = false;
 };
 
 class InputManager {
@@ -42,6 +42,7 @@ private:
     entt::registry& _registry;
     sf::RenderWindow& _window;
     Actions keyboardActions;
+    std::string currentTextInput;
 
 public:
     InputManager() = delete;

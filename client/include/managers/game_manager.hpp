@@ -197,6 +197,14 @@ public:
     void moveSettingLine(int direction);
     void updateSettingHighlight();
 
+    void lobbySystem(float deltaTime);
+    void updateLobbyHighlight();
+    void moveLobbyLine(int direction);
+    void handleTextInput(sf::Event& event);
+
+    void aboutSystem();
+    void tutorialSystem();
+
     void planetSystem(float deltaTime);
 
     void makeAllAnimations();
