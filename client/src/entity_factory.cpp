@@ -268,3 +268,23 @@ entt::entity EntityFactory::createPlanet(float x, float y, std::string randomFil
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
     return planet;
 }
+
+entt::entity EntityFactory::createHealth() {
+    auto health = _registry.create();
+    auto texture = _resourceManager.loadTexture(_assetsPath + "/player/heart.png");
+
+    sf::IntRect initialFrameRect(0, 0, 3068, 3068);
+    RenderableComponent renderable;
+    renderable.texture = texture;
+    renderable.sprite.setPosition(sf::Vector2f(100.0f, 1820.0f));
+    renderable.sprite.setTexture(*texture);
+    renderable.sprite.setScale(sf::Vector2f(0.03f, 0.03f));
+    renderable.frameRect = initialFrameRect;
+    renderable.sprite.setTextureRect(initialFrameRect);
+    _registry.emplace<RenderableComponent>(health, std::move(renderable));
+
+    _registry.emplace<TransformComponent>(health, 100.0f, WINDOW_HEIGHT - 3068.0f / 26, 1.0f, 1.0f, 3068, 3068);
+    _registry.emplace<SceneComponent>(health, GameScenes::InGame);
+    _registry.emplace<HealthComponent>(health, 3.0f);
+    return health;
+}
