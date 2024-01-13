@@ -135,7 +135,7 @@ void GameManager::processPlayerActions(float deltaTime)
 {
     auto& actions = _inputManager.getKeyboardActions();
     rtype::Event event;
-    if (sendEventClock.getElapsedTime().asSeconds() >= 0.016f) {
+    if (sendEventClock.getElapsedTime().asSeconds() >= INPUT_LIMITER) {
         if (actions.Up == true) {
             std::cout << RED << "MOVE UP" << RESET << std::endl;
             send_event_to_server(rtype::EventType::MOVE_UP);
@@ -153,7 +153,7 @@ void GameManager::processPlayerActions(float deltaTime)
             send_event_to_server(rtype::EventType::MOVE_LEFT);
         }
         if (actions.Shoot == true) {
-            if (shootClock.getElapsedTime().asSeconds() >= 0.5f) {
+            if (shootClock.getElapsedTime().asSeconds() >= SHOOT_LIMITER) {
                 std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
                 send_event_to_server(rtype::EventType::SHOOT);
                 shootClock.restart();
