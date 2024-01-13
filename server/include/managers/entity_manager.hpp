@@ -76,7 +76,9 @@ public:
         float velocity, EntityType type, std::uint32_t ownerId
     );
 
-    entt::entity createFastEnemy(entt::entity hint, float spawnWidth, float speed);
+    entt::entity createFastEnemy(
+        entt::entity hint, std::pair<float, float> position, float velocity
+    );
 };
 
 #endif  // ENTITY_MANAGER_HPP

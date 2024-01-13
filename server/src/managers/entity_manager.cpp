@@ -75,21 +75,23 @@ entt::entity EntityManager::createProjectile(
     return projectile;
 }
 
-entt::entity EntityManager::createFastEnemy(entt::entity hint, float spawnWidth, float speed)
+entt::entity EntityManager::createFastEnemy(
+    entt::entity hint, std::pair<float, float> position, float velocity
+)
 {
     auto enemy = _registry.create(hint);
 
     _registry.emplace<EnemyComponent>(enemy, EnemyType::FAST);
 
     TransformComponent transformComponent = {
-        .x = spawnWidth,
-        .y = -128.0f,
+        .x = position.first,
+        .y = position.second,
         .scaleX = 1.0f,
         .scaleY = 1.0f,
     };
 
     _registry.emplace<TransformComponent>(enemy, transformComponent);
-    _registry.emplace<VelocityComponent>(enemy, 0.0f, 1.0f, speed);
+    _registry.emplace<VelocityComponent>(enemy, 0.0f, 1.0f, velocity);
     _registry.emplace<WeaponComponent>(
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );

@@ -6,6 +6,7 @@
 
 #    include "../../common/components/component_includes.hpp"
 
+#    include "../../build/common/proto/r_type.pb.h"
 #    include "./managers/resource_manager.hpp"
 
 using std::string;
@@ -27,7 +28,9 @@ public:
 
     entt::entity createPlayer(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createEnemy(EnemyType type, entt::entity hint, std::pair<float, float> position);
+    entt::entity createEnemy(
+        rtype::EnemyType type, entt::entity hint, std::pair<float, float> position
+    );
 
     entt::entity createNormalEnemy(entt::entity hint, std::pair<float, float> position);
 

@@ -70,6 +70,9 @@ void GameManager::handle_closing_game()
 
 void GameManager::game_loop()
 {
+    _entityFactory.createNormalEnemy(
+        static_cast<entt::entity>(123), std::make_pair(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    );
     while (_window.isOpen()) {
         sf::Time deltaTime = clock.restart();
         processEvents();
@@ -335,45 +338,43 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
 
         if (_isWaveInProgress) {
             for (const auto& enemyState : game_state.enemies()) {
-                const bool isIdAlreadyPresent =
-                    _enemiesIds.contains(enemyState.enemy_id());  // ! C++20
+                uint32_t enemyID = enemyState.enemy_id();
+                float posX = enemyState.pos_x();
+                float posY = enemyState.pos_y();
+                rtype::EnemyType type = enemyState.type();
+                float health = enemyState.health();  // Not needed for normal and fast enemies
+
+                std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
+                          << ", " << posY << "), Health: " << health << std::endl;
+
+                entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+
+                const bool isIdAlreadyPresent = _enemiesIds.contains(enemyState.enemy_id());
 
                 std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
                 if (!isIdAlreadyPresent) {
-                    uint32_t enemyID = enemyState.enemy_id();
-                    float posX = enemyState.pos_x();
-                    float posY = enemyState.pos_y();
-                    rtype::EnemyType type = enemyState.type();
-                    float health = enemyState.health();
-
-                    std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
-                              << ", " << posY << "), Health: " << health << std::endl;
-
+                    std::cout << "la vie est belle" << std::endl;
                     entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
                     _enemiesIds.insert(enemyID);
-                    EnemyType enemyType = static_cast<EnemyType>(type);
-                    _entityFactory.createEnemy(enemyType, enemyEntity, std::make_pair(posX, posY));
+                    _entityFactory.createEnemy(type, enemyEntity, std::make_pair(posX, posY));
+                }
 
-                    if (_registry.all_of<TransformComponent, HealthComponent>(enemyEntity)) {
-                        auto& transformComponent = _registry.get<TransformComponent>(enemyEntity);
-                        auto& healthComponent = _registry.get<HealthComponent>(enemyEntity);
+                if (_registry.all_of<TransformComponent, RenderableComponent>(enemyEntity)) {
+                    auto& transformComponent = _registry.get<TransformComponent>(enemyEntity);
+                    auto& renderableComponent = _registry.get<RenderableComponent>(enemyEntity);
 
-                        transformComponent.x = posX;
-                        transformComponent.y = posY;
+                    transformComponent.x = posX;
+                    transformComponent.y = posY;
 
-                        healthComponent.healthPoints = health;
-
-                    } else {
-                        std::cerr << "Enemy entity with ID " << enemyID
-                                  << " does not have required components." << std::endl;
-                    }
+                    renderableComponent.sprite.setPosition(posX, posY);
+                } else {
+                    std::cerr << "Enemy entity with ID " << enemyID
+                              << " does not have required components." << std::endl;
                 }
             }
+        } else {
+            std::cerr << "Wave not in progress or no wave info." << std::endl;
         }
-    }
-
-    else {
-        std::cerr << "Wave not in progress or no wave info." << std::endl;
     }
 }
 
@@ -409,7 +410,6 @@ void GameManager::handleGameState(const rtype::Payload& payload)
         // update_player_score(gameState);
         // update_enemies_state(gameState);
         update_game_wave(gameState);
-        // TODO : Continue for powerUps, scores, bullets, etc.
     } else {
         std::cerr << "Payload does not contain a GameState." << std::endl;
     }

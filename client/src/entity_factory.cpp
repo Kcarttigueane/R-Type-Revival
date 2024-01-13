@@ -64,7 +64,7 @@ entt::entity EntityFactory::createProjectile(entt::entity hint, std::pair<float,
 
 entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float, float> position)
 {
-    auto enemy = _registry.create();
+    auto enemy = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
     sf::IntRect initialFrameRect(32, 48, 64, 32);
 
@@ -77,6 +77,7 @@ entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float
     renderable.sprite.setTextureRect(initialFrameRect);
     sf::Vector2f scaledSize = sf::Vector2f(64.0f, 32.0f) * 2.0f;
     renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+
     _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
 
     TransformComponent transformComponent = {
@@ -87,6 +88,7 @@ entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float
         .width = 64,
         .height = 32,
     };
+
     _registry.emplace<TransformComponent>(enemy, transformComponent);
 
     _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
@@ -95,15 +97,15 @@ entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float
 }
 
 entt::entity EntityFactory::createEnemy(
-    EnemyType type, entt::entity hint, std::pair<float, float> position
+    rtype::EnemyType type, entt::entity hint, std::pair<float, float> position
 )
 {
     switch (type) {
-        case EnemyType::NORMAL:
+        case rtype::EnemyType::NORMAL:
             return createNormalEnemy(hint, position);
-        case EnemyType::FAST:
+        case rtype::EnemyType::FAST:
             return createFastEnemy(hint, position);
-        case EnemyType::BOSS:
+        case rtype::EnemyType::BOSS:
             // TODO: Implement boss enemy creation logic
             break;
         default:
@@ -114,7 +116,7 @@ entt::entity EntityFactory::createEnemy(
 
 entt::entity EntityFactory::createFastEnemy(entt::entity hint, std::pair<float, float> position)
 {
-    auto enemy = _registry.create();
+    auto enemy = _registry.create(hint);
     auto texture = _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
     sf::IntRect initialFrameRect(150, 48, 82, 32);
 

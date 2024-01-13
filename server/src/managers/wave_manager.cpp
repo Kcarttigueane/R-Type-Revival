@@ -22,7 +22,7 @@ WaveManager::WaveManager(EntityManager& entityManager, IdGenerator& idGenerator)
 void WaveManager::initializeWaves()
 {
     Wave wave1(1, 20.0f);
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 4; ++i) {
         wave1.enemies.push_back(rtype::EnemyType::NORMAL);
     }
     for (int i = 0; i < 2; ++i) {
@@ -31,19 +31,19 @@ void WaveManager::initializeWaves()
     _waves.push_back(wave1);
 
     Wave wave2(2, 45.0f);
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 8; ++i) {
         wave2.enemies.push_back(rtype::EnemyType::NORMAL);
     }
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 4; ++i) {
         wave2.enemies.push_back(rtype::EnemyType::FAST);
     }
     _waves.push_back(wave2);
 
     Wave wave3(3, 60.0f);
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 16; ++i) {
         wave3.enemies.push_back(rtype::EnemyType::NORMAL);
     }
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 4; ++i) {
         wave3.enemies.push_back(rtype::EnemyType::FAST);
     }
     wave3.enemies.push_back(rtype::EnemyType::BOSS);
@@ -117,7 +117,7 @@ void WaveManager::spawnEnemy(rtype::EnemyType enemyType)
 
     switch (enemyType) {
         case rtype::EnemyType::NORMAL: {
-            float randomNormalX = getRandomFloat(WINDOW_WIDTH, WINDOW_WIDTH + 100.0f);
+            float randomNormalX = WINDOW_WIDTH + 100;
             float randomNormalY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
             float randomNormalSpeed = getRandomFloat(2.0f, 5.0f);
             _entityManager.createNormalEnemy(
@@ -126,9 +126,11 @@ void WaveManager::spawnEnemy(rtype::EnemyType enemyType)
             break;
         }
         case rtype::EnemyType::FAST: {
-            float randomFastY = getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-            float randomFastSpeed = getRandomFloat(2.0f, 5.0f);
-            _entityManager.createFastEnemy(playerEntityId, randomFastY, randomFastSpeed);
+            float randomNormalX = getRandomFloat(32.0f, WINDOW_WIDTH - 32.0f);
+            float randomNormalY = -100;
+            _entityManager.createFastEnemy(
+                playerEntityId, std::make_pair(randomNormalX, randomNormalY), 10.0f
+            );
             break;
         }
         case rtype::EnemyType::BOSS:
