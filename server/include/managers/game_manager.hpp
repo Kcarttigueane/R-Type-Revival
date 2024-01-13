@@ -7,8 +7,11 @@
 #    include "./entity_manager.hpp"
 #    include "./network_manager.hpp"
 #    include "./players_session_manager.hpp"
+#    include "./wave_manager.hpp"
 
 #    include "../../../common/utils/id_generator.hpp"
+
+#    include <chrono>
 
 class GameManager {
 private:
@@ -22,6 +25,7 @@ private:
     // ! Managers
     EntityManager _entity_manager;
     NetworkManager _network_manager;
+    WaveManager _wave_manager;
 
     // ! ID generator
     IdGenerator _idGenerator;
@@ -34,6 +38,10 @@ public:
     void run();
 
     void game_loop();
+
+    void updateGameLogic(float deltaTime);
+
+    void velocitySystem();
 };
 
 #endif  // GAME_MANGER_HPP

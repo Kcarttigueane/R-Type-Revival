@@ -2,7 +2,7 @@
 
 // void collisionProjectileAndEnemy()
 // {
-//     auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
+//     auto enemies = _registry.view<EnemyComponent, RenderableComponent, HealthComponent>();
 //     auto projectiles = _registry.view<RenderableComponent, DamageComponent>();
 
 //     for (auto& enemy : enemies) {
@@ -24,7 +24,7 @@
 
 // void collisionEnemyAndPlayer()
 // {
-//     auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
+//     auto enemies = _registry.view<EnemyComponent, RenderableComponent>();
 //     auto player = _playerProfileManager.getPlayerEntity();
 
 //     for (auto& enemy : enemies) {

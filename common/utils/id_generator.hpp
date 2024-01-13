@@ -7,6 +7,12 @@
 #    include <set>
 #    include <stdexcept>
 
+#    define BACKGROUND_ID 1
+#    define MAIN_MENU_ID 2
+#    define PLANET_WET_ID 3
+#    define PLANET_ICE_ID 4
+#    define HEALTH_ID 5
+
 class IdGenerator {
 private:
     std::set<uint32_t> usedIds;
@@ -22,6 +28,14 @@ private:
     {
         std::uniform_int_distribution<uint32_t> distribution(min, max);
         return distribution(gen);
+    }
+
+    bool isExcluded(uint32_t id)
+    {
+        static const std::set<uint32_t> excludedIds = {
+            BACKGROUND_ID, MAIN_MENU_ID, PLANET_WET_ID, PLANET_ICE_ID, HEALTH_ID
+        };
+        return excludedIds.find(id) != excludedIds.end();
     }
 
 public:

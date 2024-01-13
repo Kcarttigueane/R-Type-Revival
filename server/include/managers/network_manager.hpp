@@ -11,7 +11,7 @@
 
 #    include "../../../libs/EnTT/entt.hpp"
 
-#    include "../../src/proto/r_type.pb.h"
+#    include "../../../build/common/proto/r_type.pb.h"
 
 // Managers
 
@@ -20,6 +20,7 @@
 
 #    include "./entity_manager.hpp"
 #    include "./players_session_manager.hpp"
+#    include "./wave_manager.hpp"
 
 #    include "../../../common/utils/id_generator.hpp"
 
@@ -40,18 +41,11 @@ private:
     // Game Data
     std::uint32_t _next_player_id = 10;
     EntityManager& _entityManager;
+    WaveManager& _wave_manager;
 
     IdGenerator& _idGenerator;
 
-    void start_receive()
-    {
-        _socket.async_receive_from(
-            boost::asio::buffer(_recv_buffer), _remote_endpoint,
-            [this](const boost::system::error_code& error, std::size_t bytes_transferred) {
-                handle_receive(error, bytes_transferred);
-            }
-        );
-    }
+    void start_receive();
 
     void handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred);
 
@@ -62,6 +56,8 @@ private:
     void handle_event(const rtype::Event& event, const udp::endpoint& sender_endpoint);
 
     void handle_player_quit(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
+
+    void handle_player_projectile_creation(std::shared_ptr<PlayerSession>& session, entt::entity playerEntity);
 
     void send_message(const std::string& serialized_message, const udp::endpoint& target_endpoint)
     {
@@ -83,23 +79,17 @@ private:
 public:
     NetworkManager(
         boost::asio::io_context& io_context, std::string port, EntityManager& entityManager,
-        IdGenerator& idGenerator
-    )
-        : _socket(io_context, udp::endpoint(udp::v4(), std::stoi(port))),
-          _entityManager(entityManager),
-          _idGenerator(idGenerator)
-    {
-        std::cout << "NetworkManager running at " << _socket.local_endpoint() << std::endl;
-        start_receive();
-    }
+        WaveManager& waveManager, IdGenerator& idGenerator
+    );
 
     ~NetworkManager() { _socket.close(); }
 
     // ! Broadcast GameState Payload:
     void addPlayerStateToGameState(rtype::GameState& game_state, entt::registry& registry);
     void addEnemyStatesToGameState(rtype::GameState& game_state, entt::registry& registry);
+    void addBulletStatesToGameState(rtype::GameState& gameState, entt::registry &registry);
     void addWaveStateToGameState(rtype::GameState& game_state);
-    void sendGameStateToAllSessions(const rtype::GameState& game_state);
+    void sendGameStateToAllSessions(rtype::GameState& game_state);
     void broadcast_game_state();
 };
 
