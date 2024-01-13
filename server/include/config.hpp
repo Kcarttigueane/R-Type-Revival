@@ -12,5 +12,6 @@
 #define MAIN_MENU_ID 2
 #define PLANET_WET_ID 3
 #define PLANET_ICE_ID 4
+#define HEALTH_ID 5
 
 #endif  // !CONFIG_HPP

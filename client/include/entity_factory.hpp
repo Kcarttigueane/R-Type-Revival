@@ -51,6 +51,8 @@ public:
     entt::entity createPlanet(
         entt::entity hint, std::pair<float, float> position, std::string randomFilepath
     );
+
+    entt::entity createHealth(entt::entity hint);
 };
 
 #endif  // ENTITY_FACTORY_HPP

@@ -11,6 +11,7 @@
 #    define MAIN_MENU_ID 2
 #    define PLANET_WET_ID 3
 #    define PLANET_ICE_ID 4
+#    define HEALTH_ID 5
 
 class IdGenerator {
 private:
@@ -32,7 +33,7 @@ private:
     bool isExcluded(uint32_t id)
     {
         static const std::set<uint32_t> excludedIds = {
-            BACKGROUND_ID, MAIN_MENU_ID, PLANET_WET_ID, PLANET_ICE_ID
+            BACKGROUND_ID, MAIN_MENU_ID, PLANET_WET_ID, PLANET_ICE_ID, HEALTH_ID
         };
         return excludedIds.find(id) != excludedIds.end();
     }
