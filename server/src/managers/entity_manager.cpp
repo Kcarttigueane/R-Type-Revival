@@ -5,8 +5,8 @@ entt::entity EntityManager::createPlayer(entt::entity hint)
     auto player = _registry.create(hint);
 
     TransformComponent transformComponent = {
-        .x = 0.0f,
-        .y = 0.0f,
+        .x = WINDOW_HEIGHT / 2.0f,
+        .y = WINDOW_WIDTH / 6.0f,
         .scaleX = 2.0f,
         .scaleY = 2.0f,
         .width = 86,
@@ -48,7 +48,9 @@ entt::entity EntityManager::createNormalEnemy(
     );
     _registry.emplace<HealthComponent>(enemy, 1.0f);
     _registry.emplace<DamageComponent>(enemy, 3.0f);
-    _registry.emplace<ClockComponent>(enemy, getRandomFloat(1.0f, 10.0f), std::chrono::_V2::steady_clock::now());
+    _registry.emplace<ClockComponent>(
+        enemy, getRandomFloat(1.0f, 10.0f), std::chrono::_V2::steady_clock::now()
+    );
 
     return enemy;
 }

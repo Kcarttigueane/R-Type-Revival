@@ -27,6 +27,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
+#include <random>
+#include <set>
 #include <vector>
 
 /**

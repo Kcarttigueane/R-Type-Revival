@@ -23,9 +23,9 @@ GameManager::GameManager(
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
     _musicSound =
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
-    _shootingSound.setVolumeLevel(1.5f);
-    _explosionSound.setVolumeLevel(7.5f);
-    _musicSound.setVolumeLevel(2.0f);
+    _shootingSound.setVolumeLevel(6.0f);
+    _explosionSound.setVolumeLevel(14.0f);
+    _musicSound.setVolumeLevel(8.0f);
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
 }
@@ -70,7 +70,8 @@ void GameManager::handle_closing_game()
     _window.close();
 }
 
-void GameManager::makeWaveTransitionAnimation() {
+void GameManager::makeWaveTransitionAnimation()
+{
     entt::entity WaveId = static_cast<entt::entity>(123);
     if (_registry.all_of<RenderableComponent, TransformComponent, VelocityComponent>(WaveId)) {
         auto& renderable = _registry.get<RenderableComponent>(WaveId);
@@ -78,7 +79,8 @@ void GameManager::makeWaveTransitionAnimation() {
 
         auto& transformComponent = _registry.get<TransformComponent>(WaveId);
         auto& velocityComponent = _registry.get<VelocityComponent>(WaveId);
-        transformComponent.x = transformComponent.x + velocityComponent.dx * velocityComponent.speed;
+        transformComponent.x =
+            transformComponent.x + velocityComponent.dx * velocityComponent.speed;
         renderable.text.setPosition(sf::Vector2f(transformComponent.x, transformComponent.y));
         if (transformComponent.x <= WINDOW_WIDTH - 2000) {
             _registry.destroy(WaveId);
@@ -183,6 +185,7 @@ void GameManager::processPlayerActions(float deltaTime)
         }
         if (actions.Shoot == true) {
             if (shootClock.getElapsedTime().asSeconds() >= SHOOT_LIMITER) {
+                _shootingSound.sound.play();
                 std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
                 send_event_to_server(rtype::EventType::SHOOT);
                 shootClock.restart();
@@ -293,6 +296,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         std::uint32_t id = *it;
         if (!currentIds.contains(id)) {
             if (_registry.valid(static_cast<entt::entity>(id))) {
+                _explosionSound.sound.play();
                 TransformComponent& transformable =
                     _registry.get<TransformComponent>(static_cast<entt::entity>(id));
                 _entityFactory.createExplosion(std::make_pair(transformable.x, transformable.y));
@@ -369,7 +373,9 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
         _currentWaveLevel = gameWave.current_wave();
         IdGenerator _idGenerator;
         entt::entity id = static_cast<entt::entity>(123);
-        entt::entity textWave = _entityFactory.createWaveTransition(id, "Wave " + std::to_string(_currentWaveLevel + 1));
+        entt::entity textWave = _entityFactory.createWaveTransition(
+            id, "Wave " + std::to_string(_currentWaveLevel + 1)
+        );
         _isWaveInProgress = true;
     }
     if (game_state.has_wave_state()) {
@@ -424,6 +430,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                 std::uint32_t id = *it;
                 if (!currentIds.contains(id)) {
                     if (_registry.valid(static_cast<entt::entity>(id))) {
+                        _explosionSound.sound.play();
                         TransformComponent& transformable =
                             _registry.get<TransformComponent>(static_cast<entt::entity>(id));
                         _entityFactory.createExplosion(std::pair(transformable.x, transformable.y));
