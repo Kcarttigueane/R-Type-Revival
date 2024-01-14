@@ -4,7 +4,7 @@ void GameManager::aboutSystem() {
 
     auto keyboardActions = _inputManager.getKeyboardActions();
 
-    if (keyboardActions.Backspace) {
+    if (keyboardActions.Escape) {
         _sceneManager.setCurrentScene(GameScenes::MainMenu);
     }
 }

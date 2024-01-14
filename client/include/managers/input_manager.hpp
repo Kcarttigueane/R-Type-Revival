@@ -42,7 +42,8 @@ struct Actions {
     bool Right;
     bool Left;
     bool Enter = false;
-    bool Backspace = false;
+    bool Escape;
+    bool Backspace;
     std::string TextInput;
 };
 

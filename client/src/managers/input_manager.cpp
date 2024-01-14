@@ -37,11 +37,14 @@ void InputManager::processKeyPress(sf::Event& event)
         if (event.key.code == sf::Keyboard::Enter) {
             keyboardActions.Enter = true;
         }
-        if (event.key.code == sf::Keyboard::BackSpace) {
-            keyboardActions.Backspace = true;
-        }
         if (event.key.code == sf::Keyboard::Space) {
             keyboardActions.Shoot = true;
+        }
+        if (event.key.code == sf::Keyboard::Escape) {
+            keyboardActions.Escape = true;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = true;
         }
     }
 }
@@ -64,11 +67,14 @@ void InputManager::processKeyRelease(sf::Event& event)
         if (event.key.code == sf::Keyboard::Enter) {
             keyboardActions.Enter = false;
         }
-        if (event.key.code == sf::Keyboard::BackSpace) {
-            keyboardActions.Backspace = false;
-        }
         if (event.key.code == sf::Keyboard::Space) {
             keyboardActions.Shoot = false;
+        }
+        if (event.key.code == sf::Keyboard::Escape) {
+            keyboardActions.Escape = false;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = false;
         }
     }
 }

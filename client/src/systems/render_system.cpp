@@ -28,7 +28,7 @@ void GameManager::renderSystem()
             }
             if (renderable.sprite.getTexture()) {
                 _window.draw(renderable.sprite);
-                //drawHitBox(renderable);
+                // drawHitBox(renderable);
             }
         }
     }

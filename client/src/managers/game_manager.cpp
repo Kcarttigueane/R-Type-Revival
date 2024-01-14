@@ -34,18 +34,18 @@ void GameManager::create_menu()
 {
     _entityFactory.createMainMenuTitle();
 
-    std::vector<std::tuple<std::string, std::string, bool>> buttonInfo = {
-        {"/menu/quit.png", "Quit", false},
-        {"/menu/settings.png", "Settings", false},
-        {"/menu/play.png", "Play", true},
-        {"/menu/tutorial.png", "Tutorial", false},
-        {"/menu/about.png", "About", false}
+    std::vector<std::tuple<std::string, std::string, bool, entt::entity>> buttonInfo = {
+        {"/menu/quit.png", "Quit", false, static_cast<entt::entity>(123)},
+        {"/menu/settings.png", "Settings", false, static_cast<entt::entity>(124)},
+        {"/menu/play.png", "Play", true, static_cast<entt::entity>(125)},
+        {"/menu/tutorial.png", "Tutorial", false, static_cast<entt::entity>(126)},
+        {"/menu/about.png", "About", false, static_cast<entt::entity>(127)}
     };
 
     for (int i = 0; i < buttonInfo.size(); ++i) {
         _entityFactory.createButton(
             _assetsPath + std::get<0>(buttonInfo[i]), std::get<1>(buttonInfo[i]), i,
-            std::get<2>(buttonInfo[i])
+            std::get<2>(buttonInfo[i]), std::get<3>(buttonInfo[i])
         );
     }
 
@@ -142,12 +142,10 @@ void GameManager::game_loop()
         }
         _window.clear();
         processServerResponse();
-        planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
         if (_sceneManager.getCurrentScene() == GameScenes::InGame) {
             planetSystem(deltaTime.asSeconds());
-        }
-        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+        } else if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
             menuSystem(deltaTime.asSeconds());
         } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
             settingsSystem(deltaTime.asSeconds());
@@ -169,13 +167,8 @@ void GameManager::processEvents()
 {
     sf::Event event;
     while (_window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
+        if (event.type == sf::Event::Closed || _sceneManager.getCurrentScene() == GameScenes::Quit) {
             handle_closing_game();
-        }
-        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                handle_closing_game();
-            }
         }
         if (isInputEvent(event)) {
             _inputManager.processKeyPress(event);
@@ -197,7 +190,8 @@ bool GameManager::isInputEvent(const sf::Event& event)
 {
     return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
            event.type == sf::Event::MouseButtonPressed ||
-           event.type == sf::Event::MouseButtonReleased;
+           event.type == sf::Event::MouseButtonReleased ||
+           event.type == sf::Event::TextEntered;
 }
 
 void GameManager::deleteEnemies()

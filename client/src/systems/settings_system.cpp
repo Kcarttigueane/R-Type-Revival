@@ -78,7 +78,7 @@ void GameManager::settingsSystem(float deltaTime)
         } else if (keyboardActions.Down) {
             moveSettingLine(-1);
             menuMoveCooldown = menuMoveDelay;
-        } else if (keyboardActions.Backspace) {
+        } else if (keyboardActions.Escape) {
             _sceneManager.setCurrentScene(GameScenes::MainMenu);
             menuMoveCooldown = menuMoveDelay;
         }

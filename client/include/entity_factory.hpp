@@ -143,7 +143,8 @@ public:
     entt::entity createMainMenuTitle();
 
     entt::entity createButton(
-        const std::string& path, const std::string& label, int index, bool isSelected
+        const std::string& path, const std::string& label, int index, bool isSelected,
+        entt::entity buttonId
     );
 
     entt::entity createSelectedLabel();

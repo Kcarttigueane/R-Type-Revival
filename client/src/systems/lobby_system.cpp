@@ -19,6 +19,8 @@ void GameManager::lobbySystem(float deltaTime)
         menuMoveCooldown = menuMoveDelay;
     } else if (keyboardActions.Enter && menuMoveCooldown <= 0) {
         _sceneManager.setCurrentScene(GameScenes::InGame);
+    } else if (keyboardActions.Escape && menuMoveCooldown <= 0) {
+        _sceneManager.setCurrentScene(GameScenes::MainMenu);
     }
 
     auto& textComponent = _registry.get<RenderableComponent>(inputFields[selectedInputField]).text;
@@ -28,10 +30,8 @@ void GameManager::lobbySystem(float deltaTime)
 
     std::string tempText = currentText;
 
-    if (keyboardActions.Backspace && !tempText.empty()) {
-        std::cout << "Before Backspace: " << tempText << std::endl;
+    if (keyboardActions.Backspace == true && !tempText.empty()) {
         tempText.pop_back();
-        std::cout << "After Backspace: " << tempText << std::endl;
         keyboardActions.Backspace = false;
     } else if (!keyboardActions.TextInput.empty()) {
         tempText += keyboardActions.TextInput;

@@ -336,10 +336,12 @@ entt::entity EntityFactory::createMainMenuTitle()
 }
 
 entt::entity EntityFactory::createButton(
-    const std::string& path, const std::string& label, int index, bool isSelected
+    const std::string& path, const std::string& label, int index, bool isSelected,
+    entt::entity buttonId
 )
 {
-    auto button = _registry.create();
+    auto button = _registry.create(buttonId);
+    entt::entity PlaneWetId = static_cast<entt::entity>(123);
     auto texture = _resourceManager.loadTexture(path);
 
     float buttonWidth = 310.0f * 0.4f;

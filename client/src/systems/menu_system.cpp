@@ -13,7 +13,7 @@ float GameManager::calculateButtonXPosition(int index)
 
 void GameManager::moveMenuItems(int direction)
 {
-    auto view = _registry.view<MenuItemComponent, RenderableComponent, TransformComponent>();
+    auto view = _registry.view<MenuItemComponent, RenderableComponent>();
 
     std::vector<entt::entity> items(view.begin(), view.end());
 
@@ -23,10 +23,12 @@ void GameManager::moveMenuItems(int direction)
     });
 
     if (direction == -1) {
+        std::cout << "Moving right" << std::endl;
         auto leftmostItem = items.front();
         items.erase(items.begin());
         items.push_back(leftmostItem);
     } else if (direction == 1) {
+        std::cout << "Moving left" << std::endl;
         auto rightmostItem = items.back();
         items.pop_back();
         items.insert(items.begin(), rightmostItem);
@@ -38,7 +40,8 @@ void GameManager::moveMenuItems(int direction)
 
         float buttonX = calculateButtonXPosition(i);
         auto& transform = _registry.get<TransformComponent>(items[i]);
-        transform.x = buttonX;
+        auto& renderable = _registry.get<RenderableComponent>(items[i]);
+        renderable.sprite.setPosition(buttonX, transform.y);
 
         menuItem.isSelected = (i == 2);
     }
@@ -103,9 +106,17 @@ void GameManager::menuSystem(float deltaTime)
 
     if (menuMoveCooldown <= 0) {
         if (keyboardActions.Left) {
+            std::cout << "Left" << std::endl;
+            for (auto entity : view) {
+                auto& menuItem = view.get<MenuItemComponent>(entity);
+                auto& transform = _registry.get<TransformComponent>(entity);
+                std::cout << "Label: " << menuItem.label << " Index: " << menuItem.index
+                          << " X: " << transform.x << " Y: " << transform.y << std::endl;
+            }
             moveMenuItems(1);
             menuMoveCooldown = menuMoveDelay;
         } else if (keyboardActions.Right) {
+            std::cout << "Right" << std::endl;
             moveMenuItems(-1);
             menuMoveCooldown = menuMoveDelay;
         }
