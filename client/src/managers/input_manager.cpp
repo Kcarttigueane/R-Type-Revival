@@ -1,5 +1,9 @@
 #include "../../include/managers/input_manager.hpp"
 
+InputManager::InputManager(entt::registry& _registry, sf::RenderWindow& window)
+    : _currentScene(GameScenes::MainMenu), _registry(_registry), _window(window)
+{}
+
 [[nodiscard]] GameScenes InputManager::getContext() const
 {
     return _currentScene;
@@ -30,6 +34,9 @@ void InputManager::processKeyPress(sf::Event& event)
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = true;
         }
+        if (event.key.code == sf::Keyboard::Space) {
+            keyboardActions.Shoot = true;
+        }
     }
 }
 
@@ -47,6 +54,9 @@ void InputManager::processKeyRelease(sf::Event& event)
         }
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = false;
+        }
+        if (event.key.code == sf::Keyboard::Space) {
+            keyboardActions.Shoot = false;
         }
     }
 }

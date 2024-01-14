@@ -17,6 +17,7 @@
 // Libraries
 
 #include "../../../common/components/component_includes.hpp"
+#include "../../../common/utils/id_generator.hpp"
 #include "../../../libs/EnTT/entt.hpp"
 
 #include <SFML/Audio.hpp>
@@ -38,19 +39,19 @@
  */
 class GameManager {
 private:
-    // Game
     string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
+
     sf::Clock clock;
     sf::Clock enemyClock;
     sf::Clock transitionClock;
-
-    int _score = 0;
+    sf::Clock sendEventClock;
+    sf::Clock shootClock;
 
     // ! Managers
     InputManager _inputManager;
-    // NetworkManager _networkManager;
+    NetworkManagerAsyncUDPClient _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
@@ -58,141 +59,25 @@ private:
 
     EntityFactory _entityFactory;
 
-    std::set<uint32_t> _playerPresent;
-    bool _isFirstPlayer = true;
+    boost::asio::io_service& _io_service;
 
-    std::string _server_ip;
-    unsigned short _server_port;
+    // --------------------------------------
+    // IF IMPROVABLE, IMPROVE! //
 
-public:
-    /**
-     * \brief Constructor for GameManager.
-     * \param server_ip IP address for the server.
-     * \param server_port Port number for the server.
-     */
-    GameManager(std::string server_ip, unsigned short server_port)
-        : _server_ip(server_ip),
-          _server_port(server_port),
-          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(_registry, _window),
-          //   _networkManager(_io_context, server_ip, server_port),
-          _playerProfileManager(),
-          _resourceManager(),
-          _sceneManager(_inputManager),
-          _settingsManager(_resourceManager),
-          _entityFactory(_registry, _resourceManager, _window)
-    {
-        _window.setFramerateLimit(60);
-        std::cout << "GameManager created!" << std::endl;
-    }
+    SoundComponent _shootingSound;
+    SoundComponent _explosionSound;
+    SoundComponent _musicSound;
 
-    ~GameManager() { _registry.clear(); }
+    // --------------------------------------
 
-    void start_game();
+    std::set<uint32_t> _connectedPlayerIds;
+    std::set<uint32_t> _bulletIds;
+    std::set<uint32_t> _enemiesIds;
 
-    void game_loop(
-        std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
-    );
+    int _currentWaveLevel = 0;
+    bool _isWaveInProgress = false;
 
-    // ! Collision and Event Handling methods
-
-    void collisionProjectileAndEnemy()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles = _registry.view<RenderableComponent, DamageComponent, PlayerProjectileComponent>();
-
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth = enemies.get<HealthComponent>(enemy).healthPoints;
-            for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite =
-                    projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage = projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(projectileSprite.getGlobalBounds())) {
-                    enemyHealth -= projectileDamage;
-                    _registry.destroy(projectile);
-                }
-            }
-        }
-    }
-
-    void collisionEnemyAndPlayer()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
-        auto player = _playerProfileManager.getPlayerEntity();
-
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite = enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite = enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
-                deleteAIEnemies();
-                _score = 0;
-                _sceneManager.setCurrentScene(GameScenes::Lose);
-            }
-        }
-    };
-
-    void checkWin()
-    {
-        if (_score >= 20) {
-            deleteAIEnemies();
-            _score = 0;
-            _sceneManager.setCurrentScene(GameScenes::Win);
-        }
-    }
-
-    void deleteAIEnemies()
-    {
-        auto enemies = _registry.view<EnemyAIComponent>();
-        for (auto enemy : enemies) {
-            _registry.destroy(enemy);
-        }
-    }
-
-    void processPlayerActions(float deltaTime, std::queue<rtype::Event>& messages)
-    {
-        auto& actions = _inputManager.getKeyboardActions();
-        rtype::Event protoEvent;
-
-        if (actions.Up == true) {
-            protoEvent.set_event(rtype::EventType::MOVEUP);
-            messages.push(protoEvent);
-        }
-        if (actions.Down == true) {
-            protoEvent.set_event(rtype::EventType::MOVEDOWN);
-            messages.push(protoEvent);
-        }
-        if (actions.Right == true) {
-            protoEvent.set_event(rtype::EventType::MOVERIGHT);
-            messages.push(protoEvent);
-        }
-        if (actions.Left == true) {
-            protoEvent.set_event(rtype::EventType::MOVELEFT);
-            messages.push(protoEvent);
-        }
-    }
-
-    // ! Systems:
-
-    void enemySystem(sf::Sound& explosionSound);
-
-    void makeEnemyShoot();
-
-    void renderSystem();
-
-    void parallaxSystem(float deltaTime);
-
-    void planetSystem(float deltaTime);
-
-    void makeAllAnimations();
-
-    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void velocitySystem();
+    std::jthread _network_thread;
 
     // ! Utility methods
     /**
@@ -200,14 +85,172 @@ public:
      * \param event The SFML event to check.
      * \return True if the event is an input event, false otherwise.
      */
-    bool isInputEvent(const sf::Event& event)
-    {
-        // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
-               event.type == sf::Event::MouseButtonPressed ||
-               event.type == sf::Event::MouseButtonReleased;
-    }
+    bool isInputEvent(const sf::Event& event);
 
+public:
+    /**
+     * \brief Constructor for GameManager.
+     * \param server_ip IP address for the server.
+     * \param server_port Port number for the server.
+     */
+    GameManager(
+        std::string server_ip, std::string server_port, boost::asio::io_service& io_service
+    );
+
+    /**
+     * \brief Default destructor.
+     */
+    ~GameManager() = default;
+
+    /**
+     * \brief Starts the game.
+     */
+    void start_game();
+
+    /**
+     * \brief Main game loop.
+     */
+    void game_loop();
+
+    /**
+     * \brief Handles the game loop.
+     */
+    void handle_closing_game();
+
+    /**
+     * \brief Handles the game loop.
+     */
+    void processEvents();
+
+    // ! Collision and Event Handling methods
+
+    /**
+     * \brief Handles the collision between two entities.
+     */
+    void deleteEnemies();
+
+    /**
+     * \brief Processes the player actions.
+     *
+     * \param deltaTime The time elapsed since the last frame.
+     */
+    void processPlayerActions(float deltaTime);
+
+    /**
+     * @brief Sends an event to the server.
+     * @param event_type The type of the event to be sent.
+     */
+    void send_event_to_server(rtype::EventType event_type);
+
+    /**
+ * @brief Processes the server's response.
+ */
+    void processServerResponse();
+
+    /**
+     * @brief Processes a payload received from the server.
+     * @param payload The payload to process.
+     */
+    void processPayload(const rtype::Payload& payload);
+
+    /**
+     * @brief Handles the response to a connection request.
+     * @param payload The payload containing the connection response.
+     */
+    void handleConnectResponse(const rtype::Payload& payload);
+
+    /**
+     * @brief Updates the player's state based on the game state information.
+     * @param game_state The GameState object containing player state information.
+     */
+    void update_player_state(const rtype::GameState& game_state);
+
+    /**
+     * @brief Updates the state of bullets based on the game state information.
+     * @param game_state The GameState object containing bullet state information.
+     */
+    void updateBulletState(const rtype::GameState& game_state);
+
+    /**
+    * @brief Updates the game's wave information based on the game state.
+    * @param game_state The GameState object containing wave information.
+    */
+    void update_game_wave(const rtype::GameState& game_state);
+
+    /**
+     * @brief Updates the player's score based on the game state.
+     * @param game_state The GameState object containing score information.
+     */
+    void update_player_score(const rtype::GameState& game_state);
+
+    /**
+     * @brief Handles the GameState payload received from the server.
+     * @param payload The payload containing the GameState.
+     */
+    void handleGameState(const rtype::Payload& payload);
+
+    // ! Systems:
+
+    /**
+     * @brief Manages the enemy system, including interactions and behavior.
+     * @param explosionSound The sound effect for enemy explosions.
+     */
+    void enemySystem(sf::Sound& explosionSound);
+
+    /**
+     * @brief Manages the rendering system for the game.
+     */
+    void renderSystem();
+
+    /**
+     * @brief Handles the parallax effect system based on delta time.
+     * @param deltaTime The time elapsed since the last frame.
+     */
+    void parallaxSystem(float deltaTime);
+
+    /**
+     * @brief Manages the planet system, simulating planetary movements.
+     * @param deltaTime The time elapsed since the last frame.
+     */
+    void planetSystem(float deltaTime);
+
+    /**
+     * @brief Triggers all animations for the game entities.
+     */
+    void makeAllAnimations();
+
+    /**
+    * @brief Executes a hold animation for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+     * @brief Executes a single animation cycle for a given entity.
+     * @param entity The entity to animate.
+     * @param rectangle The frame rectangle for the animation.
+     */
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+    * @brief Executes an infinite animation loop for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+    * @brief Manages the velocity system for game entities.
+    */
+    void velocitySystem();
+
+    // ! Utility methods
+
+    /**
+     * @brief Draws the hit box for a renderable component.
+     * @param renderable The renderable component to draw the hit box for.
+     */
     void drawHitBox(RenderableComponent& renderable);
 };
 

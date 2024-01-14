@@ -10,8 +10,8 @@ struct HoldAnimationComponent {
     sf::Clock animationClock;
 
     HoldAnimationComponent(int frames, float time, bool s)
-        : totalFrames(frames), animationTime(time), status(s) {
-    }
+        : totalFrames(frames), animationTime(time), status(s)
+    {}
 };
 
 struct SingleAnimationComponent {
@@ -19,9 +19,7 @@ struct SingleAnimationComponent {
     float animationTime;
     sf::Clock animationClock;
 
-    SingleAnimationComponent(int frames, float time)
-        : totalFrames(frames), animationTime(time) {
-    }
+    SingleAnimationComponent(int frames, float time) : totalFrames(frames), animationTime(time) {}
 };
 
 struct InfiniteAnimationComponent {
@@ -29,9 +27,7 @@ struct InfiniteAnimationComponent {
     float animationTime;
     sf::Clock animationClock;
 
-    InfiniteAnimationComponent(int frames, float time)
-        : totalFrames(frames), animationTime(time) {
-    }
+    InfiniteAnimationComponent(int frames, float time) : totalFrames(frames), animationTime(time) {}
 };
 
-#endif // ECS_ANIMATION_COMPONENT_HPP
+#endif  // ECS_ANIMATION_COMPONENT_HPP
