@@ -13,34 +13,64 @@
 
 #    include <chrono>
 
+/**
+ * @file game_manager.hpp
+ * @brief File containing the GameManager class.
+ */
+
+/**
+ * @class GameManager
+ * @brief Main controller for the game, handling game loop and systems.
+ *
+ * The GameManager class is responsible for initializing and controlling
+ * the main game loop, managing entities, and handling user input and
+ * interactions between different game systems.
+ */
 class GameManager {
 private:
     boost::asio::io_context _io_context;
-    // std::thread _network_thread;
     std::jthread _network_thread;
 
-    // ! Game metadata
     GameMetadata _game_metadata;
 
-    // ! Managers
     EntityManager _entity_manager;
     NetworkManager _network_manager;
     WaveManager _wave_manager;
 
-    // ! ID generator
     IdGenerator _idGenerator;
 
 public:
+    /**
+     * @brief Constructor for GameManager.
+     * @param server_address IP address for the server.
+     * @param port Port number for the server.
+     */
     GameManager(const std::string& server_address, std::string port);
 
+    /**
+     * @brief Default destructor.
+     */
     ~GameManager();
 
+    /**
+     * @brief Starts the game.
+     */
     void run();
 
+    /**
+     * @brief Main game loop.
+     */
     void game_loop();
 
+    /**
+     * @brief Updates the game logic.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     void updateGameLogic(float deltaTime);
 
+    /**
+     * @brief Updates the velocity system.
+     */
     void velocitySystem();
 };
 

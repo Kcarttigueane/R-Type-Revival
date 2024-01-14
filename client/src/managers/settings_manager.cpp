@@ -1,5 +1,9 @@
 #include "../../include/managers/settings_manager.hpp"
 
+SettingsManager::SettingsManager(ResourceManager& resourceManager)
+    : _resourceManager(resourceManager)
+{}
+
 [[nodiscard]] int SettingsManager::getVolume() const
 {
     return _volume;
