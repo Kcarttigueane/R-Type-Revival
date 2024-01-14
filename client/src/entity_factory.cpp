@@ -1,5 +1,10 @@
 #include "../include/entity_factory.hpp"
 
+EntityFactory ::EntityFactory(
+    entt::registry& registry, ResourceManager& resourceManager, sf::RenderWindow& window
+)
+    : _registry(registry), _resourceManager(resourceManager), _window(window){};
+
 entt::entity EntityFactory::createPlayer(entt::entity hint, std::pair<float, float> position)
 {
     auto player = _registry.create(hint);
