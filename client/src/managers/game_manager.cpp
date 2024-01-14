@@ -34,6 +34,14 @@ void GameManager::create_menu()
     _entityFactory.createAboutMenu();
 
     _entityFactory.createTutorialPage();
+
+    _entityFactory.createTextEntity("Username: ", 600, 400);
+    _entityFactory.createTextEntity("IP: ", 600, 440);
+    _entityFactory.createTextEntity("Port: ", 600, 480);
+    usernameEntity = _entityFactory.createTextEntity("", 800, 400);
+    ipEntity = _entityFactory.createTextEntity("", 800, 440);
+    portEntity = _entityFactory.createTextEntity("", 800, 480);
+    inputFields = {usernameEntity, ipEntity, portEntity};
 }
 
 
@@ -86,6 +94,7 @@ void GameManager::start_game()
 void GameManager::game_loop(
     std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
 )
+void GameManager::game_loop()
 {
     auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav");
     auto explosionSoundBuffer =
@@ -111,6 +120,7 @@ void GameManager::game_loop(
             if (isInputEvent(event)) {
                 _inputManager.processKeyPress(event);
                 _inputManager.processKeyRelease(event);
+                _inputManager.processTextInput(event);
             }
             if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
                 sound.playSound();
@@ -179,7 +189,7 @@ void GameManager::game_loop(
         } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
             settingsSystem(deltaTime.asSeconds());
         } else if (_sceneManager.getCurrentScene() == GameScenes::Lobby) {
-            lobbySystem();
+            lobbySystem(deltaTime.asSeconds());
         } else if (_sceneManager.getCurrentScene() == GameScenes::Tutorial) {
             tutorialSystem();
         } else if (_sceneManager.getCurrentScene() == GameScenes::About) {

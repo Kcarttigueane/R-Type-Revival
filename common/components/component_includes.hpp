@@ -18,5 +18,6 @@
 #    include "./menu_items.hpp"
 #    include "./settings_items.hpp"
 #    include "./planet.hpp"
+#    include "./lobby.hpp"
 
 #endif  // COMPONENTS_INCLUDE

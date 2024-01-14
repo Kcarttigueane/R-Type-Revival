@@ -371,3 +371,20 @@ entt::entity EntityFactory::createTutorialPage()
 
     return tutorialPageEntity;
 }
+
+entt::entity EntityFactory::createTextEntity(const std::string& initialText, float x, float y)
+{
+    auto lobbyEntity = _registry.create();
+    auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
+
+    RenderableComponent renderable;
+    renderable.text.setFont(*font);
+    renderable.text.setString(initialText);
+    renderable.text.setCharacterSize(32);
+    renderable.text.setPosition(x, y);
+
+    _registry.emplace<RenderableComponent>(lobbyEntity, std::move(renderable));
+    _registry.emplace<SceneComponent>(lobbyEntity, GameScenes::Lobby);
+
+    return lobbyEntity;
+}

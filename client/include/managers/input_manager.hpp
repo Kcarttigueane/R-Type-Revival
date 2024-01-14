@@ -34,6 +34,7 @@ struct Actions {
     bool Left = false;
     bool Enter = false;
     bool Backspace = false;
+    std::string TextInput;
 };
 
 class InputManager {

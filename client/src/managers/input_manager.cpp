@@ -62,3 +62,17 @@ void InputManager::processKeyRelease(sf::Event& event)
         }
     }
 }
+
+void InputManager::processTextInput(sf::Event& event)
+{
+    if (event.type == sf::Event::TextEntered) {
+        if (event.text.unicode >= 32 && event.text.unicode < 128) {
+            keyboardActions.TextInput += static_cast<char>(event.text.unicode);
+        }
+    }
+}
+
+void InputManager::clearTextInput()
+{
+    keyboardActions.TextInput.clear();
+}

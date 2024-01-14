@@ -58,6 +58,8 @@ public:
 
     entt::entity createTutorialPage();
 
+    entt::entity createTextEntity(const std::string& initialText, float x, float y);
+
     entt::entity createPlanet(float x, float y, std::string randomFilepath);
 };
 

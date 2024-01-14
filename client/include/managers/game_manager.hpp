@@ -67,6 +67,12 @@ private:
     std::string _server_ip;
     unsigned short _server_port;
 
+    std::vector<entt::entity> inputFields;
+    size_t selectedInputField = 0;
+    entt::entity usernameEntity;
+    entt::entity ipEntity;
+    entt::entity portEntity;
+
 public:
     /**
      * \brief Constructor for GameManager.
@@ -197,7 +203,7 @@ public:
     void moveSettingLine(int direction);
     void updateSettingHighlight();
 
-    void lobbySystem();
+    void lobbySystem(float deltaTime);
 
     void aboutSystem();
     void tutorialSystem();
