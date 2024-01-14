@@ -16,6 +16,7 @@ class PlayerSession {
 private:
     udp::endpoint endpoint_;
     entt::entity _playerEntity;
+    bool _isDead = false;
 
 public:
     /**
@@ -45,6 +46,15 @@ public:
      * @return entt::entity The entity representing the player in the game.
      */
     entt::entity getPlayerEntity() const;
+
+    void setIsDead(bool isDead)
+    {
+        _isDead = isDead;
+    }
+
+    bool getIsDead() {
+        return _isDead;
+    }
 };
 
 #endif  // PLAYER_SESSION_MANAGER_HPP

@@ -33,6 +33,11 @@ void GameManager::game_loop()
             _network_manager.broadcast_game_state();
             last_update = now;
             velocitySystem();
+            collisionProjectileAndEnemy();
+            deleteDeadEnemies();
+            collisionPlayerAndEnemy();
+            makeEnemyShoot();
+            collisionPlayerAndEnemyBullet();
         }
     }
 }
