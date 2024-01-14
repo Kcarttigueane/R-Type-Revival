@@ -39,7 +39,7 @@ void GameManager::renderSystem()
         health.healthPoints = _playerProfileManager.getPlayerHealth();
         if (scene.scene.has_value() && scene.scene == _sceneManager.getCurrentScene()) {
             for (float i = 0; i < health.healthPoints; i++) {
-                renderable.sprite.setPosition(sf::Vector2f(transformable.x * i, transformable.y));
+                renderable.sprite.setPosition(sf::Vector2f((transformable.x * i) + 30, transformable.y));
                 _window.draw(renderable.sprite);
             }
         }

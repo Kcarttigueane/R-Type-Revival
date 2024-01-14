@@ -220,6 +220,11 @@ public:
     void makeAllAnimations();
 
     /**
+     * @brief Manages the animation of the Wave title screen.
+     */
+    void makeWaveTransitionAnimation();
+
+    /**
     * @brief Executes a hold animation for a given entity.
     * @param entity The entity to animate.
     * @param rectangle The frame rectangle for the animation.

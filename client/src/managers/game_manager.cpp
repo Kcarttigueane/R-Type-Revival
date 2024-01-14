@@ -70,6 +70,22 @@ void GameManager::handle_closing_game()
     _window.close();
 }
 
+void GameManager::makeWaveTransitionAnimation() {
+    entt::entity WaveId = static_cast<entt::entity>(123);
+    if (_registry.all_of<RenderableComponent, TransformComponent, VelocityComponent>(WaveId)) {
+        auto& renderable = _registry.get<RenderableComponent>(WaveId);
+        // Access Renderable component data here
+
+        auto& transformComponent = _registry.get<TransformComponent>(WaveId);
+        auto& velocityComponent = _registry.get<VelocityComponent>(WaveId);
+        transformComponent.x = transformComponent.x + velocityComponent.dx * velocityComponent.speed;
+        renderable.text.setPosition(sf::Vector2f(transformComponent.x, transformComponent.y));
+        if (transformComponent.x <= WINDOW_WIDTH - 2000) {
+            _registry.destroy(WaveId);
+        }
+    }
+}
+
 void GameManager::game_loop()
 {
     while (_window.isOpen()) {
@@ -83,6 +99,7 @@ void GameManager::game_loop()
         planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
         renderSystem();
+        makeWaveTransitionAnimation();
         makeAllAnimations();
         _window.display();
     }
@@ -265,7 +282,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
             transformComponent.x = posX;
             transformComponent.y = posY;
 
-            renderableComponent.text.setString(std::to_string(scoreComponent.score));
+            renderableComponent.text.setString("Score : " + std::to_string(scoreComponent.score));
             renderableComponent.sprite.setPosition(posX, posY);
         } else {
             std::cerr << "update_player_state() << Entity with ID " << playerID
@@ -341,6 +358,20 @@ void GameManager::updateBulletState(const rtype::GameState& game_state)
 
 void GameManager::update_game_wave(const rtype::GameState& game_state)
 {
+    std::cout << "Wave in progress : " << _isWaveInProgress << std::endl;
+    if (_isWaveInProgress && !game_state.has_wave_state()) {
+        std::cout << "Wave transition completed." << std::endl;
+        _isWaveInProgress = false;
+    }
+
+    if (!_isWaveInProgress && game_state.has_wave_state()) {
+        const rtype::WaveState& gameWave = game_state.wave_state();
+        _currentWaveLevel = gameWave.current_wave();
+        IdGenerator _idGenerator;
+        entt::entity id = static_cast<entt::entity>(123);
+        entt::entity textWave = _entityFactory.createWaveTransition(id, "Wave " + std::to_string(_currentWaveLevel + 1));
+        _isWaveInProgress = true;
+    }
     if (game_state.has_wave_state()) {
         const rtype::WaveState& gameWave = game_state.wave_state();
 
@@ -358,14 +389,14 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                 rtype::EnemyType type = enemyState.type();
                 float health = enemyState.health();  // Not needed for normal and fast enemies
 
-                std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
-                          << ", " << posY << "), Health: " << health << std::endl;
+                // std::cout << "Enemy " << enemyID << ": Type(" << type << "), Position(" << posX
+                //           << ", " << posY << "), Health: " << health << std::endl;
 
                 entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
 
                 const bool isIdAlreadyPresent = _enemiesIds.contains(enemyState.enemy_id());
 
-                std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
+                // std::cout << "isIdAlreadyPresent: " << isIdAlreadyPresent << std::endl;
                 if (!isIdAlreadyPresent) {
                     std::cout << "la vie est belle" << std::endl;
                     entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
@@ -389,6 +420,8 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
         } else {
             std::cerr << "Wave not in progress or no wave info." << std::endl;
         }
+    } else {
+        _isWaveInProgress = false;
     }
 }
 
