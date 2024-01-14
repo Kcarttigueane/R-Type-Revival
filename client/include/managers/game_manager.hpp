@@ -139,6 +139,8 @@ public:
 
     void makeAllAnimations();
 
+    void makeWaveTransitionAnimation();
+
     void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
 
     void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);

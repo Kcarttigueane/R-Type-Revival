@@ -15,9 +15,9 @@ entt::entity EntityFactory::createPlayer(entt::entity hint, std::pair<float, flo
     renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
     renderable.text.setFont(*font);
-    renderable.text.setString("100");
+    renderable.text.setString("Score : 0");
     renderable.text.setCharacterSize(50);
-    renderable.text.setPosition(WINDOW_WIDTH - 200, 50);
+    renderable.text.setPosition(WINDOW_WIDTH - 450, 50);
 
     _registry.emplace<RenderableComponent>(player, std::move(renderable));
 
@@ -272,7 +272,7 @@ entt::entity EntityFactory::createWaveTransition(entt::entity hint, std::string 
         transitionTitle, _window.getSize().x + titleBounds.width / 2.0f, _window.getSize().y / 2.0f,
         1.0f, 1.0f, 0, 0
     );
-    _registry.emplace<VelocityComponent>(transitionTitle, -1.0f, 0.0f, 5.0f);
+    _registry.emplace<VelocityComponent>(transitionTitle, -1.0f, 0.0f, 0.5f);
     _registry.emplace<RenderableComponent>(transitionTitle, std::move(renderable));
     _registry.emplace<SceneComponent>(transitionTitle, GameScenes::InGame);
     return transitionTitle;
@@ -312,7 +312,7 @@ entt::entity EntityFactory::createHealth(entt::entity hint)
     sf::IntRect initialFrameRect(0, 0, 3068, 3068);
     RenderableComponent renderable;
     renderable.texture = texture;
-    renderable.sprite.setPosition(sf::Vector2f(100.0f, 1820.0f));
+    renderable.sprite.setPosition(sf::Vector2f(100.0f, 500.0f));
     renderable.sprite.setTexture(*texture);
     renderable.sprite.setScale(sf::Vector2f(0.03f, 0.03f));
     renderable.frameRect = initialFrameRect;
@@ -320,7 +320,7 @@ entt::entity EntityFactory::createHealth(entt::entity hint)
     _registry.emplace<RenderableComponent>(health, std::move(renderable));
 
     _registry.emplace<TransformComponent>(
-        health, 100.0f, WINDOW_HEIGHT - 3068.0f / 26, 0.03f, 0.03f, 3068, 3068
+        health, 100.0f, WINDOW_HEIGHT - 3068.0f / 18, 0.03f, 0.03f, 3068, 3068
     );
     _registry.emplace<SceneComponent>(health, GameScenes::InGame);
     _registry.emplace<HealthComponent>(health, 3.0f);

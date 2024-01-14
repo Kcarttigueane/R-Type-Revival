@@ -7,7 +7,7 @@
 #    define BUFFER_SIZE 3000
 
 #    define INPUT_LIMITER 0.016f
-#    define SHOOT_LIMITER 0.5f
+#    define SHOOT_LIMITER 0.15f
 
 #    define GAME_TITLE "R-Type-Revival"
 
