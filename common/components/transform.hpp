@@ -12,9 +12,9 @@
 */
 struct TransformComponent {
   float x, y;
-  float rotation;
   float scaleX, scaleY;
-  float orientation;
+  int width;
+  int height;
 };
 
 #endif // ECS_TRANSFORM_COMPONENT_HPP

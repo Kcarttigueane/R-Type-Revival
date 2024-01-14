@@ -11,6 +11,8 @@
 struct SoundComponent {
     sf::Sound sound;
 
+    SoundComponent() {};
+
     SoundComponent(const sf::SoundBuffer& buffer) {
         sound.setBuffer(buffer);
     }
@@ -26,6 +28,8 @@ struct SoundComponent {
     void setVolumeLevel(float volume) {
         sound.setVolume(volume);
     }
+
+    ~SoundComponent() = default;
 };
 
 

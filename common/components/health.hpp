@@ -3,8 +3,6 @@
 
 struct HealthComponent {
     float healthPoints;
-    // float invulnerabilityDuration;
-    // float invulnerabilityTimer;
 };
 
 #endif  // ECS_COMPONENTS_HEALTH_HPP

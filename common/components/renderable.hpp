@@ -13,7 +13,6 @@ struct RenderableComponent {
     sf::Text text;
     sf::Sprite sprite;
     sf::IntRect frameRect;
-    std::shared_ptr<sf::Shape> shape;
 };
 
 #endif  // ECS_RENDERABLE_COMPONENT_HPP

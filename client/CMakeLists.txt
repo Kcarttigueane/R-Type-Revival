@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES(${Protobuf_INCLUDE_DIRS})
 
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
-file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/*.cc")
+file(GLOB_RECURSE SOURCE_FILES "src/*.cpp" "src/proto/*.cc")
 
 add_executable(r-type_client ${SOURCE_FILES})
 

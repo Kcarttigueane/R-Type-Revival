@@ -5,25 +5,22 @@ float GameManager::calculateButtonXPosition(int index)
     float buttonWidth = 310.0f * 0.4f;
     float buttonSpacing = 75.0f;
     int totalButtons = 5;
-    float totalWidth =
-        totalButtons * buttonWidth + (totalButtons - 1) * buttonSpacing;
-    float firstButtonX =
-        _window.getSize().x / 2.0f - totalWidth / 2.0f + buttonWidth / 2.0f;
+    float totalWidth = totalButtons * buttonWidth + (totalButtons - 1) * buttonSpacing;
+    float firstButtonX = _window.getSize().x / 2.0f - totalWidth / 2.0f + buttonWidth / 2.0f;
+
     return firstButtonX + index * (buttonWidth + buttonSpacing);
 }
 
 void GameManager::moveMenuItems(int direction)
 {
-    auto view = _registry.view<MenuItemComponent, RenderableComponent>();
+    auto view = _registry.view<MenuItemComponent, RenderableComponent, TransformComponent>();
+
     std::vector<entt::entity> items(view.begin(), view.end());
 
-    std::sort(
-        items.begin(), items.end(),
-        [this](entt::entity a, entt::entity b) {
-            return _registry.get<MenuItemComponent>(a).index <
-                   _registry.get<MenuItemComponent>(b).index;
-        }
-    );
+    std::sort(items.begin(), items.end(), [this](entt::entity a, entt::entity b) {
+        return _registry.get<MenuItemComponent>(a).index <
+               _registry.get<MenuItemComponent>(b).index;
+    });
 
     if (direction == -1) {
         auto leftmostItem = items.front();
@@ -69,19 +66,16 @@ void GameManager::changeGameState(const std::string& label)
 void GameManager::updateSelectedLabel()
 {
     auto view = _registry.view<MenuItemComponent>();
+
     for (auto entity : view) {
         const auto& menuItem = view.get<MenuItemComponent>(entity);
+
         if (menuItem.isSelected) {
-            auto& renderable =
-                _registry.get<RenderableComponent>(selectedLabelEntity);
+            auto& renderable = _registry.get<RenderableComponent>(selectedLabelEntity);
             renderable.text.setString(menuItem.label);
             sf::FloatRect bounds = renderable.text.getLocalBounds();
-            renderable.text.setOrigin(
-                bounds.width / 2, bounds.height / 2
-            );
-            renderable.text.setPosition(
-                _window.getSize().x / 2, _window.getSize().y * 0.7
-            );
+            renderable.text.setOrigin(bounds.width / 2, bounds.height / 2);
+
             break;
         }
     }
