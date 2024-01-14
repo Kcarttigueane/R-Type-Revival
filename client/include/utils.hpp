@@ -1,8 +1,8 @@
 #if !defined(UTILS_HPP)
 #    define UTILS_HPP
 
-#    include <random>
 #    include <cmath>
+#    include <random>
 
 const std::string RED = "\033[31m";
 const std::string GREEN = "\033[32m";
@@ -13,7 +13,5 @@ const std::string CYAN = "\033[1;36m";
 const std::string RESET = "\033[0m";
 
 float getRandomFloat(float min, float max);
-
-std::pair<double, double> get_direction(float x1, float y1, float x2, float y2);
 
 #endif  // UTILS_HPP

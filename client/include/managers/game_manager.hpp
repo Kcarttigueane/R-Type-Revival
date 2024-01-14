@@ -79,6 +79,14 @@ private:
 
     std::jthread _network_thread;
 
+    // ! Utility methods
+    /**
+     * \brief Checks if an event is related to input.
+     * \param event The SFML event to check.
+     * \return True if the event is an input event, false otherwise.
+     */
+    bool isInputEvent(const sf::Event& event);
+
 public:
     /**
      * \brief Constructor for GameManager.
@@ -89,72 +97,160 @@ public:
         std::string server_ip, std::string server_port, boost::asio::io_service& io_service
     );
 
+    /**
+     * \brief Default destructor.
+     */
     ~GameManager() = default;
 
+    /**
+     * \brief Starts the game.
+     */
     void start_game();
 
+    /**
+     * \brief Main game loop.
+     */
     void game_loop();
 
+    /**
+     * \brief Handles the game loop.
+     */
     void handle_closing_game();
 
+    /**
+     * \brief Handles the game loop.
+     */
     void processEvents();
 
     // ! Collision and Event Handling methods
 
-    void deleteAIEnemies();
+    /**
+     * \brief Handles the collision between two entities.
+     */
+    void deleteEnemies();
 
+    /**
+     * \brief Processes the player actions.
+     *
+     * \param deltaTime The time elapsed since the last frame.
+     */
     void processPlayerActions(float deltaTime);
 
+    /**
+     * @brief Sends an event to the server.
+     * @param event_type The type of the event to be sent.
+     */
     void send_event_to_server(rtype::EventType event_type);
 
-    // ! Server Response Processing:
-
+    /**
+ * @brief Processes the server's response.
+ */
     void processServerResponse();
 
+    /**
+     * @brief Processes a payload received from the server.
+     * @param payload The payload to process.
+     */
     void processPayload(const rtype::Payload& payload);
 
+    /**
+     * @brief Handles the response to a connection request.
+     * @param payload The payload containing the connection response.
+     */
     void handleConnectResponse(const rtype::Payload& payload);
 
+    /**
+     * @brief Updates the player's state based on the game state information.
+     * @param game_state The GameState object containing player state information.
+     */
     void update_player_state(const rtype::GameState& game_state);
 
+    /**
+     * @brief Updates the state of bullets based on the game state information.
+     * @param game_state The GameState object containing bullet state information.
+     */
     void updateBulletState(const rtype::GameState& game_state);
 
+    /**
+    * @brief Updates the game's wave information based on the game state.
+    * @param game_state The GameState object containing wave information.
+    */
     void update_game_wave(const rtype::GameState& game_state);
 
+    /**
+     * @brief Updates the player's score based on the game state.
+     * @param game_state The GameState object containing score information.
+     */
     void update_player_score(const rtype::GameState& game_state);
 
+    /**
+     * @brief Handles the GameState payload received from the server.
+     * @param payload The payload containing the GameState.
+     */
     void handleGameState(const rtype::Payload& payload);
 
     // ! Systems:
 
+    /**
+     * @brief Manages the enemy system, including interactions and behavior.
+     * @param explosionSound The sound effect for enemy explosions.
+     */
     void enemySystem(sf::Sound& explosionSound);
 
-    void makeEnemyShoot();
-
+    /**
+     * @brief Manages the rendering system for the game.
+     */
     void renderSystem();
 
+    /**
+     * @brief Handles the parallax effect system based on delta time.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     void parallaxSystem(float deltaTime);
 
+    /**
+     * @brief Manages the planet system, simulating planetary movements.
+     * @param deltaTime The time elapsed since the last frame.
+     */
     void planetSystem(float deltaTime);
 
+    /**
+     * @brief Triggers all animations for the game entities.
+     */
     void makeAllAnimations();
 
+    /**
+    * @brief Executes a hold animation for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
     void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
 
+    /**
+     * @brief Executes a single animation cycle for a given entity.
+     * @param entity The entity to animate.
+     * @param rectangle The frame rectangle for the animation.
+     */
     void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
 
+    /**
+    * @brief Executes an infinite animation loop for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
     void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
 
+    /**
+    * @brief Manages the velocity system for game entities.
+    */
     void velocitySystem();
 
     // ! Utility methods
-    /**
-     * \brief Checks if an event is related to input.
-     * \param event The SFML event to check.
-     * \return True if the event is an input event, false otherwise.
-     */
-    bool isInputEvent(const sf::Event& event);
 
+    /**
+     * @brief Draws the hit box for a renderable component.
+     * @param renderable The renderable component to draw the hit box for.
+     */
     void drawHitBox(RenderableComponent& renderable);
 };
 

@@ -122,9 +122,10 @@ bool GameManager::isInputEvent(const sf::Event& event)
            event.type == sf::Event::MouseButtonReleased;
 }
 
-void GameManager::deleteAIEnemies()
+void GameManager::deleteEnemies()
 {
     auto enemies = _registry.view<EnemyComponent>();
+
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
     }
@@ -145,6 +146,7 @@ void GameManager::processPlayerActions(float deltaTime)
 {
     auto& actions = _inputManager.getKeyboardActions();
     rtype::Event event;
+
     if (sendEventClock.getElapsedTime().asSeconds() >= INPUT_LIMITER) {
         if (actions.Up == true) {
             std::cout << RED << "MOVE UP" << RESET << std::endl;
@@ -207,7 +209,6 @@ void GameManager::handleConnectResponse(const rtype::Payload& payload)
 
     if (responseStatus == rtype::ConnectResponseStatus::SUCCESS) {
         std::cout << "Connect response -> OK" << std::endl;
-        // TODO : should I check if the set can container max 4 players
         _playerProfileManager.setPlayerEntity(
             static_cast<entt::entity>(payload.connect_response().player_id())
         );
