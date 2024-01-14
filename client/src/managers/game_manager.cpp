@@ -23,9 +23,9 @@ GameManager::GameManager(
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
     _musicSound =
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
-    _shootingSound.setVolumeLevel(1.5f);
-    _explosionSound.setVolumeLevel(7.5f);
-    _musicSound.setVolumeLevel(2.0f);
+    _shootingSound.setVolumeLevel(20.0f);
+    _explosionSound.setVolumeLevel(20.0f);
+    _musicSound.setVolumeLevel(20.0f);
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
 }
@@ -52,10 +52,8 @@ void GameManager::create_menu()
     selectedLabelEntity = _entityFactory.createSelectedLabel();
 
     std::vector<std::pair<std::string, std::vector<std::string>>> settingsInfo = {
-        {"Sound Volume", {"Low", "Medium", "High"}},
-        {"Music", {"On", "Off"}},
-        {"Resolution", {"1920x1080", "1280x720", "800x600"}},
-        {"Fullscreen", {"On", "Off"}},
+        {"Music Volume", {"Medium", "High", "Max", "Off", "Low"}},
+        {"Effects Volume", {"Medium", "High", "Max", "Off", "Low"}},
     };
     for (int i = 0; i < settingsInfo.size(); ++i) {
         _entityFactory.createSettingsItem(settingsInfo[i].first, settingsInfo[i].second, 0, i);
@@ -65,9 +63,10 @@ void GameManager::create_menu()
 
     _entityFactory.createTutorialPage();
 
-    _entityFactory.createTextEntity("Username: ", 600, 400);
-    _entityFactory.createTextEntity("IP: ", 600, 440);
-    _entityFactory.createTextEntity("Port: ", 600, 480);
+    titleEntities.push_back(_entityFactory.createTextEntity("Username: ", 600, 400));
+    titleEntities.push_back(_entityFactory.createTextEntity("IP: ", 600, 440));
+    titleEntities.push_back(_entityFactory.createTextEntity("Port: ", 600, 480));
+
     usernameEntity = _entityFactory.createTextEntity("", 800, 400);
     ipEntity = _entityFactory.createTextEntity("", 800, 440);
     portEntity = _entityFactory.createTextEntity("", 800, 480);

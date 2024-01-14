@@ -8,6 +8,8 @@ void GameManager::lobbySystem(float deltaTime)
         menuMoveCooldown -= deltaTime;
     }
 
+    size_t prevSelectedTitleIndex = selectedTitleIndex;
+
     if (keyboardActions.Down && selectedInputField < inputFields.size() - 1 &&
         menuMoveCooldown <= 0) {
         selectedInputField++;
@@ -23,10 +25,37 @@ void GameManager::lobbySystem(float deltaTime)
         _sceneManager.setCurrentScene(GameScenes::MainMenu);
     }
 
+    updateSelectedTitle(prevSelectedTitleIndex);
+    updateCurrentTitle();
+    updateInputFieldText();
+}
+
+void GameManager::updateSelectedTitle(size_t prevSelectedTitleIndex)
+{
+    if (prevSelectedTitleIndex < titleEntities.size()) {
+        auto& prevTitleTextComponent =
+            _registry.get<RenderableComponent>(titleEntities[prevSelectedTitleIndex]);
+        prevTitleTextComponent.text.setFillColor(sf::Color::White);
+    }
+}
+
+void GameManager::updateCurrentTitle()
+{
+    selectedTitleIndex = selectedInputField;
+
+    if (selectedTitleIndex < titleEntities.size()) {
+        auto& titleTextComponent =
+            _registry.get<RenderableComponent>(titleEntities[selectedTitleIndex]);
+        titleTextComponent.text.setFillColor(sf::Color::Red);
+    }
+}
+
+void GameManager::updateInputFieldText()
+{
+    auto& keyboardActions = _inputManager.getKeyboardActions();
+
     auto& textComponent = _registry.get<RenderableComponent>(inputFields[selectedInputField]).text;
     std::string currentText = textComponent.getString();
-
-    int minLength = 0;
 
     std::string tempText = currentText;
 

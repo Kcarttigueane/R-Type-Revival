@@ -60,13 +60,46 @@ void GameManager::settingsSystem(float deltaTime)
 
                 if (settingItem.isSelected) {
                     settingItem.currentValueIndex =
-                        (settingItem.currentValueIndex + 1) %
-                        settingItem.values.size();
+                        (settingItem.currentValueIndex + 1) % settingItem.values.size();
 
                     renderable.text.setString(
-                        settingItem.name + ": " +
-                        settingItem.values[settingItem.currentValueIndex]
+                        settingItem.name + ": " + settingItem.values[settingItem.currentValueIndex]
                     );
+
+                    if (settingItem.name == "Music Volume") {
+                        float volume = 0.0f;
+                        if (settingItem.values[settingItem.currentValueIndex] == "Off") {
+                            volume = 0.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Low") {
+                            volume = 10.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Medium") {
+                            volume = 20.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "High") {
+                            volume = 30.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Max") {
+                            volume = 40.0f;
+                        }
+
+                        _musicSound.setVolumeLevel(volume);
+                    }
+
+                    if (settingItem.name == "Effects Volume") {
+                        float volume = 0.0f;
+                        if (settingItem.values[settingItem.currentValueIndex] == "Off") {
+                            volume = 0.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Low") {
+                            volume = 10.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Medium") {
+                            volume = 20.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "High") {
+                            volume = 30.0f;
+                        } else if (settingItem.values[settingItem.currentValueIndex] == "Max") {
+                            volume = 40.0f;
+                        }
+
+                        _shootingSound.setVolumeLevel(volume);
+                        _explosionSound.setVolumeLevel(volume);
+                    }
 
                     break;
                 }

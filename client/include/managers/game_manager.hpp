@@ -77,14 +77,18 @@ private:
     // ! Game MENU & LOBBY :
     std::vector<entt::entity> inputFields;
     size_t selectedInputField = 0;
+
     entt::entity usernameEntity;
     entt::entity ipEntity;
     entt::entity portEntity;
+
     float menuMoveCooldown = 0.2f;
     const float menuMoveDelay = 0.2f;
     entt::entity selectedLabelEntity;
     std::set<uint32_t> _playerPresent;
     bool _isFirstPlayer = true;
+    std::vector<entt::entity> titleEntities;
+    int selectedTitleIndex;
 
     // ! Game WAVE :
 
@@ -108,6 +112,9 @@ private:
     void updateSettingHighlight();
 
     void lobbySystem(float deltaTime);
+    void updateSelectedTitle(size_t prevSelectedTitleIndex);
+    void updateCurrentTitle();
+    void updateInputFieldText();
 
     void aboutSystem();
     void tutorialSystem();
