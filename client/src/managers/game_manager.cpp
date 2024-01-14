@@ -44,7 +44,6 @@ void GameManager::create_menu()
     inputFields = {usernameEntity, ipEntity, portEntity};
 }
 
-
 void GameManager::start_game()
 {
     create_menu();
@@ -94,7 +93,6 @@ void GameManager::start_game()
 void GameManager::game_loop(
     std::queue<rtype::Event>& messages, std::mutex& messages_mutex, ClientUDP& client
 )
-void GameManager::game_loop()
 {
     auto soundBuffer = _resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/shot2.wav");
     auto explosionSoundBuffer =
