@@ -18,5 +18,6 @@
 #    include "./transform.hpp"
 #    include "./velocity.hpp"
 #    include "./weapon.hpp"
+#    include "./clock.hpp"
 
 #endif  // COMPONENTS_INCLUDE

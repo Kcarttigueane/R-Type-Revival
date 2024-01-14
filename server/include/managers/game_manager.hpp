@@ -42,6 +42,16 @@ public:
     void updateGameLogic(float deltaTime);
 
     void velocitySystem();
+
+    void collisionProjectileAndEnemy();
+
+    void deleteDeadEnemies();
+
+    void makeEnemyShoot();
+
+    void collisionPlayerAndEnemy();
+
+    void collisionPlayerAndEnemyBullet();
 };
 
 #endif  // GAME_MANGER_HPP

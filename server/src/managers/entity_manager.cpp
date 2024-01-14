@@ -47,6 +47,8 @@ entt::entity EntityManager::createNormalEnemy(
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<HealthComponent>(enemy, 1.0f);
+    _registry.emplace<DamageComponent>(enemy, 3.0f);
+    _registry.emplace<ClockComponent>(enemy, getRandomFloat(1.0f, 10.0f), std::chrono::_V2::steady_clock::now());
 
     return enemy;
 }
@@ -64,8 +66,8 @@ entt::entity EntityManager::createProjectile(
         .y = position.second,
         .scaleX = 1.0f,
         .scaleY = 1.0f,
-        .width = 7,
-        .height = 6,
+        .width = 12,
+        .height = 12,
     };
     _registry.emplace<TransformComponent>(projectile, transformComponent);
 
@@ -86,8 +88,10 @@ entt::entity EntityManager::createFastEnemy(
     TransformComponent transformComponent = {
         .x = position.first,
         .y = position.second,
-        .scaleX = 1.0f,
-        .scaleY = 1.0f,
+        .scaleX = 2.0f,
+        .scaleY = 2.0f,
+        .width = 82,
+        .height = 32,
     };
 
     _registry.emplace<TransformComponent>(enemy, transformComponent);
@@ -96,7 +100,8 @@ entt::entity EntityManager::createFastEnemy(
         enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100, false
     );
     _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-    _registry.emplace<HealthComponent>(enemy, 100.0f);
+    _registry.emplace<HealthComponent>(enemy, 1.0f);
+    _registry.emplace<DamageComponent>(enemy, 3.0f);
 
     return enemy;
 }

@@ -350,6 +350,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
 
         if (_isWaveInProgress) {
+            std::set<std::uint32_t> currentIds;
             for (const auto& enemyState : game_state.enemies()) {
                 uint32_t enemyID = enemyState.enemy_id();
                 float posX = enemyState.pos_x();
@@ -361,6 +362,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                           << ", " << posY << "), Health: " << health << std::endl;
 
                 entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                currentIds.insert(enemyID);
 
                 const bool isIdAlreadyPresent = _enemiesIds.contains(enemyState.enemy_id());
 
@@ -383,6 +385,21 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                 } else {
                     std::cerr << "Enemy entity with ID " << enemyID
                               << " does not have required components." << std::endl;
+                }
+            }
+
+            for (auto it = _enemiesIds.begin(); it != _enemiesIds.end();) {
+                std::uint32_t id = *it;
+                if (!currentIds.contains(id)) {
+                    if (_registry.valid(static_cast<entt::entity>(id))) {
+                        TransformComponent& transformable =
+                            _registry.get<TransformComponent>(static_cast<entt::entity>(id));
+                        _entityFactory.createExplosion(std::pair(transformable.x, transformable.y));
+                        _registry.destroy(static_cast<entt::entity>(id));
+                    }
+                    it = _enemiesIds.erase(it);
+                } else {
+                    ++it;
                 }
             }
         } else {
