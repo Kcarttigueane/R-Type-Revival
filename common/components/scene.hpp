@@ -5,11 +5,13 @@
 
 enum class GameScenes {
     InGame,
+    Lobby,
     MainMenu,
     Settings,
     PauseMenu,
     GameOver,
     Tutorial,
+    About,
     Quit,
     Lose,
     Win,

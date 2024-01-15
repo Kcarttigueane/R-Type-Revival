@@ -33,7 +33,23 @@ private:
     bool isExcluded(uint32_t id)
     {
         static const std::set<uint32_t> excludedIds = {
-            BACKGROUND_ID, MAIN_MENU_ID, PLANET_WET_ID, PLANET_ICE_ID, HEALTH_ID
+            BACKGROUND_ID,
+            MAIN_MENU_ID,
+            PLANET_WET_ID,
+            PLANET_ICE_ID,
+            HEALTH_ID,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
         };
         return excludedIds.find(id) != excludedIds.end();
     }

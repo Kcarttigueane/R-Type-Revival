@@ -77,10 +77,50 @@ private:
     std::set<uint32_t> _bulletIds;
     std::set<uint32_t> _enemiesIds;
 
+    // ! Game MENU & LOBBY :
+    std::vector<entt::entity> inputFields;
+    size_t selectedInputField = 0;
+
+    entt::entity usernameEntity;
+    entt::entity ipEntity;
+    entt::entity portEntity;
+
+    float menuMoveCooldown = 0.2f;
+    const float menuMoveDelay = 0.2f;
+    entt::entity selectedLabelEntity;
+    std::set<uint32_t> _playerPresent;
+    bool _isFirstPlayer = true;
+    std::vector<entt::entity> titleEntities;
+    int selectedTitleIndex;
+
+    // ! Game WAVE :
+
     int _currentWaveLevel = 0;
     bool _isWaveInProgress = false;
 
     std::jthread _network_thread;
+
+    // TODO : Add documentation and check if all the functions are used and declared
+
+    void create_menu();
+
+    void updateSelectedLabel();
+    void changeGameState(const std::string& label);
+    float calculateButtonXPosition(int index);
+    void moveMenuItems(int direction);
+    void menuSystem(float deltaTime);
+
+    void settingsSystem(float deltaTime);
+    void moveSettingLine(int direction);
+    void updateSettingHighlight();
+
+    void lobbySystem(float deltaTime);
+    void updateSelectedTitle(size_t prevSelectedTitleIndex);
+    void updateCurrentTitle();
+    void updateInputFieldText();
+
+    void aboutSystem();
+    void tutorialSystem();
 
     // ! Utility methods
     /**

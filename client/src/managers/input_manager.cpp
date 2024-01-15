@@ -34,8 +34,17 @@ void InputManager::processKeyPress(sf::Event& event)
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = true;
         }
+        if (event.key.code == sf::Keyboard::Enter) {
+            keyboardActions.Enter = true;
+        }
         if (event.key.code == sf::Keyboard::Space) {
             keyboardActions.Shoot = true;
+        }
+        if (event.key.code == sf::Keyboard::Escape) {
+            keyboardActions.Escape = true;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = true;
         }
     }
 }
@@ -55,8 +64,31 @@ void InputManager::processKeyRelease(sf::Event& event)
         if (event.key.code == sf::Keyboard::Down) {
             keyboardActions.Down = false;
         }
+        if (event.key.code == sf::Keyboard::Enter) {
+            keyboardActions.Enter = false;
+        }
         if (event.key.code == sf::Keyboard::Space) {
             keyboardActions.Shoot = false;
         }
+        if (event.key.code == sf::Keyboard::Escape) {
+            keyboardActions.Escape = false;
+        }
+        if (event.key.code == sf::Keyboard::BackSpace) {
+            keyboardActions.Backspace = false;
+        }
     }
+}
+
+void InputManager::processTextInput(sf::Event& event)
+{
+    if (event.type == sf::Event::TextEntered) {
+        if (event.text.unicode >= 32 && event.text.unicode < 128) {
+            keyboardActions.TextInput += static_cast<char>(event.text.unicode);
+        }
+    }
+}
+
+void InputManager::clearTextInput()
+{
+    keyboardActions.TextInput.clear();
 }
