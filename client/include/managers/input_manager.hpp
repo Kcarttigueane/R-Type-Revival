@@ -37,8 +37,8 @@
  */
 struct Actions {
     bool Shoot;
-    bool Up;
-    bool Down;
+    bool Up = false;
+    bool Down = false;
     bool Right;
     bool Left;
     bool Enter = false;
