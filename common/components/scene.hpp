@@ -1,9 +1,19 @@
 #if !defined(SCENE_COMPONENT_HPP)
 #    define SCENE_COMPONENT_HPP
 
-#    include "../../client/include/config.hpp"
-
 #    include <optional>
+
+enum class GameScenes {
+    InGame,
+    MainMenu,
+    Settings,
+    PauseMenu,
+    GameOver,
+    Tutorial,
+    Quit,
+    Lose,
+    Win,
+};
 
 struct SceneComponent {
     std::optional<GameScenes> scene;

@@ -23,17 +23,32 @@
 
 #    include <queue>
 
+#    include "../../../build/common/proto/r_type.pb.h"
 #    include "../../../common/components/component_includes.hpp"
-#    include "../../src/network/payload.pb.h"
 
+/**
+ * @file input_manager.hpp
+ * @brief Defines the InputManager class.
+ */
+
+/**
+ * @struct Actions
+ * @brief Represents the actions that can be performed by the player.
+ */
 struct Actions {
-    bool Spacebar;
+    bool Shoot;
     bool Up;
     bool Down;
     bool Right;
     bool Left;
 };
 
+/**
+ * @class InputManager
+ * @brief This class is responsible for managing the input in the game.
+ *
+ * It uses the SFML library to process keyboard events.
+ */
 class InputManager {
 private:
     GameScenes _currentScene;
@@ -42,59 +57,48 @@ private:
     Actions keyboardActions;
 
 public:
-    InputManager() = delete;
+    /**
+     * @brief Constructs a new InputManager.
+     *
+     * @param _registry The registry from EnTT.
+     * @param window The SFML window.
+     */
+    InputManager(entt::registry& _registry, sf::RenderWindow& window);
 
-    InputManager(entt::registry& _registry, sf::RenderWindow& window)
-        : _currentScene(GameScenes::InGame),
-          _registry(_registry),
-          _window(window)
-    {}
+    /**
+     * @brief Returns the current game scene.
+     *
+     * @return The current game scene.
+     */
+    [[nodiscard]] GameScenes getContext() const;
 
-    ~InputManager() = default;
+    /**
+     * @brief Sets the current game scene.
+     *
+     * @param context The new game scene.
+     */
+    void setContext(GameScenes context);
 
-    [[nodiscard]] GameScenes getContext() const { return _currentScene; }
+    /**
+     * @brief Returns the actions that can be performed by the player.
+     *
+     * @return The actions that can be performed by the player.
+     */
+    [[nodiscard]] Actions& getKeyboardActions();
 
-    void setContext(GameScenes context) { _currentScene = context; }
+    /**
+     * @brief Processes a key press event.
+     *
+     * @param event The SFML event.
+     */
+    void processKeyPress(sf::Event& event);
 
-    [[nodiscard]] Actions& getKeyboardActions() { return keyboardActions; }
-
-    void processKeyPress(sf::Event& event)
-    {
-        if (event.type == event.KeyPressed) {
-            if (event.key.code == sf::Keyboard::Left) {
-
-                keyboardActions.Left = true;
-            }
-            if (event.key.code == sf::Keyboard::Right) {
-
-                keyboardActions.Right = true;
-            }
-            if (event.key.code == sf::Keyboard::Up) {
-                keyboardActions.Up = true;
-            }
-            if (event.key.code == sf::Keyboard::Down) {
-                keyboardActions.Down = true;
-            }
-        }
-    }
-
-    void processKeyRelease(sf::Event& event)
-    {
-        if (event.type == event.KeyReleased) {
-            if (event.key.code == sf::Keyboard::Left) {
-                keyboardActions.Left = false;
-            }
-            if (event.key.code == sf::Keyboard::Right) {
-                keyboardActions.Right = false;
-            }
-            if (event.key.code == sf::Keyboard::Up) {
-                keyboardActions.Up = false;
-            }
-            if (event.key.code == sf::Keyboard::Down) {
-                keyboardActions.Down = false;
-            }
-        }
-    }
+    /**
+     * @brief Processes a key release event.
+     *
+     * @param event The SFML event.
+     */
+    void processKeyRelease(sf::Event& event);
 };
 
 #endif  // INPUT_MANAGER_HPP

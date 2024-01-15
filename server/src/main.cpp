@@ -1,16 +1,14 @@
+#include "../../common/command_line_arguments/command_line_arguments.hpp"
 #include "../include/managers/game_manager.hpp"
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3) {
-        std::cerr << "Usage: ./r-type_server <address> <port>\n";
-        return 1;
+    CommandLineArgs args;
+    if (!args.parse_command_line_arguments(argc, argv)) {
+        return 0;
     }
 
-    std::string server_address = argv[1];
-    unsigned short port = std::stoi(argv[2]);
-
-    GameManager game_manager(server_address, port);
+    GameManager game_manager(args._ip_address, args._port);
     game_manager.run();
     return 0;
 }

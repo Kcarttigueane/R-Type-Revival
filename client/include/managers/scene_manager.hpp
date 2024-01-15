@@ -4,8 +4,13 @@
 #    include "input_manager.hpp"
 
 /**
- * \class SceneManager
- * \brief Manages different scenes in the game.
+ * @file scene_manager.hpp
+ * @brief File containing the SceneManager class.
+ */
+
+/**
+ * @class SceneManager
+ * @brief Manages different scenes in the game.
  *
  * This class is responsible for managing the transitions between
  * different scenes in the game. It interacts with the InputManager
@@ -13,55 +18,37 @@
  */
 class SceneManager {
 private:
-    GameScenes _current_scene = GameScenes::InGame;
+    GameScenes _current_scene = GameScenes::MainMenu;
     InputManager& _inputManager;
 
 public:
+    /**
+     * @brief Deleted default constructor.
+     */
     SceneManager() = delete;
 
-    SceneManager(InputManager& input_manager) : _inputManager(input_manager) {}
+    /**
+     * @brief Constructs a new SceneManager object.
+     * @param input_manager Reference to the InputManager.
+     */
+    SceneManager(InputManager& input_manager);
 
+    /**
+     * @brief Default destructor.
+     */
     ~SceneManager() = default;
 
-    [[nodiscard]] GameScenes getCurrentScene() const { return _current_scene; }
+    /**
+     * @brief Gets the current scene.
+     * @return The current scene.
+     */
+    [[nodiscard]] GameScenes getCurrentScene() const;
 
-    void setCurrentScene(GameScenes scene) { _current_scene = scene; }
-
-    void getCurrentSceneName() const
-    {
-        switch (_current_scene) {
-            case GameScenes::MainMenu:
-                std::cout << "MainMenu" << std::endl;
-                break;
-            case GameScenes::InGame:
-                std::cout << "InGame" << std::endl;
-                break;
-            case GameScenes::GameOver:
-                std::cout << "GameOver" << std::endl;
-                break;
-            case GameScenes::Settings:
-                std::cout << "Settings" << std::endl;
-                break;
-            case GameScenes::Tutorial:
-                std::cout << "Credits" << std::endl;
-                break;
-            case GameScenes::Quit:
-                std::cout << "Quit" << std::endl;
-                break;
-            case GameScenes::PauseMenu:
-                std::cout << "PauseMenu" << std::endl;
-                break;
-            case GameScenes::Lose:
-                std::cout << "Lose" << std::endl;
-                break;
-            case GameScenes::Win:
-                std::cout << "Win" << std::endl;
-                break;
-            default:
-                std::cout << "Unknown" << std::endl;
-                break;
-        }
-    }
+    /**
+     * @brief Sets the current scene.
+     * @param scene The scene to set as the current scene.
+     */
+    void setCurrentScene(GameScenes scene);
 };
 
 #endif  // SCENE_MANAGER_HPP

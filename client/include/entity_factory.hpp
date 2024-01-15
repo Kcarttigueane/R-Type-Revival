@@ -6,240 +6,143 @@
 
 #    include "../../common/components/component_includes.hpp"
 
+#    include "../../build/common/proto/r_type.pb.h"
 #    include "./managers/resource_manager.hpp"
 
 using std::string;
 
+/**
+ * @file entity_factory.hpp
+ * @brief File containing the EntityFactory class.
+ */
+
+/**
+ * @class EntityFactory
+ * @brief Class responsible for creating different types of entities.
+ *
+ * This class uses the EnTT library to create entities and assign them components.
+ * It interacts with the ResourceManager to load resources and the SFML RenderWindow to display entities.
+ */
 class EntityFactory {
 private:
-    string _assetsPath = ASSETS_DIR;
-    entt::registry& _registry;
-    ResourceManager& _resourceManager;
-    sf::RenderWindow& _window;
+    string _assetsPath = ASSETS_DIR;    ///< Path to the assets directory.
+    entt::registry& _registry;          ///< Reference to the EnTT registry.
+    ResourceManager& _resourceManager;  ///< Reference to the ResourceManager.
+    sf::RenderWindow& _window;          ///< Reference to the SFML RenderWindow.
 
 public:
+    /**
+     * @brief Constructs a new EntityFactory object.
+     * @param registry Reference to the EnTT registry.
+     * @param resourceManager Reference to the ResourceManager.
+     * @param window Reference to the SFML RenderWindow.
+     */
     EntityFactory(
-        entt::registry& registry, ResourceManager& resourceManager,
-        sf::RenderWindow& window
-    )
-        : _registry(registry),
-          _resourceManager(resourceManager),
-          _window(window){};
+        entt::registry& registry, ResourceManager& resourceManager, sf::RenderWindow& window
+    );
 
+    /**
+     * @brief Default destructor.
+     */
     ~EntityFactory() = default;
 
-    entt::entity createPlayer(entt::entity hint)
-    {
-        auto player = _registry.create(hint);
-        auto texture =
-            _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
-        sf::IntRect initialFrameRect(277, 44, 86, 40);
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
+    /**
+     * @brief Creates a new player entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the player.
+     * @return The created player entity.
+     */
+    entt::entity createPlayer(entt::entity hint, std::pair<float, float> position);
 
-        _registry.emplace<RenderableComponent>(player, std::move(renderable));
-        _registry.emplace<TransformComponent>(
-            player, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<VelocityComponent>(player, 0.0f, 0.0f, 10.0f);
-        _registry.emplace<WeaponComponent>(
-            player, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100,
-            false
-        );
-        _registry.emplace<ScoreComponent>(player, 0, 1.0f, 0);
-        _registry.emplace<HealthComponent>(player, 100.0f);
-        _registry.emplace<SceneComponent>(player, GameScenes::InGame);
-        _registry.emplace<PlayerComponent>(player);
-        return player;
-    }
+    /**
+     * @brief Creates a new enemy entity.
+     * @param type The type of the enemy.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the enemy.
+     * @return The created enemy entity.
+     */
+    entt::entity createEnemy(
+        rtype::EnemyType type, entt::entity hint, std::pair<float, float> position
+    );
 
-    entt::entity createNormalEnemy(float spawnHeight, float speed)
-    {
-        auto enemy = _registry.create();
-        auto texture =
-            _resourceManager.loadTexture(_assetsPath + "/bydos/bydos.png");
-        sf::IntRect initialFrameRect(32, 48, 64, 32);
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setPosition(sf::Vector2f(2100.0f, spawnHeight));
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(-2.0, 2.0));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-        _registry.emplace<EnemyAIComponent>(enemy);
-        _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
-        _registry.emplace<TransformComponent>(
-            enemy, WINDOW_WIDTH + 128.0f, spawnHeight, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<VelocityComponent>(enemy, -1.0f, 0.0f, speed);
-        _registry.emplace<WeaponComponent>(
-            enemy, WeaponType::NORMAL, std::vector<std::string>{}, 1.0f, 100,
-            false
-        );
-        _registry.emplace<ScoreComponent>(enemy, 0, 1.0f, 0);
-        _registry.emplace<HealthComponent>(enemy, 100.0f);
-        _registry.emplace<SceneComponent>(enemy, GameScenes::InGame);
+    /**
+     * @brief Creates a new normal enemy entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the enemy.
+     * @return The created enemy entity.
+     */
+    entt::entity createNormalEnemy(entt::entity hint, std::pair<float, float> position);
 
-        auto soundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/explosion.wav"
-        );
-        if (!soundBuffer)
-            std::cerr << "Error loading sound buffer." << std::endl;
-        SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(10.0f);
+    /**
+     * @brief Creates a new fast enemy entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the enemy.
+     * @return The created enemy entity.
+     */
+    entt::entity createFastEnemy(entt::entity hint, std::pair<float, float> position);
 
-        _registry.emplace<SoundComponent>(enemy, std::move(sound));
+    /**
+     * @brief Creates a new projectile entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the projectile.
+     * @return The created projectile entity.
+     */
+    entt::entity createProjectile(entt::entity hint, std::pair<float, float> position);
 
-        return enemy;
-    }
+    /**
+     * @brief Creates a new enemy projectile entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the projectile.
+     * @return The created projectile entity.
+     */
+    entt::entity createEnemyProjectile(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createProjectile(
-        float dx, float dy, float x, float y, float velocity
-    )
-    {
-        auto projectile = _registry.create();
-        auto texture = _resourceManager.loadTexture(
-            _assetsPath + "/player/player_shots_revamped.png"
-        );
-        sf::IntRect initialFrameRect(0, 0, 54, 12);
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setPosition(sf::Vector2f(x, y));
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-        _registry.emplace<RenderableComponent>(
-            projectile, std::move(renderable)
-        );
-        _registry.emplace<TransformComponent>(
-            projectile, x, y, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<VelocityComponent>(projectile, dx, dy, velocity);
-        _registry.emplace<DamageComponent>(projectile, 100.0f);
-        _registry.emplace<SceneComponent>(projectile, GameScenes::InGame);
-        _registry.emplace<HoldAnimationComponent>(projectile, 6, 0.5f, true);
-        return projectile;
-    }
+    /**
+     * @brief Creates a new explosion entity.
+     * @param position The initial position of the explosion.
+     * @return The created explosion entity.
+     */
+    entt::entity createExplosion(std::pair<float, float> position);
 
-    entt::entity createExplosion(float x, float y)
-    {
-        auto explosion = _registry.create();
-        auto texture = _resourceManager.loadTexture(
-            _assetsPath + "/explosions/ships_explosions.png"
-        );
-        sf::IntRect initialFrameRect(0, 0, 256, 256);
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setPosition(sf::Vector2f(x, y));
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setScale(sf::Vector2f(0.75f, 0.75f));
-        renderable.frameRect = initialFrameRect;
-        renderable.sprite.setTextureRect(initialFrameRect);
-        _registry.emplace<RenderableComponent>(
-            explosion, std::move(renderable)
-        );
-        _registry.emplace<TransformComponent>(
-            explosion, x, y, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<SceneComponent>(explosion, GameScenes::InGame);
-        _registry.emplace<SingleAnimationComponent>(explosion, 11, 0.75f);
-        return explosion;
-    }
+    /**
+     * @brief Creates a new background entity.
+     * @param hint A hint for the entity identifier.
+     * @return The created background entity.
+     */
+    entt::entity createBackground(entt::entity hint);
 
-    entt::entity createBackground()
-    {
-        auto texture = _resourceManager.loadTexture(
-            _assetsPath + "/background/layer_3/space_background.png"
-        );
-        auto background = _registry.create();
-        RenderableComponent renderable;
-        renderable.texture = texture;
-        renderable.sprite.setTexture(*texture);
-        renderable.sprite.setPosition(sf::Vector2f(0.0f, 0.0f));
-        _registry.emplace<RenderableComponent>(
-            background, std::move(renderable)
-        );
-        _registry.emplace<TransformComponent>(
-            background, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f
-        );
-        _registry.emplace<ParallaxComponent>(background, 100.0f);
-        _registry.emplace<SceneComponent>(background);
-        return background;
-    };
+    /**
+     * @brief Creates a new main menu entity.
+     * @param hint A hint for the entity identifier.
+     * @return The created main menu entity.
+     */
+    entt::entity createMainMenu(entt::entity hint);
 
-    entt::entity createMainMenu()
-    {
-        auto font =
-            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-        auto mainMenuTitle = _registry.create();
-        RenderableComponent renderable;
-        renderable.text.setFont(*font);
-        renderable.text.setString("R-Type");
-        renderable.text.setCharacterSize(96);
-        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
-        renderable.text.setOrigin(
-            titleBounds.width / 2, titleBounds.height / 2
-        );
-        renderable.text.setPosition(
-            _window.getSize().x / 2, _window.getSize().y * 0.20
-        );
-        _registry.emplace<RenderableComponent>(
-            mainMenuTitle, std::move(renderable)
-        );
-        _registry.emplace<SceneComponent>(mainMenuTitle, GameScenes::MainMenu);
-        return mainMenuTitle;
-    };
+    /**
+     * @brief Creates a new wave transition entity.
+     * @param hint A hint for the entity identifier.
+     * @param title The title of the wave transition.
+     * @return The created wave transition entity.
+     */
+    entt::entity createWaveTransition(entt::entity hint, std::string title);
 
-    entt::entity createLoseScene()
-    {
-        auto font =
-            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-        auto loseTitle = _registry.create();
-        RenderableComponent renderable;
-        renderable.text.setFont(*font);
-        renderable.text.setString("You lose!");
-        renderable.text.setCharacterSize(96);
-        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
-        renderable.text.setOrigin(
-            titleBounds.width / 2, titleBounds.height / 2
-        );
-        renderable.text.setPosition(
-            _window.getSize().x / 2, _window.getSize().y * 0.20
-        );
-        _registry.emplace<RenderableComponent>(
-            loseTitle, std::move(renderable)
-        );
-        _registry.emplace<SceneComponent>(loseTitle, GameScenes::Lose);
-        return loseTitle;
-    }
+    /**
+     * @brief Creates a new planet entity.
+     * @param hint A hint for the entity identifier.
+     * @param position The initial position of the planet.
+     * @param randomFilepath The file path to the planet image.
+     * @return The created planet entity.
+     */
+    entt::entity createPlanet(
+        entt::entity hint, std::pair<float, float> position, std::string randomFilepath
+    );
 
-    entt::entity createWinScene()
-    {
-        auto font =
-            _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-        auto winTitle = _registry.create();
-        RenderableComponent renderable;
-        renderable.text.setFont(*font);
-        renderable.text.setString("You win!");
-        renderable.text.setCharacterSize(96);
-        sf::FloatRect titleBounds = renderable.text.getLocalBounds();
-        renderable.text.setOrigin(
-            titleBounds.width / 2, titleBounds.height / 2
-        );
-        renderable.text.setPosition(
-            _window.getSize().x / 2, _window.getSize().y * 0.20
-        );
-        _registry.emplace<RenderableComponent>(
-            winTitle, std::move(renderable)
-        );
-        _registry.emplace<SceneComponent>(winTitle, GameScenes::Win);
-        return winTitle;
-    }
+    /**
+     * @brief Creates a new health entity.
+     * @param hint A hint for the entity identifier.
+     * @return The created health entity.
+     */
+    entt::entity createHealth(entt::entity hint);
 };
 
 #endif  // ENTITY_FACTORY_HPP

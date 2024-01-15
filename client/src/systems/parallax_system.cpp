@@ -2,9 +2,7 @@
 
 void GameManager::parallaxSystem(float deltaTime)
 {
-    auto view =
-        _registry
-            .view<ParallaxComponent, RenderableComponent, TransformComponent>();
+    auto view = _registry.view<ParallaxComponent, RenderableComponent, TransformComponent>();
 
     for (auto entity : view) {
         auto& parallax = view.get<ParallaxComponent>(entity);

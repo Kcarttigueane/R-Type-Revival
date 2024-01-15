@@ -17,6 +17,7 @@
 // Libraries
 
 #include "../../../common/components/component_includes.hpp"
+#include "../../../common/utils/id_generator.hpp"
 #include "../../../libs/EnTT/entt.hpp"
 
 #include <SFML/Audio.hpp>
@@ -26,7 +27,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <random>
+#include <set>
 #include <vector>
 
 /**
@@ -39,18 +42,19 @@
  */
 class GameManager {
 private:
-    // Game
     string _assetsPath = ASSETS_DIR;
     sf::RenderWindow _window;
     entt::registry _registry;
+
     sf::Clock clock;
     sf::Clock enemyClock;
-
-    int _score = 0;
+    sf::Clock transitionClock;
+    sf::Clock sendEventClock;
+    sf::Clock shootClock;
 
     // ! Managers
     InputManager _inputManager;
-    // NetworkManager _networkManager;
+    NetworkManagerAsyncUDPClient _networkManager;
     PlayerProfileManager _playerProfileManager;
     ResourceManager _resourceManager;
     SceneManager _sceneManager;
@@ -58,11 +62,33 @@ private:
 
     EntityFactory _entityFactory;
 
-    std::set<uint32_t> _playerPresent;
-    bool _isFirstPlayer = true;
+    boost::asio::io_service& _io_service;
 
-    std::string _server_ip;
-    unsigned short _server_port;
+    // --------------------------------------
+    // IF IMPROVABLE, IMPROVE! //
+
+    SoundComponent _shootingSound;
+    SoundComponent _explosionSound;
+    SoundComponent _musicSound;
+
+    // --------------------------------------
+
+    std::set<uint32_t> _connectedPlayerIds;
+    std::set<uint32_t> _bulletIds;
+    std::set<uint32_t> _enemiesIds;
+
+    int _currentWaveLevel = 0;
+    bool _isWaveInProgress = false;
+
+    std::jthread _network_thread;
+
+    // ! Utility methods
+    /**
+     * \brief Checks if an event is related to input.
+     * \param event The SFML event to check.
+     * \return True if the event is an input event, false otherwise.
+     */
+    bool isInputEvent(const sf::Event& event);
 
 public:
     /**
@@ -70,338 +96,170 @@ public:
      * \param server_ip IP address for the server.
      * \param server_port Port number for the server.
      */
-    GameManager(std::string server_ip, unsigned short server_port)
-        : _server_ip(server_ip),
-          _server_port(server_port),
-          _window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "R-Type-Revival"),
-          _inputManager(_registry, _window),
-          //   _networkManager(_io_context, server_ip, server_port),
-          _playerProfileManager(),
-          _resourceManager(),
-          _sceneManager(_inputManager),
-          _settingsManager(_resourceManager),
-          _entityFactory(_registry, _resourceManager, _window)
-    {
-        _window.setFramerateLimit(60);
-        std::cout << "GameManager created!" << std::endl;
-    }
-
-    ~GameManager()
-    {
-        _registry.clear();
-        // Signal the client thread to stop
-
-        // client_thread.join();
-    }
+    GameManager(
+        std::string server_ip, std::string server_port, boost::asio::io_service& io_service
+    );
 
     /**
-     * \brief Generates a random float within a range.
-     * \param min Minimum value of the range.
-     * \param max Maximum value of the range.
-     * \return Randomly generated float.
+     * \brief Default destructor.
      */
-    float getRandomFloat(float min, float max)
-    {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> distribution(min, max);
-        return distribution(gen);
-    }
+    ~GameManager() = default;
 
-    rtype::Event handle_key(sf::Keyboard::Key key)
-    {
-        rtype::Event event;
-        switch (key) {
-            case sf::Keyboard::Up:
-                event.set_event(rtype::EventType::MOVEUP);
-                break;
-            case sf::Keyboard::Down:
-                event.set_event(rtype::EventType::MOVEDOWN);
-                break;
-            case sf::Keyboard::Left:
-                event.set_event(rtype::EventType::MOVELEFT);
-                break;
-            case sf::Keyboard::Right:
-                event.set_event(rtype::EventType::MOVERIGHT);
-                break;
-            case sf::Keyboard::Space:
-                event.set_event(rtype::EventType::SHOOT);
-                break;
-            default:
-                break;
-        }
-        return event;
-    }
+    /**
+     * \brief Starts the game.
+     */
+    void start_game();
 
-    void start_game()
-    {
-        _entityFactory.createMainMenu();
-        _entityFactory.createWinScene();
-        _entityFactory.createLoseScene();
-        _entityFactory.createBackground();
+    /**
+     * \brief Main game loop.
+     */
+    void game_loop();
 
-        std::queue<rtype::Event> messages;
-        std::mutex messages_mutex;
+    /**
+     * \brief Handles the game loop.
+     */
+    void handle_closing_game();
 
-        boost::asio::io_context io_context;
-        ClientUDP client(io_context, _server_ip, _server_port);
+    /**
+     * \brief Handles the game loop.
+     */
+    void processEvents();
 
-        std::thread client_thread([&io_context, &client, &messages,
-                                   &messages_mutex]() {
-            while (true) {
-                io_context.poll();  // Handle asynchronous operations
+    // ! Collision and Event Handling methods
 
-                // Check for stop request
-                if (client.stop_requested_) {
-                    std::cout << "Stopping client thread..." << std::endl;
-                    rtype::Event event;
-                    event.set_event(rtype::EventType::QUIT);
-                    client.send_payload(event);
-                    break;
-                }
+    /**
+     * \brief Handles the collision between two entities.
+     */
+    void deleteEnemies();
 
-                // Send messages to the server
-                {
-                    std::lock_guard<std::mutex> lock(messages_mutex);
-                    while (!messages.empty()) {
-                        client.send_payload(messages.front());
-                        messages.pop();
-                    }
-                }
-            }
-        });
+    /**
+     * \brief Processes the player actions.
+     *
+     * \param deltaTime The time elapsed since the last frame.
+     */
+    void processPlayerActions(float deltaTime);
 
-        auto soundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/shot2.wav"
-        );
-        auto explosionSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/explosion.wav"
-        );
-        auto musicSoundBuffer = _resourceManager.loadSoundBuffer(
-            _assetsPath + "/sound_fx/music.wav"
-        );
-        SoundComponent sound(*soundBuffer);
-        sound.setVolumeLevel(1.5f);
-        SoundComponent explosionSound(*explosionSoundBuffer);
-        explosionSound.setVolumeLevel(7.5f);
-        SoundComponent musicSound(*musicSoundBuffer);
-        musicSound.setVolumeLevel(2.0f);
-        musicSound.sound.play();
-        while (_window.isOpen()) {
-            sf::Time deltaTime = clock.restart();
-            sf::Event event;
-            while (_window.pollEvent(event)) {
-                if (event.type == sf::Event::Closed) {
-                    _window.close();
-                }
-                if (isInputEvent(event)) {
-                    std::lock_guard<std::mutex> lock(messages_mutex);
-                    messages.push(handle_key(event.key.code));
-                    // _inputManager.processKeyPress(event);
-                    // _inputManager.processKeyRelease(event);
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Space) {
-                    sound.playSound();
+    /**
+     * @brief Sends an event to the server.
+     * @param event_type The type of the event to be sent.
+     */
+    void send_event_to_server(rtype::EventType event_type);
 
-                    entt::entity player =
-                        _playerProfileManager.getPlayerEntity();
-                    const sf::Vector2f& playerPosition =
-                        _registry.get<RenderableComponent>(player)
-                            .sprite.getPosition();
-                    _entityFactory.createProjectile(
-                        1.0f, 0.0f, playerPosition.x + 145.0f,
-                        playerPosition.y + 47.5f, 5.0f
-                    );
-                }
-                if (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Escape) {
-                    _sceneManager.setCurrentScene(GameScenes::InGame);
-                }
-            }
-            if (musicSound.sound.getStatus() == sf::Music::Stopped) {
-                musicSound.sound.play();
-            }
-            auto payloads = client.get_payloads();
-            for (auto payload : payloads) {
+    /**
+ * @brief Processes the server's response.
+ */
+    void processServerResponse();
 
-                std::cout << "Payload : " << payload.ShortDebugString()
-                          << std::endl;
-                if (_playerPresent.find(payload.identity()) ==
-                    _playerPresent.end()) {
-                    printf(
-                        "Player %u joined the game\n",
-                        static_cast<unsigned int>(payload.identity())
-                    );
-                    _playerPresent.insert(payload.identity());
+    /**
+     * @brief Processes a payload received from the server.
+     * @param payload The payload to process.
+     */
+    void processPayload(const rtype::Payload& payload);
 
-                    entt::entity player =
-                        static_cast<entt::entity>(payload.identity());
-                    auto playerEntity = _entityFactory.createPlayer(player);
-                    if (_isFirstPlayer) {
-                        _playerProfileManager.setPlayerEntity(playerEntity);
-                        _isFirstPlayer = false;
-                    }
-                }
-                if (!_playerPresent.empty()) {
-                    processPlayerActions(deltaTime.asSeconds());
-                    // Update player position
-                    entt::entity playerEntity =
-                        static_cast<entt::entity>(payload.identity());
+    /**
+     * @brief Handles the response to a connection request.
+     * @param payload The payload containing the connection response.
+     */
+    void handleConnectResponse(const rtype::Payload& payload);
 
-                    auto& transform =
-                        _registry.get<TransformComponent>(playerEntity);
-                    transform.x = payload.posx();
-                    transform.y = payload.posy();
+    /**
+     * @brief Updates the player's state based on the game state information.
+     * @param game_state The GameState object containing player state information.
+     */
+    void update_player_state(const rtype::GameState& game_state);
 
-                    if (enemyClock.getElapsedTime().asSeconds() > 0.5f) {
-                        enemyClock.restart();
-                        float randomSpeed = getRandomFloat(2.0f, 5.0f);
-                        float randomY =
-                            getRandomFloat(0.0f, WINDOW_HEIGHT - 64.0f);
-                        _entityFactory.createNormalEnemy(randomY, randomSpeed);
-                    }
-                }
-            }
-            // std::cout << "identity : " << payload.identity() << std::endl;
-            // std::cout << "posx : " << payload.posx() << std::endl;
-            // std::cout << "posy : " << payload.posy() << std::endl;
+    /**
+     * @brief Updates the state of bullets based on the game state information.
+     * @param game_state The GameState object containing bullet state information.
+     */
+    void updateBulletState(const rtype::GameState& game_state);
 
-            _window.clear();
-            parallaxSystem(deltaTime.asSeconds());
+    /**
+    * @brief Updates the game's wave information based on the game state.
+    * @param game_state The GameState object containing wave information.
+    */
+    void update_game_wave(const rtype::GameState& game_state);
 
-            if (!_playerPresent.empty()) {
-                enemySystem(explosionSound.sound);
-                renderSystem();
-                projectileSystem();
-                collisionProjectileAndEnemy();
-                collisionEnemyAndPlayer();
-                makeAllAnimations();
-                checkWin();
-            }
-            // printf("Payload : %s\n", payload.
+    /**
+     * @brief Updates the player's score based on the game state.
+     * @param game_state The GameState object containing score information.
+     */
+    void update_player_score(const rtype::GameState& game_state);
 
-            _window.display();
-        }
+    /**
+     * @brief Handles the GameState payload received from the server.
+     * @param payload The payload containing the GameState.
+     */
+    void handleGameState(const rtype::Payload& payload);
 
-        client.stop();
-        client_thread.join();
-    }
+    // ! Systems:
 
-    void parallaxSystem(float deltaTime);
-
-    void makeAllAnimations();
-
-    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
-
-    void game_loop(){};
-
-    void collisionProjectileAndEnemy()
-    {
-        auto enemies =
-            _registry
-                .view<EnemyAIComponent, RenderableComponent, HealthComponent>();
-        auto projectiles =
-            _registry.view<RenderableComponent, DamageComponent>();
-
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite =
-                enemies.get<RenderableComponent>(enemy).sprite;
-            float& enemyHealth =
-                enemies.get<HealthComponent>(enemy).healthPoints;
-            for (auto& projectile : projectiles) {
-                sf::Sprite& projectileSprite =
-                    projectiles.get<RenderableComponent>(projectile).sprite;
-                float projectileDamage =
-                    projectiles.get<DamageComponent>(projectile).damage;
-                if (enemySprite.getGlobalBounds().intersects(
-                        projectileSprite.getGlobalBounds()
-                    )) {
-                    enemyHealth -= projectileDamage;
-                    _registry.destroy(projectile);
-                }
-            }
-        }
-    }
-
-    void collisionEnemyAndPlayer()
-    {
-        auto enemies = _registry.view<EnemyAIComponent, RenderableComponent>();
-        auto player = _playerProfileManager.getPlayerEntity();
-        for (auto& enemy : enemies) {
-            sf::Sprite& enemySprite =
-                enemies.get<RenderableComponent>(enemy).sprite;
-            sf::Sprite& playerSprite =
-                enemies.get<RenderableComponent>(player).sprite;
-            if (enemySprite.getGlobalBounds().intersects(
-                    playerSprite.getGlobalBounds()
-                )) {
-                deleteAIEnemies();
-                _score = 0;
-                _sceneManager.setCurrentScene(GameScenes::Lose);
-            }
-        }
-    };
-
-    void checkWin()
-    {
-        if (_score >= 20) {
-            deleteAIEnemies();
-            _score = 0;
-            _sceneManager.setCurrentScene(GameScenes::Win);
-        }
-    }
-
-    void deleteAIEnemies()
-    {
-        auto enemies = _registry.view<EnemyAIComponent>();
-        for (auto enemy : enemies) {
-            _registry.destroy(enemy);
-        }
-    }
-
-    void processPlayerActions(float deltaTime)
-    {
-        auto& actions = _inputManager.getKeyboardActions();
-        rtype::Event protoEvent;
-
-        if (actions.Up == true) {
-            protoEvent.set_event(rtype::EventType::MOVEUP);
-        }
-        if (actions.Down == true) {
-            protoEvent.set_event(rtype::EventType::MOVEDOWN);
-        }
-        if (actions.Right == true) {
-            protoEvent.set_event(rtype::EventType::MOVERIGHT);
-        }
-        if (actions.Left == true) {
-            protoEvent.set_event(rtype::EventType::MOVELEFT);
-        }
-    }
-
-    void projectileSystem();
-
+    /**
+     * @brief Manages the enemy system, including interactions and behavior.
+     * @param explosionSound The sound effect for enemy explosions.
+     */
     void enemySystem(sf::Sound& explosionSound);
 
+    /**
+     * @brief Manages the rendering system for the game.
+     */
     void renderSystem();
 
     /**
-     * \brief Checks if an event is related to input.
-     * \param event The SFML event to check.
-     * \return True if the event is an input event, false otherwise.
+     * @brief Handles the parallax effect system based on delta time.
+     * @param deltaTime The time elapsed since the last frame.
      */
-    bool isInputEvent(const sf::Event& event)
-    {
-        // TODO: Add more input events if needed define scope with gars
-        return event.type == sf::Event::KeyPressed ||
-               event.type == sf::Event::KeyReleased ||
-               event.type == sf::Event::MouseButtonPressed ||
-               event.type == sf::Event::MouseButtonReleased;
-    }
+    void parallaxSystem(float deltaTime);
+
+    /**
+     * @brief Manages the planet system, simulating planetary movements.
+     * @param deltaTime The time elapsed since the last frame.
+     */
+    void planetSystem(float deltaTime);
+
+    /**
+     * @brief Triggers all animations for the game entities.
+     */
+    void makeAllAnimations();
+
+    /**
+     * @brief Manages the animation of the Wave title screen.
+     */
+    void makeWaveTransitionAnimation();
+
+    /**
+    * @brief Executes a hold animation for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
+    void makeHoldAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+     * @brief Executes a single animation cycle for a given entity.
+     * @param entity The entity to animate.
+     * @param rectangle The frame rectangle for the animation.
+     */
+    void makeSingleAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+    * @brief Executes an infinite animation loop for a given entity.
+    * @param entity The entity to animate.
+    * @param rectangle The frame rectangle for the animation.
+    */
+    void makeInfiniteAnimation(entt::entity& entity, sf::IntRect rectangle);
+
+    /**
+    * @brief Manages the velocity system for game entities.
+    */
+    void velocitySystem();
+
+    // ! Utility methods
+
+    /**
+     * @brief Draws the hit box for a renderable component.
+     * @param renderable The renderable component to draw the hit box for.
+     */
+    void drawHitBox(RenderableComponent& renderable);
 };
 
 #endif  // GAME_MANAGER_HPP
