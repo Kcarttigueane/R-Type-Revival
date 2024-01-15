@@ -13,11 +13,10 @@ entt::entity EntityFactory::createPlayer(entt::entity hint, std::pair<float, flo
     RenderableComponent renderable;
     renderable.texture = texture;
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
-    sf::Vector2f scaledSize = sf::Vector2f(86.0f, 40.0f);
-    renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    renderable.sprite.setOrigin(86.0f / 2.0f, 40.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
     renderable.text.setFont(*font);
     renderable.text.setString("Score : 0");
@@ -57,9 +56,9 @@ entt::entity EntityFactory::createProjectile(entt::entity hint, std::pair<float,
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
+    renderable.sprite.setScale(sf::Vector2f(1.0f, 1.0f));
     renderable.sprite.setOrigin(48, 12 / 2.0f);
     _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
 
@@ -88,11 +87,10 @@ entt::entity EntityFactory::createNormalEnemy(entt::entity hint, std::pair<float
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(-2.0, 2.0));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
-    sf::Vector2f scaledSize = sf::Vector2f(64.0f, 32.0f) * 2.0f;
-    renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    renderable.sprite.setOrigin(64.0f / 2.0f, 32.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(-2.0, 2.0));
 
     _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
 
@@ -140,12 +138,11 @@ entt::entity EntityFactory::createFastEnemy(entt::entity hint, std::pair<float, 
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
-    renderable.sprite.setRotation(90.0f);
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
-    sf::Vector2f scaledSize = sf::Vector2f(82.0f, 32.0f) * 2.0f;
-    renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    renderable.sprite.setOrigin(82.0f / 2.0f, 32.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(2.0, 2.0));
+    renderable.sprite.setRotation(90.0f);
     _registry.emplace<RenderableComponent>(enemy, std::move(renderable));
 
     TransformComponent transformComponent = {
@@ -174,11 +171,10 @@ entt::entity EntityFactory::createEnemyProjectile(
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
-    sf::Vector2f scaledSize = sf::Vector2f(7.0f, 6.0f) * 2.0f;
-    renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    renderable.sprite.setOrigin(7.0 / 2.0f, 6.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     _registry.emplace<RenderableComponent>(projectile, std::move(renderable));
 
     TransformComponent transformComponent = {
@@ -206,11 +202,10 @@ entt::entity EntityFactory::createExplosion(std::pair<float, float> position)
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(0.75f, 0.75f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
-    sf::Vector2f scaledSize = sf::Vector2f(265.0f, 256.0f) * 0.75f;
-    renderable.sprite.setOrigin(scaledSize.x / 2.0f, scaledSize.y / 2.0f);
+    renderable.sprite.setOrigin(256.0f / 2.0f, 256.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(0.75f, 0.75f));
     _registry.emplace<RenderableComponent>(explosion, std::move(renderable));
 
     TransformComponent transformComponent = {
@@ -279,15 +274,15 @@ entt::entity EntityFactory::createPlanet(
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(position.first, position.second));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
+    renderable.sprite.setOrigin(64.0f / 2.0f, 64.0f / 2.0f);
+    renderable.sprite.setScale(sf::Vector2f(2.0f, 2.0f));
     _registry.emplace<RenderableComponent>(planet, std::move(renderable));
     _registry.emplace<TransformComponent>(
         planet, position.first, position.second, 1.0f, 1.0f, 0, 0
     );
     _registry.emplace<PlanetComponent>(planet);
-    _registry.emplace<SceneComponent>(planet, GameScenes::InGame);
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
 
     return planet;
@@ -303,9 +298,9 @@ entt::entity EntityFactory::createHealth(entt::entity hint)
     renderable.texture = texture;
     renderable.sprite.setPosition(sf::Vector2f(100.0f, 500.0f));
     renderable.sprite.setTexture(*texture);
-    renderable.sprite.setScale(sf::Vector2f(0.03f, 0.03f));
     renderable.frameRect = initialFrameRect;
     renderable.sprite.setTextureRect(initialFrameRect);
+    renderable.sprite.setScale(sf::Vector2f(0.03f, 0.03f));
     _registry.emplace<RenderableComponent>(health, std::move(renderable));
 
     _registry.emplace<TransformComponent>(
@@ -316,10 +311,10 @@ entt::entity EntityFactory::createHealth(entt::entity hint)
     return health;
 }
 
-entt::entity EntityFactory::createMainMenuTitle()
+entt::entity EntityFactory::createMainMenuTitle(entt::entity hint)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto mainMenuTitle = _registry.create();
+    auto mainMenuTitle = _registry.create(hint);
 
     RenderableComponent renderable;
     renderable.text.setFont(*font);
@@ -379,10 +374,10 @@ entt::entity EntityFactory::createButton(
     return button;
 }
 
-entt::entity EntityFactory::createSelectedLabel()
+entt::entity EntityFactory::createSelectedLabel(entt::entity hint)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto labelEntity = _registry.create();
+    auto labelEntity = _registry.create(hint);
     RenderableComponent renderable;
     renderable.text.setFont(*font);
     renderable.text.setString("");
@@ -398,12 +393,12 @@ entt::entity EntityFactory::createSelectedLabel()
 }
 
 entt::entity EntityFactory::createSettingsItem(
-    const std::string& settingName, const std::vector<std::string>& settingValues,
-    int currentValueIndex, int index
+    entt::entity hint, const std::string& settingName,
+    const std::vector<std::string>& settingValues, int currentValueIndex, int index
 )
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto settingsItem = _registry.create();
+    auto settingsItem = _registry.create(hint);
 
     float startingY = _window.getSize().y * 0.3f;
     float spacing = 50.0f;
@@ -426,10 +421,10 @@ entt::entity EntityFactory::createSettingsItem(
     return settingsItem;
 }
 
-entt::entity EntityFactory::createAboutMenu()
+entt::entity EntityFactory::createAboutMenu(entt::entity hint)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto aboutMenuEntity = _registry.create();
+    auto aboutMenuEntity = _registry.create(hint);
     RenderableComponent renderable;
 
     std::string aboutText =
@@ -472,10 +467,10 @@ entt::entity EntityFactory::createAboutMenu()
     return aboutMenuEntity;
 }
 
-entt::entity EntityFactory::createTutorialPage()
+entt::entity EntityFactory::createTutorialPage(entt::entity hint)
 {
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
-    auto tutorialPageEntity = _registry.create();
+    auto tutorialPageEntity = _registry.create(hint);
     RenderableComponent renderable;
 
     std::string tutorialText =
@@ -503,9 +498,11 @@ entt::entity EntityFactory::createTutorialPage()
     return tutorialPageEntity;
 }
 
-entt::entity EntityFactory::createTextEntity(const std::string& initialText, float x, float y)
+entt::entity EntityFactory::createTextEntity(
+    entt::entity hint, const std::string& initialText, float x, float y
+)
 {
-    auto lobbyEntity = _registry.create();
+    auto lobbyEntity = _registry.create(hint);
     auto font = _resourceManager.loadFont(_assetsPath + "/fonts/francis.ttf");
 
     RenderableComponent renderable;

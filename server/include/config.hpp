@@ -6,7 +6,7 @@
 
 #define UPDATE_INTERVAL_MS 15
 
-#define OUT_OF_BOUND 1000.0f
+#define OUT_OF_BOUND 2000.0f
 
 #define BACKGROUND_ID 1
 #define MAIN_MENU_ID 2

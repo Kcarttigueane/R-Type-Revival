@@ -134,6 +134,11 @@ void NetworkManager::handle_event(const rtype::Event& event, const udp::endpoint
     auto session_it = _sessions.find(sender_endpoint);
     if (session_it != _sessions.end()) {
         auto& session = session_it->second;
+        if (session.get()->getIsDead()) {
+            std::cout << MAGENTA << "You are a spectator in the game" << RESET << std::endl;
+            return;
+        }
+
         entt::entity playerEntity = session.get()->getPlayerEntity();
 
         TransformComponent& transformComponent =
@@ -197,19 +202,45 @@ void NetworkManager::addPlayerStateToGameState(
 )
 {
     // Add player states : 1 player/session
-    for (const auto& [endpoint, session] : _sessions) {
+    for (auto& [endpoint, session] : _sessions) {
         auto playerEntity = session->getPlayerEntity();
+
+        if (session.get()->getIsDead()) {
+            std::cout << MAGENTA << "You are a spectator in the game" << std::endl;
+            return;
+        }
 
         if (registry.all_of<TransformComponent, HealthComponent, ScoreComponent>(playerEntity)) {
             auto& transformComponent = registry.get<TransformComponent>(playerEntity);
             auto& healthComponent = registry.get<HealthComponent>(playerEntity);
             auto& scoreComponent = registry.get<ScoreComponent>(playerEntity);
 
+            if (healthComponent.healthPoints <= 0) {
+                    std::cout << RED << "Player " << static_cast<uint32_t>(playerEntity) << " quit the game."
+              << RESET << std::endl;
+                session.get()->setIsDead(true);
+                rtype::PlayerState player_state;
+                player_state.set_player_id(static_cast<uint32_t>(playerEntity));
+                player_state.set_pos_x(transformComponent.x);
+                player_state.set_pos_y(transformComponent.y);
+                player_state.set_health(healthComponent.healthPoints);
+
+                game_state.add_players()->CopyFrom(player_state);
+
+                rtype::ScoreUpdate score_update;
+                score_update.set_player_id(static_cast<uint32_t>(playerEntity));
+                score_update.set_score(scoreComponent.score);
+                game_state.add_scores()->CopyFrom(score_update);                
+                std::cout << BLUE << "Player DIED with Id" << static_cast<uint32_t>(playerEntity) << RESET << std::endl;
+                continue;
+            }
+
             rtype::PlayerState player_state;
             player_state.set_player_id(static_cast<uint32_t>(playerEntity));
             player_state.set_pos_x(transformComponent.x);
             player_state.set_pos_y(transformComponent.y);
             player_state.set_health(healthComponent.healthPoints);
+
             game_state.add_players()->CopyFrom(player_state);
 
             rtype::ScoreUpdate score_update;

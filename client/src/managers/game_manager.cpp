@@ -26,20 +26,35 @@ GameManager::GameManager(
     _shootingSound.setVolumeLevel(20.0f);
     _explosionSound.setVolumeLevel(20.0f);
     _musicSound.setVolumeLevel(20.0f);
+
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
 }
 
 void GameManager::create_menu()
 {
-    _entityFactory.createMainMenuTitle();
+    entt::entity MainMenuTitleId = static_cast<entt::entity>(MAIN_MENU_ID);
+    entt::entity ButtonQuitId = static_cast<entt::entity>(6);
+    entt::entity ButtonSettingsId = static_cast<entt::entity>(7);
+    entt::entity ButtonPlayId = static_cast<entt::entity>(8);
+    entt::entity ButtonTutorialId = static_cast<entt::entity>(9);
+    entt::entity ButtonAboutId = static_cast<entt::entity>(10);
+    entt::entity SelectedLabelId = static_cast<entt::entity>(11);
+    entt::entity AboutMenuTextId = static_cast<entt::entity>(12);
+    entt::entity TutorialMenuTextId = static_cast<entt::entity>(13);
+    entt::entity MusicTestSettingsTextId = static_cast<entt::entity>(14);
+    entt::entity SoundTestSettingsTextId = static_cast<entt::entity>(15);
+    entt::entity UsernameLabelId = static_cast<entt::entity>(16);
+    entt::entity UsernameInputTextId = static_cast<entt::entity>(17);
+
+    _entityFactory.createMainMenuTitle(MainMenuTitleId);
 
     std::vector<std::tuple<std::string, std::string, bool, entt::entity>> buttonInfo = {
-        {"/menu/quit.png", "Quit", false, static_cast<entt::entity>(123)},
-        {"/menu/settings.png", "Settings", false, static_cast<entt::entity>(124)},
-        {"/menu/play.png", "Play", true, static_cast<entt::entity>(125)},
-        {"/menu/tutorial.png", "Tutorial", false, static_cast<entt::entity>(126)},
-        {"/menu/about.png", "About", false, static_cast<entt::entity>(127)}
+        {"/menu/quit.png", "Quit", false, ButtonQuitId},
+        {"/menu/settings.png", "Settings", false, ButtonSettingsId},
+        {"/menu/play.png", "Play", true, ButtonPlayId},
+        {"/menu/tutorial.png", "Tutorial", false, ButtonTutorialId},
+        {"/menu/about.png", "About", false, ButtonAboutId},
     };
 
     for (int i = 0; i < buttonInfo.size(); ++i) {
@@ -49,23 +64,28 @@ void GameManager::create_menu()
         );
     }
 
-    selectedLabelEntity = _entityFactory.createSelectedLabel();
+    selectedLabelEntity = _entityFactory.createSelectedLabel(SelectedLabelId);
 
     std::vector<std::pair<std::string, std::vector<std::string>>> settingsInfo = {
         {"Music Volume", {"Medium", "High", "Max", "Off", "Low"}},
         {"Effects Volume", {"Medium", "High", "Max", "Off", "Low"}},
     };
-    for (int i = 0; i < settingsInfo.size(); ++i) {
-        _entityFactory.createSettingsItem(settingsInfo[i].first, settingsInfo[i].second, 0, i);
-    }
 
-    _entityFactory.createAboutMenu();
+    _entityFactory.createSettingsItem(
+        MusicTestSettingsTextId, settingsInfo[0].first, settingsInfo[0].second, 0, 0
+    );
+    _entityFactory.createSettingsItem(
+        SoundTestSettingsTextId, settingsInfo[1].first, settingsInfo[1].second, 1, 1
+    );
 
-    _entityFactory.createTutorialPage();
+    _entityFactory.createAboutMenu(AboutMenuTextId);
 
-    titleEntities.push_back(_entityFactory.createTextEntity("Username: ", 600, 400));
+    _entityFactory.createTutorialPage(TutorialMenuTextId);
 
-    usernameEntity = _entityFactory.createTextEntity("", 800, 400);
+    titleEntities.push_back(_entityFactory.createTextEntity(UsernameLabelId, "Username: ", 600, 400)
+    );
+
+    usernameEntity = _entityFactory.createTextEntity(UsernameInputTextId, "", 800, 400);
     inputFields = {usernameEntity};
 }
 
@@ -74,7 +94,6 @@ void GameManager::start_game()
     create_menu();  // TODO : Add id for each element of the menus
 
     entt::entity backgroundEntityId = static_cast<entt::entity>(BACKGROUND_ID);
-    entt::entity MainMenuId = static_cast<entt::entity>(MAIN_MENU_ID);
     entt::entity PlaneWetId = static_cast<entt::entity>(PLANET_WET_ID);
     entt::entity PlaneIceId = static_cast<entt::entity>(PLANET_ICE_ID);
     entt::entity HealthId = static_cast<entt::entity>(HEALTH_ID);
@@ -138,20 +157,23 @@ void GameManager::game_loop()
         _window.clear();
         processServerResponse();
         parallaxSystem(deltaTime.asSeconds());
-        if (_sceneManager.getCurrentScene() == GameScenes::InGame) {
-            planetSystem(deltaTime.asSeconds());
-        } else if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+
+        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
             menuSystem(deltaTime.asSeconds());
+            renderSystem();
         } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
             settingsSystem(deltaTime.asSeconds());
+            renderSystem();
         } else if (_sceneManager.getCurrentScene() == GameScenes::Lobby) {
             lobbySystem(deltaTime.asSeconds());
+            renderSystem();
         } else if (_sceneManager.getCurrentScene() == GameScenes::Tutorial) {
             tutorialSystem();
+            renderSystem();
         } else if (_sceneManager.getCurrentScene() == GameScenes::About) {
             aboutSystem();
+            renderSystem();
         }
-        renderSystem();
         makeWaveTransitionAnimation();
         makeAllAnimations();
         _window.display();
@@ -233,6 +255,7 @@ void GameManager::processPlayerActions(float deltaTime)
         }
         if (actions.Shoot == true) {
             if (shootClock.getElapsedTime().asSeconds() >= SHOOT_LIMITER) {
+                _shootingSound.sound.play();
                 std::cout << RED << "MOVE SHOOT" << RESET << std::endl;
                 send_event_to_server(rtype::EventType::SHOOT);
                 shootClock.restart();
@@ -343,6 +366,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         std::uint32_t id = *it;
         if (!currentIds.contains(id)) {
             if (_registry.valid(static_cast<entt::entity>(id))) {
+                _explosionSound.sound.play();
                 TransformComponent& transformable =
                     _registry.get<TransformComponent>(static_cast<entt::entity>(id));
                 _entityFactory.createExplosion(std::make_pair(transformable.x, transformable.y));
@@ -434,6 +458,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;
 
         if (_isWaveInProgress) {
+            std::set<std::uint32_t> currentIds;
             for (const auto& enemyState : game_state.enemies()) {
                 uint32_t enemyID = enemyState.enemy_id();
                 float posX = enemyState.pos_x();
@@ -445,6 +470,7 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                 //           << ", " << posY << "), Health: " << health << std::endl;
 
                 entt::entity enemyEntity = static_cast<entt::entity>(enemyID);
+                currentIds.insert(enemyID);
 
                 const bool isIdAlreadyPresent = _enemiesIds.contains(enemyState.enemy_id());
 
@@ -467,6 +493,22 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
                 } else {
                     std::cerr << "Enemy entity with ID " << enemyID
                               << " does not have required components." << std::endl;
+                }
+            }
+
+            for (auto it = _enemiesIds.begin(); it != _enemiesIds.end();) {
+                std::uint32_t id = *it;
+                if (!currentIds.contains(id)) {
+                    if (_registry.valid(static_cast<entt::entity>(id))) {
+                        _explosionSound.sound.play();
+                        TransformComponent& transformable =
+                            _registry.get<TransformComponent>(static_cast<entt::entity>(id));
+                        _entityFactory.createExplosion(std::pair(transformable.x, transformable.y));
+                        _registry.destroy(static_cast<entt::entity>(id));
+                    }
+                    it = _enemiesIds.erase(it);
+                } else {
+                    ++it;
                 }
             }
         } else {

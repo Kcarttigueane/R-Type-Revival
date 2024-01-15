@@ -97,7 +97,6 @@ public:
      */
     entt::entity createEnemyProjectile(entt::entity hint, std::pair<float, float> position);
 
-    entt::entity createTextEntity(const std::string& initialText, float x, float y);
     /**
      * @brief Creates a new explosion entity.
      * @param position The initial position of the explosion.
@@ -140,25 +139,26 @@ public:
 
     // TODO: Add documentation AFTER ALSO ADD ENTT ID
 
-    entt::entity createMainMenuTitle();
+    entt::entity createMainMenuTitle(entt::entity hint);
 
     entt::entity createButton(
         const std::string& path, const std::string& label, int index, bool isSelected,
         entt::entity buttonId
     );
 
-    entt::entity createSelectedLabel();
+    entt::entity createSelectedLabel(entt::entity hint);
 
     entt::entity createSettingsItem(
-        const std::string& settingName, const std::vector<std::string>& settingValues,
-        int currentValueIndex, int index
+        entt::entity hint, const std::string& settingName,
+        const std::vector<std::string>& settingValues, int currentValueIndex, int index
     );
 
-    entt::entity createAboutMenu();
+    entt::entity createAboutMenu(entt::entity hint);
 
-    entt::entity createTutorialPage();
-
-    // TODO: Add documentation BEFORE
+    entt::entity createTutorialPage(entt::entity hint);
+    entt::entity createTextEntity(
+        entt::entity hint, const std::string& initialText, float x, float y
+    );
 };
 
 #endif  // ENTITY_FACTORY_HPP

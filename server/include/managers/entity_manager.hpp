@@ -3,8 +3,11 @@
 
 #    include "../../../common/components/component_includes.hpp"
 #    include "../../../libs/EnTT/entt.hpp"
+#    include "../utils.hpp"
 
 #    include "../config.hpp"
+
+#    include <chrono>
 
 /**
  * @file entity_manager.hpp
@@ -79,6 +82,24 @@ public:
     entt::entity createFastEnemy(
         entt::entity hint, std::pair<float, float> position, float velocity
     );
+
+    entt::entity selectRandomPlayer(entt::registry& registry) {
+        std::vector<entt::entity> playerEntities;
+
+        auto view = registry.view<PlayerComponent>();
+        for (auto entity : view) {
+            playerEntities.push_back(entity);
+        }
+
+        if (playerEntities.empty()) {
+            return entt::null;
+        }
+
+        std::random_device rd;
+        std::mt19937 eng(rd());
+        std::uniform_int_distribution<size_t> distr(0, playerEntities.size() - 1);
+        return playerEntities[distr(eng)];
+    }
 };
 
 #endif  // ENTITY_MANAGER_HPP
