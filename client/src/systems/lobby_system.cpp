@@ -20,6 +20,20 @@ void GameManager::lobbySystem(float deltaTime)
         keyboardActions.Up = false;
         menuMoveCooldown = menuMoveDelay;
     } else if (keyboardActions.Enter && menuMoveCooldown <= 0) {
+        // uint32_t port = static_cast<uint32_t>(std::stoi(
+        //     _registry.get<RenderableComponent>(portEntity).text.getString().toAnsiString()
+        // ));
+        // std::string ip =
+        //     _registry.get<RenderableComponent>(ipEntity).text.getString().toAnsiString();
+
+        std::string playerName =
+            _registry.get<RenderableComponent>(usernameEntity).text.getString().toAnsiString();
+
+        rtype::Connect connect_message;
+        connect_message.set_player_name(playerName);
+        rtype::Payload payload;
+        payload.mutable_connect()->CopyFrom(connect_message);
+        _networkManager.send(payload);
         _sceneManager.setCurrentScene(GameScenes::InGame);
     } else if (keyboardActions.Escape && menuMoveCooldown <= 0) {
         _sceneManager.setCurrentScene(GameScenes::MainMenu);

@@ -64,13 +64,9 @@ void GameManager::create_menu()
     _entityFactory.createTutorialPage();
 
     titleEntities.push_back(_entityFactory.createTextEntity("Username: ", 600, 400));
-    titleEntities.push_back(_entityFactory.createTextEntity("IP: ", 600, 440));
-    titleEntities.push_back(_entityFactory.createTextEntity("Port: ", 600, 480));
 
     usernameEntity = _entityFactory.createTextEntity("", 800, 400);
-    ipEntity = _entityFactory.createTextEntity("", 800, 440);
-    portEntity = _entityFactory.createTextEntity("", 800, 480);
-    inputFields = {usernameEntity, ipEntity, portEntity};
+    inputFields = {usernameEntity};
 }
 
 void GameManager::start_game()
@@ -166,7 +162,8 @@ void GameManager::processEvents()
 {
     sf::Event event;
     while (_window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed || _sceneManager.getCurrentScene() == GameScenes::Quit) {
+        if (event.type == sf::Event::Closed ||
+            _sceneManager.getCurrentScene() == GameScenes::Quit) {
             handle_closing_game();
         }
         if (isInputEvent(event)) {
@@ -189,8 +186,7 @@ bool GameManager::isInputEvent(const sf::Event& event)
 {
     return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
            event.type == sf::Event::MouseButtonPressed ||
-           event.type == sf::Event::MouseButtonReleased ||
-           event.type == sf::Event::TextEntered;
+           event.type == sf::Event::MouseButtonReleased || event.type == sf::Event::TextEntered;
 }
 
 void GameManager::deleteEnemies()
