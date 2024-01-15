@@ -23,7 +23,8 @@ void GameManager::renderSystem()
         if (sceneComponent.scene.has_value() &&
             sceneComponent.scene == _sceneManager.getCurrentScene()) {
 
-            if (renderable.text.getFont()) {
+            if (renderable.text.getFont() && entity == _playerProfileManager.getPlayerEntity() ||
+            static_cast<uint32_t>(entity) == 123 || static_cast<uint32_t>(entity) == 2) {
                 _window.draw(renderable.text);
             }
             if (renderable.sprite.getTexture()) {
