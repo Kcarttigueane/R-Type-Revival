@@ -174,6 +174,7 @@ void GameManager::game_loop()
             aboutSystem();
             renderSystem();
         }
+        renderSystem();
         makeWaveTransitionAnimation();
         makeAllAnimations();
         _window.display();
