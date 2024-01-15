@@ -284,6 +284,7 @@ entt::entity EntityFactory::createPlanet(
     );
     _registry.emplace<PlanetComponent>(planet);
     _registry.emplace<InfiniteAnimationComponent>(planet, 256, 8.6f);
+    _registry.emplace<SceneComponent>(planet);
 
     return planet;
 }

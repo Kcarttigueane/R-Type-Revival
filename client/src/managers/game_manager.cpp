@@ -157,6 +157,7 @@ void GameManager::game_loop()
         _window.clear();
         processServerResponse();
         parallaxSystem(deltaTime.asSeconds());
+        planetSystem(deltaTime.asSeconds());
 
         if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
             menuSystem(deltaTime.asSeconds());
@@ -210,6 +211,24 @@ void GameManager::deleteEnemies()
 
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
+    }
+}
+
+void GameManager::deleteBullets()
+{
+    auto enemies = _registry.view<BulletTypeComponent>();
+
+    for (auto enemy : enemies) {
+        _registry.destroy(enemy);
+    }
+}
+
+void GameManager::deletePlayers()
+{
+    auto players = _registry.view<PlayerComponent>();
+
+    for (auto player : players) {
+        _registry.destroy(player);
     }
 }
 
@@ -328,6 +347,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         }
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
+
         if (!isPlayerAlreadyExist) {
             _entityFactory.createPlayer(playerEntity, std::make_pair(posX, posY));
             _connectedPlayerIds.insert(playerID);
@@ -446,6 +466,15 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
 
         _currentWaveLevel = gameWave.current_wave();
         _isWaveInProgress = gameWave.is_wave_in_progress();
+
+        if (_currentWaveLevel == 3) {
+            _sceneManager.setCurrentScene(GameScenes::MainMenu);
+            deleteEnemies();
+            deleteBullets();
+            _bulletIds.clear();
+            _enemiesIds.clear();
+            return;
+        }
 
         std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;

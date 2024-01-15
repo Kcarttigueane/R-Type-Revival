@@ -21,7 +21,7 @@ WaveManager::WaveManager(EntityManager& entityManager, IdGenerator& idGenerator)
 
 void WaveManager::initializeWaves()
 {
-    Wave wave1(1, 20.0f);
+    Wave wave1(1, 15.0f);
     for (int i = 0; i < 6; ++i) {
         wave1.enemies.push_back(rtype::EnemyType::NORMAL);
     }
@@ -30,7 +30,7 @@ void WaveManager::initializeWaves()
     }
     _waves.push_back(wave1);
 
-    Wave wave2(2, 20.0f);
+    Wave wave2(2, 15.0f);
     for (int i = 0; i < 8; ++i) {
         wave2.enemies.push_back(rtype::EnemyType::NORMAL);
     }
@@ -49,12 +49,19 @@ void WaveManager::initializeWaves()
     wave3.enemies.push_back(rtype::EnemyType::BOSS);
     _waves.push_back(wave3);
 
+    Wave wave4(4, 5.0f);
+
+    _waves.push_back(wave4);
+
     _currentWaveIndex = 0;
     _waveTimer = 0.0f;
 }
 
 void WaveManager::updateWaves(float deltaTime)
 {
+    if (_currentWaveIndex == 3) {
+        exit(0);
+    }
     if (_currentWaveIndex < _waves.size()) {
         std::cout << "Wave " << _currentWaveIndex << std::endl;
         std::cout << "Wave active: " << _waves[_currentWaveIndex].isActive << std::endl;
@@ -117,7 +124,7 @@ void WaveManager::spawnEnemy(rtype::EnemyType enemyType)
 
     switch (enemyType) {
         case rtype::EnemyType::NORMAL: {
-            float randomNormalX = getRandomFloat(WINDOW_WIDTH + 500, WINDOW_WIDTH + 1000);
+            float randomNormalX = getRandomFloat(WINDOW_WIDTH + 500, WINDOW_WIDTH + 1500);
             float randomNormalY = getRandomFloat(75.0f, WINDOW_HEIGHT - 64.0f);
             float randomNormalSpeed = getRandomFloat(2.0f, 5.0f);
             _entityManager.createNormalEnemy(

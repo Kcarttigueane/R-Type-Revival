@@ -300,6 +300,10 @@ public:
      * @param renderable The renderable component to draw the hit box for.
      */
     void drawHitBox(RenderableComponent& renderable);
+
+    void deleteBullets();
+
+    void deletePlayers();
 };
 
 #endif  // GAME_MANAGER_HPP
