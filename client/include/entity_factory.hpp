@@ -112,13 +112,6 @@ public:
     entt::entity createBackground(entt::entity hint);
 
     /**
-     * @brief Creates a new main menu entity.
-     * @param hint A hint for the entity identifier.
-     * @return The created main menu entity.
-     */
-    entt::entity createMainMenu(entt::entity hint);
-
-    /**
      * @brief Creates a new wave transition entity.
      * @param hint A hint for the entity identifier.
      * @param title The title of the wave transition.
@@ -143,6 +136,29 @@ public:
      * @return The created health entity.
      */
     entt::entity createHealth(entt::entity hint);
+
+    // TODO: Add documentation AFTER ALSO ADD ENTT ID
+
+    entt::entity createMainMenuTitle(entt::entity hint);
+
+    entt::entity createButton(
+        const std::string& path, const std::string& label, int index, bool isSelected,
+        entt::entity buttonId
+    );
+
+    entt::entity createSelectedLabel(entt::entity hint);
+
+    entt::entity createSettingsItem(
+        entt::entity hint, const std::string& settingName,
+        const std::vector<std::string>& settingValues, int currentValueIndex, int index
+    );
+
+    entt::entity createAboutMenu(entt::entity hint);
+
+    entt::entity createTutorialPage(entt::entity hint);
+    entt::entity createTextEntity(
+        entt::entity hint, const std::string& initialText, float x, float y
+    );
 };
 
 #endif  // ENTITY_FACTORY_HPP

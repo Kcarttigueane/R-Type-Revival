@@ -37,10 +37,14 @@
  */
 struct Actions {
     bool Shoot;
-    bool Up;
-    bool Down;
+    bool Up = false;
+    bool Down = false;
     bool Right;
     bool Left;
+    bool Enter = false;
+    bool Escape;
+    bool Backspace;
+    std::string TextInput;
 };
 
 /**
@@ -55,6 +59,7 @@ private:
     entt::registry& _registry;
     sf::RenderWindow& _window;
     Actions keyboardActions;
+    std::string currentTextInput;
 
 public:
     /**
@@ -99,6 +104,10 @@ public:
      * @param event The SFML event.
      */
     void processKeyRelease(sf::Event& event);
+
+    void processTextInput(sf::Event& event);
+
+    void clearTextInput();
 };
 
 #endif  // INPUT_MANAGER_HPP

@@ -23,22 +23,81 @@ GameManager::GameManager(
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/explosion.wav"));
     _musicSound =
         SoundComponent(*_resourceManager.loadSoundBuffer(_assetsPath + "/sound_fx/music.wav"));
-    _shootingSound.setVolumeLevel(6.0f);
-    _explosionSound.setVolumeLevel(14.0f);
-    _musicSound.setVolumeLevel(8.0f);
+    _shootingSound.setVolumeLevel(20.0f);
+    _explosionSound.setVolumeLevel(20.0f);
+    _musicSound.setVolumeLevel(20.0f);
+
     _musicSound.sound.setLoop(true);
     _musicSound.sound.play();
 }
 
+void GameManager::create_menu()
+{
+    entt::entity MainMenuTitleId = static_cast<entt::entity>(MAIN_MENU_ID);
+    entt::entity ButtonQuitId = static_cast<entt::entity>(6);
+    entt::entity ButtonSettingsId = static_cast<entt::entity>(7);
+    entt::entity ButtonPlayId = static_cast<entt::entity>(8);
+    entt::entity ButtonTutorialId = static_cast<entt::entity>(9);
+    entt::entity ButtonAboutId = static_cast<entt::entity>(10);
+    entt::entity SelectedLabelId = static_cast<entt::entity>(11);
+    entt::entity AboutMenuTextId = static_cast<entt::entity>(12);
+    entt::entity TutorialMenuTextId = static_cast<entt::entity>(13);
+    entt::entity MusicTestSettingsTextId = static_cast<entt::entity>(14);
+    entt::entity SoundTestSettingsTextId = static_cast<entt::entity>(15);
+    entt::entity UsernameLabelId = static_cast<entt::entity>(16);
+    entt::entity UsernameInputTextId = static_cast<entt::entity>(17);
+
+    _entityFactory.createMainMenuTitle(MainMenuTitleId);
+
+    std::vector<std::tuple<std::string, std::string, bool, entt::entity>> buttonInfo = {
+        {"/menu/quit.png", "Quit", false, ButtonQuitId},
+        {"/menu/settings.png", "Settings", false, ButtonSettingsId},
+        {"/menu/play.png", "Play", true, ButtonPlayId},
+        {"/menu/tutorial.png", "Tutorial", false, ButtonTutorialId},
+        {"/menu/about.png", "About", false, ButtonAboutId},
+    };
+
+    for (int i = 0; i < buttonInfo.size(); ++i) {
+        _entityFactory.createButton(
+            _assetsPath + std::get<0>(buttonInfo[i]), std::get<1>(buttonInfo[i]), i,
+            std::get<2>(buttonInfo[i]), std::get<3>(buttonInfo[i])
+        );
+    }
+
+    selectedLabelEntity = _entityFactory.createSelectedLabel(SelectedLabelId);
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> settingsInfo = {
+        {"Music Volume", {"Medium", "High", "Max", "Off", "Low"}},
+        {"Effects Volume", {"Medium", "High", "Max", "Off", "Low"}},
+    };
+
+    _entityFactory.createSettingsItem(
+        MusicTestSettingsTextId, settingsInfo[0].first, settingsInfo[0].second, 0, 0
+    );
+    _entityFactory.createSettingsItem(
+        SoundTestSettingsTextId, settingsInfo[1].first, settingsInfo[1].second, 1, 1
+    );
+
+    _entityFactory.createAboutMenu(AboutMenuTextId);
+
+    _entityFactory.createTutorialPage(TutorialMenuTextId);
+
+    titleEntities.push_back(_entityFactory.createTextEntity(UsernameLabelId, "Username: ", 600, 400)
+    );
+
+    usernameEntity = _entityFactory.createTextEntity(UsernameInputTextId, "", 800, 400);
+    inputFields = {usernameEntity};
+}
+
 void GameManager::start_game()
 {
+    create_menu();  // TODO : Add id for each element of the menus
+
     entt::entity backgroundEntityId = static_cast<entt::entity>(BACKGROUND_ID);
-    entt::entity MainMenuId = static_cast<entt::entity>(MAIN_MENU_ID);
     entt::entity PlaneWetId = static_cast<entt::entity>(PLANET_WET_ID);
     entt::entity PlaneIceId = static_cast<entt::entity>(PLANET_ICE_ID);
     entt::entity HealthId = static_cast<entt::entity>(HEALTH_ID);
 
-    _entityFactory.createMainMenu(MainMenuId);
     _entityFactory.createPlanet(
         PlaneWetId, std::make_pair(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2),
         "/background/layer_1/wet_256.png"
@@ -75,10 +134,9 @@ void GameManager::makeWaveTransitionAnimation()
     entt::entity WaveId = static_cast<entt::entity>(123);
     if (_registry.all_of<RenderableComponent, TransformComponent, VelocityComponent>(WaveId)) {
         auto& renderable = _registry.get<RenderableComponent>(WaveId);
-        // Access Renderable component data here
-
         auto& transformComponent = _registry.get<TransformComponent>(WaveId);
         auto& velocityComponent = _registry.get<VelocityComponent>(WaveId);
+
         transformComponent.x =
             transformComponent.x + velocityComponent.dx * velocityComponent.speed;
         renderable.text.setPosition(sf::Vector2f(transformComponent.x, transformComponent.y));
@@ -98,8 +156,25 @@ void GameManager::game_loop()
         }
         _window.clear();
         processServerResponse();
-        planetSystem(deltaTime.asSeconds());
         parallaxSystem(deltaTime.asSeconds());
+        planetSystem(deltaTime.asSeconds());
+
+        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
+            menuSystem(deltaTime.asSeconds());
+            renderSystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Settings) {
+            settingsSystem(deltaTime.asSeconds());
+            renderSystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Lobby) {
+            lobbySystem(deltaTime.asSeconds());
+            renderSystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::Tutorial) {
+            tutorialSystem();
+            renderSystem();
+        } else if (_sceneManager.getCurrentScene() == GameScenes::About) {
+            aboutSystem();
+            renderSystem();
+        }
         renderSystem();
         makeWaveTransitionAnimation();
         makeAllAnimations();
@@ -111,34 +186,23 @@ void GameManager::processEvents()
 {
     sf::Event event;
     while (_window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
+        if (event.type == sf::Event::Closed ||
+            _sceneManager.getCurrentScene() == GameScenes::Quit) {
             handle_closing_game();
-        }
-        if (_sceneManager.getCurrentScene() == GameScenes::MainMenu) {
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
-                handle_closing_game();
-            }
         }
         if (isInputEvent(event)) {
             _inputManager.processKeyPress(event);
             _inputManager.processKeyRelease(event);
-        }
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
-            rtype::Connect connect_message;
-            connect_message.set_player_name("Player Kevin");
-            rtype::Payload payload;
-            payload.mutable_connect()->CopyFrom(connect_message);
-            _networkManager.send(payload);
+            _inputManager.processTextInput(event);
         }
     }
 }
 
 bool GameManager::isInputEvent(const sf::Event& event)
 {
-    // TODO: Add more input events if needed define scope with gars
     return event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased ||
            event.type == sf::Event::MouseButtonPressed ||
-           event.type == sf::Event::MouseButtonReleased;
+           event.type == sf::Event::MouseButtonReleased || event.type == sf::Event::TextEntered;
 }
 
 void GameManager::deleteEnemies()
@@ -147,6 +211,24 @@ void GameManager::deleteEnemies()
 
     for (auto enemy : enemies) {
         _registry.destroy(enemy);
+    }
+}
+
+void GameManager::deleteBullets()
+{
+    auto enemies = _registry.view<BulletTypeComponent>();
+
+    for (auto enemy : enemies) {
+        _registry.destroy(enemy);
+    }
+}
+
+void GameManager::deletePlayers()
+{
+    auto players = _registry.view<PlayerComponent>();
+
+    for (auto player : players) {
+        _registry.destroy(player);
     }
 }
 
@@ -265,6 +347,7 @@ void GameManager::update_player_state(const rtype::GameState& game_state)
         }
 
         const bool isPlayerAlreadyExist = _connectedPlayerIds.contains(playerID);
+
         if (!isPlayerAlreadyExist) {
             _entityFactory.createPlayer(playerEntity, std::make_pair(posX, posY));
             _connectedPlayerIds.insert(playerID);
@@ -383,6 +466,15 @@ void GameManager::update_game_wave(const rtype::GameState& game_state)
 
         _currentWaveLevel = gameWave.current_wave();
         _isWaveInProgress = gameWave.is_wave_in_progress();
+
+        if (_currentWaveLevel == 3) {
+            _sceneManager.setCurrentScene(GameScenes::MainMenu);
+            deleteEnemies();
+            deleteBullets();
+            _bulletIds.clear();
+            _enemiesIds.clear();
+            return;
+        }
 
         std::cout << "Wave Info: Current Wave: " << _currentWaveLevel
                   << ", Wave In Progress: " << (_isWaveInProgress ? "Yes" : "No") << std::endl;

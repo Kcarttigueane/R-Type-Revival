@@ -17,4 +17,7 @@
 #    define PLANET_ICE_ID 4
 #    define HEALTH_ID 5
 
+#    include <map>
+#    include <string>
+
 #endif  // CONFIG_HPP
