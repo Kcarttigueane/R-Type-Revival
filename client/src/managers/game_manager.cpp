@@ -194,14 +194,6 @@ void GameManager::processEvents()
             _inputManager.processKeyRelease(event);
             _inputManager.processTextInput(event);
         }
-        // TODO : should be removed and use the lobby instead
-        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C) {
-            rtype::Connect connect_message;
-            connect_message.set_player_name("Player Kevin");
-            rtype::Payload payload;
-            payload.mutable_connect()->CopyFrom(connect_message);
-            _networkManager.send(payload);
-        }
     }
 }
 
