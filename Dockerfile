@@ -7,3 +7,5 @@ WORKDIR /app
 COPY . .
 
 RUN cd build && rm -rf * && cmake .. && make
+
+CMD ["./build/server/r-type_server"]

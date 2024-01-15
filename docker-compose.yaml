@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  server:
+    image: jvlxz/rtype-server:latest
+    container_name: rtype-server
+    ports:
+      - "80:12345"
