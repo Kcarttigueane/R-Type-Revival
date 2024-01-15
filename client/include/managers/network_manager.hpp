@@ -1,5 +1,5 @@
-// #if !defined(NETWORK_MANAGER_HPP)
-// #    define NETWORK_MANAGER_HPP
+#if !defined(NETWORK_MANAGER_HPP)
+#    define NETWORK_MANAGER_HPP
 
 #    include <boost/array.hpp>
 #    include <boost/asio.hpp>
